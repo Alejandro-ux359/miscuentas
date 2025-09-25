@@ -1,0 +1,69 @@
+.bottom-menu-container {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.bottom-menu {
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  padding: 10px 0;
+  background: rgb(30, 30, 255);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 300px 300px 0px 0px;
+}
+
+.floating-circle {
+  position: absolute;
+  bottom: 35px;
+  width: 60px;
+  height: 60px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.circle-inner {
+  color: rgb(0, 0, 0);
+  font-size: 24px;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.4s ease, color 0.4s ease;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.tab-item .tab-icon {
+  display: block;
+  font-size: 24px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tab-item.active {
+  color: #4f46e5;
+}
+
+.tab-item.active .tab-icon {
+  transform: translateY(-20px) scale(1.3);
+}
+
+.tab-item:not(.active) .tab-icon {
+  transform: translateY(0) scale(1);
+}
