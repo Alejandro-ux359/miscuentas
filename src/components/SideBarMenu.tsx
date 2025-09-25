@@ -7,6 +7,7 @@ import CalculateIcon from "@mui/icons-material/Calculate";
 import SettingsIcon from "@mui/icons-material/Settings";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 export default function SidebarMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +18,11 @@ export default function SidebarMenu() {
       id: "home",
       icon: <HomeIcon style={{ color: "inherit" }} />,
       label: "Inicio",
+    },
+    {
+      id:"notification",
+      icon: <NotificationsIcon style={{color:"inherit"}}/>,
+      label:"Notificación",
     },
     {
       id: "income",
