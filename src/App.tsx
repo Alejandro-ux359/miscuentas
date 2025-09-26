@@ -1,8 +1,13 @@
 import SideBarMenu from "./components/SideBarMenu";
 import MobileBottomNav from "./components/TabBarMenuNavegation";
 import "./assets/styles/StyleApp.css";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useState } from "react";
 
 function App() {
+  const [notification, setNotification] = useState("Notification");
+  const [oscClaro, setOscClaro] = useState();
+
   return (
     <>
       {/* Sidebar solo en PC */}
