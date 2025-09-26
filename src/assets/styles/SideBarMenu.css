@@ -89,7 +89,22 @@
   text-align: center;
   padding: 5px 0;
   margin-bottom: 10px;
+  transition: opacity 0.3s ease;
+  opacity: 0;           
+  visibility: hidden;    
+  height: 18px;         
 }
+
+.sidebar-version.visible {
+  opacity: 1;            
+  visibility: visible;
+}
+
+.sidebar-version.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
 
 .sidebar-footer {
   margin-top: auto;

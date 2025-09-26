@@ -7,7 +7,7 @@ import CalculateIcon from "@mui/icons-material/Calculate";
 import SettingsIcon from "@mui/icons-material/Settings";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 export default function SidebarMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,9 +20,9 @@ export default function SidebarMenu() {
       label: "Inicio",
     },
     {
-      id:"notification",
-      icon: <NotificationsIcon style={{color:"inherit"}}/>,
-      label:"Notificación",
+      id: "notification",
+      icon: <NotificationsIcon style={{ color: "inherit" }} />,
+      label: "Notificación",
     },
     {
       id: "income",
@@ -68,7 +68,9 @@ export default function SidebarMenu() {
 
       <div className="sidebar-footer">
         <hr className="sidebar-divider" />
-        {isOpen && <div className="sidebar-version">Versión 1.0.0</div>}
+        <div className={`sidebar-version ${isOpen ? "visible" : "hidden"}`}>
+          Versión 1.0.0
+        </div>
       </div>
     </div>
   );
