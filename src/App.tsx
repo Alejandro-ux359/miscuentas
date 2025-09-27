@@ -9,6 +9,7 @@ import { Calculadora } from "./routers/calculadora/Calculadora";
 import { Configuracion } from "./routers/configuracion/Configuracion";
 import { Notification } from "./routers/notificaciones/Notificaciones";
 import { IngresosGastos } from "./routers/ingresosGastos/IngresosGastos";
+import NotificationPage from "./components/NotificationPage";
 
 function App() {
   return (
@@ -32,9 +33,8 @@ function App() {
           <Route path="/negocios" element={<Negocios />} />
           <Route path="/calculadora" element={<Calculadora />} />
           <Route path="/configuracion" element={<Configuracion />} />
-          <Route path="/notificacion" element={<Notification />} />
+          <Route path="/notificacion" element={<NotificationPage />} />
           <Route path="/ingresosgastos" element={<IngresosGastos />} />
-          {/* <Route path="*" element={<h1>404 - Página no encontrada</h1>} /> */}
         </Routes>
       </main>
     </>
