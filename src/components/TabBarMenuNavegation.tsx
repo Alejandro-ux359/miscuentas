@@ -51,13 +51,24 @@ export default function TabBarMenuNavegation() {
   const activeTab =
     tabs.find((tab) => tab.path === location.pathname)?.id || "inicio";
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
+      document.body.classList.add("dark-mode");
+    }
+  }, []);
+
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-     if (!isDarkMode) {
-    document.body.classList.add("dark-mode");
-  } else {
-    document.body.classList.remove("dark-mode");
-  }
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem("theme", newMode ? "dark" : "light");
+
+    if (newMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
   };
 
   useEffect(() => {
@@ -81,22 +92,20 @@ export default function TabBarMenuNavegation() {
 
   return (
     <>
-   <div className="top-bar">
-  <div className={`custom-toggle ${isDarkMode ? "dark" : "light"}`} onClick={toggleTheme}>
-    <div className="toggle-ball">
-      {isDarkMode ? (
-        <div className="moon" />
-      ) : (
-        <div className="sun" />
-      )}
-    </div>
-  </div>
-  <NotificationsNoneIcon
-  className="notification-icon"
-  onClick={() => navigate("/notificacion")}
-/>
-</div>
-
+      <div className="top-bar">
+        <div
+          className={`custom-toggle ${isDarkMode ? "dark" : "light"}`}
+          onClick={toggleTheme}
+        >
+          <div className="toggle-ball">
+            {isDarkMode ? <div className="moon" /> : <div className="sun" />}
+          </div>
+        </div>
+        <NotificationsNoneIcon
+          className="notification-icon"
+          onClick={() => navigate("/notificacion")}
+        />
+      </div>
 
       <div className="bottom-menu-container">
         <div
