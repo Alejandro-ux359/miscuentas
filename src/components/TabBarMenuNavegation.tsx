@@ -32,7 +32,7 @@ export default function TabBarMenuNavegation() {
       const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
       if (tabRefs.current[activeIndex]) {
         const tabElement = tabRefs.current[activeIndex];
-        const position = tabElement.offsetLeft + tabElement.offsetWidth / 1000-195; 
+        const position = tabElement.offsetLeft + tabElement.offsetWidth / 1000-145; 
         setCirclePosition(position);
       }
     };
