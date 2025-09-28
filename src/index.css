@@ -9,7 +9,7 @@
 }
 
 /* ============================
-   🔽 MENÚ INFERIOR
+   🔽 MENÚ INFERIOR (MÓVIL)
    ============================ */
 .bottom-tab {
   position: fixed;
@@ -113,4 +113,74 @@ body.dark-mode {
 /* 🛠️ Otros ajustes visuales */
 body.dark-mode .tab-center-button {
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+/* ============================
+   🖥️ SIDEBAR + DESPLAZAMIENTO DE CONTENIDO
+   ============================ */
+.app-root {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar fijo en la izquierda (solo desktop) */
+.desktop-only {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  width: 60px; /* ancho cerrado */
+  transition: width 0.28s ease;
+}
+
+/* Cuando el sidebar se abre */
+.app-root.sidebar-open .desktop-only {
+  width: 220px; /* ancho abierto, sincronizar con Sidebar */
+}
+
+/* Área principal que contiene contenido + barra móvil */
+.main-area {
+  flex: 1;
+  transition: margin-left 0.28s ease;
+  margin-left: 60px; /* igual al ancho cerrado del sidebar */
+}
+
+/* Cuando el sidebar se abre, el contenido se desplaza */
+.app-root.sidebar-open .main-area {
+  margin-left: 220px; /* igual al ancho abierto del sidebar */
+}
+
+.main-content {
+  padding: 24px;
+  transition: margin-left 0.28s ease;
+}
+
+/* ============================
+   📱 VISIBILIDAD POR DISPOSITIVO
+   ============================ */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+  }
+
+  /* En móviles el contenido ocupa todo el ancho */
+  .main-area {
+    margin-left: 0 !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
 }

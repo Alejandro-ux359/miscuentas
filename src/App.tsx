@@ -1,43 +1,34 @@
+// App.tsx
+import React, { JSX, useState } from "react";
 import SideBarMenu from "./components/SideBarMenu";
 import MobileBottomNav from "./components/TabBarMenuNavegation";
 import "./assets/styles/StyleApp.css";
-import { useState } from "react";
-import { Route, Routes } from "react-router-dom";
-import { Negocios } from "./routers/business/Negocios";
-import { Home } from "./routers/home/Home";
-import { Calculadora } from "./routers/calculadora/Calculadora";
-import { Configuracion } from "./routers/configuracion/Configuracion";
-import { Notification } from "./routers/notificaciones/Notificaciones";
-import { IngresosGastos } from "./routers/ingresosGastos/IngresosGastos";
-import NotificationPage from "./components/NotificationPage";
+import AppRouter from "./routers/appRouters/AppRouters";
 
-function App() {
+function App(): JSX.Element {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   return (
-    <>
-      {/*Sidebar solo en PC*/}
+    <div className={`app-root ${isOpen ? "sidebar-open" : ""}`}>
+      {/* Sidebar solo en PC */}
       <div className="desktop-only">
-        <SideBarMenu />
+        <SideBarMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
 
-      {/* Navegación inferior solo en móviles/tablets */}
-      <div className="mobile-only">
-        <MobileBottomNav />
+      {/* Area principal: navegación móvil + contenido */}
+      <div className="main-area">
+        {/* Navegación inferior solo en móviles/tablets */}
+        <div className="mobile-only">
+          <MobileBottomNav />
+        </div>
+
+        {/* Contenido principal */}
+        <main className="main-content min-h-screen">
+         
+          <AppRouter />
+        </main>
       </div>
-
-      {/* Contenido principal */}
-      <main style={{ paddingLeft: "70px", paddingBottom: "80px" }}>
-        {/* Enrutado */}
-
-        <Routes>
-          <Route path="/inicio" element={<Home />} />
-          <Route path="/negocios" element={<Negocios />} />
-          <Route path="/calculadora" element={<Calculadora />} />
-          <Route path="/configuracion" element={<Configuracion />} />
-          <Route path="/notificacion" element={<NotificationPage />} />
-          <Route path="/ingresosgastos" element={<IngresosGastos />} />
-        </Routes>
-      </main>
-    </>
+    </div>
   );
 }
 

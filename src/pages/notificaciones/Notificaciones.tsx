@@ -1,6 +1,6 @@
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { useNavigate } from "react-router-dom";
-import "../assets/styles/NotificationPage.css"; 
+import "../../assets/styles/NotificationPage.css"; 
 
 export default function NotificationPage() {
   const navigate = useNavigate();

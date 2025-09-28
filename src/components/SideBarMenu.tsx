@@ -7,11 +7,16 @@ import CalculateIcon from "@mui/icons-material/Calculate";
 import SettingsIcon from "@mui/icons-material/Settings";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import { useNavigate, useLocation } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useNavigate, useLocation } from "react-router-dom";
 
-export default function SidebarMenu() {
-  const [isOpen, setIsOpen] = useState(false);
+// 1️⃣ Definimos el tipo de props
+interface SidebarMenuProps {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function SideBarMenu({ isOpen, setIsOpen }: SidebarMenuProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,16 +29,17 @@ export default function SidebarMenu() {
     { id: "configuracion", icon: <SettingsIcon />, label: "Configuración", path: "/configuracion" },
   ];
 
-  // Determinar la pestaña activa según la ruta actual
   const activeTab = tabs.find(tab => tab.path === location.pathname)?.id || "";
 
   return (
     <div className={`sidebar-container ${isOpen ? "open" : "closeup"}`}>
+      {/* Botón abrir/cerrar sidebar */}
       <div className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? <CloseIcon /> : <MenuIcon />}
         {isOpen && <span className="sidebar-user-label">Mis Cuentas</span>}
       </div>
 
+      {/* Menú de navegación */}
       <nav className="sidebar-menu">
         {tabs.map((tab) => (
           <div
@@ -47,6 +53,7 @@ export default function SidebarMenu() {
         ))}
       </nav>
 
+      {/* Footer */}
       <div className="sidebar-footer">
         <hr className="sidebar-divider" />
         <div className={`sidebar-version ${isOpen ? "visible" : "hidden"}`}>
