@@ -1,9 +1,17 @@
-.notification-page {
-  height: 100vh;
-  background-color: white;
-  color: #222;
-  display: flex;
-  flex-direction: column;
+@media (max-width: 1024px) {
+  .notification-page {
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 2000;
+  }
 }
 
 body.dark-mode .notification-page {
@@ -17,25 +25,26 @@ body.dark-mode .notification-page {
   padding: 16px;
   gap: 12px;
   border-bottom: 1px solid #ccc;
-  background-color: #fff;
+  background-color: #fff;  
 }
 
 body.dark-mode .notification-header {
   background-color: #1e1e1e;
-  border-color: #333;
+  border-color: #333; 
 }
 
 .back-icon {
   cursor: pointer;
   color: #333;
+  z-index: 3000; 
 }
 
 body.dark-mode .back-icon {
-  color: #f0f0f0;
+  color: #f0f0f0; 
 }
 
 .notification-content {
   padding: 20px;
-  flex: 1;
+  flex: 1; 
   overflow-y: auto;
 }
