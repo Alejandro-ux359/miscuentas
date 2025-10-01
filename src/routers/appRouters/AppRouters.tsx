@@ -19,9 +19,7 @@ function AppRouter() {
       <Route path="/ingresosgastos" element={<IngresosGastos />} />
       <Route path="/configuracion" element={<Configuracion />} />
 
-      {/* Ruta por defecto (404) */}
-      <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
-    </Routes>
+   </Routes>
   );
 }
 
