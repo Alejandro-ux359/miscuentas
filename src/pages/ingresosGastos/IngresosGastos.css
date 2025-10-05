@@ -118,6 +118,85 @@
   background: hsl(244, 100%, 40%);
 }
 
+.tabla-contenedor {
+  width: 95%;
+  margin: 30px auto;
+  border-radius: 10px;
+  overflow-x: auto;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+}
+
+/* Encabezado */
+.tabla-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1px;
+}
+
+.tabla-header span {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #333;
+}
+
+.tabla-subtitulo {
+  margin-right: 100px; 
+  font-weight: bold;   
+  font-size: 1rem;    
+}
+
+.buscador {
+  margin-left: auto;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+
+.buscador:focus {
+  border-color: hsl(244, 100%, 46%);
+  outline: none;
+}
+
+/* Tabla principal */
+.tabla-datos {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.tabla-datos thead {
+  background-color: hsl(244, 100%, 46%);
+  color: white;
+}
+
+.tabla-datos th,
+.tabla-datos td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  min-width: 120px;
+}
+
+.tabla-datos tr:hover {
+  background-color: #f3f4f8;
+  transition: background 0.2s;
+}
+
+.sin-datos {
+  text-align: center;
+  color: gray;
+  font-style: italic;
+  padding: 15px;
+}
+
+
 /* ============================
    📱 Móviles y Tablets
    ============================ */
@@ -160,5 +239,66 @@
   .acciones {
     gap: 10px;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 1024px) {
+  .tabla-contenedor {
+    width: 95%;
+    padding: 10px;
+    box-shadow: none;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .tabla-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .tabla-header span {
+    font-size: 0.95rem;
+  }
+
+  .buscador {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .tabla-datos {
+    font-size: 0.85rem;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .tabla-datos th,
+  .tabla-datos td {
+    padding: 8px 10px;
+  }
+
+  .sin-datos {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}
+
+/* ============================
+   📱 Pantallas muy pequeñas
+   ============================ */
+@media (max-width: 480px) {
+  .tabla-header {
+    gap: 5px;
+  }
+
+  .tabla-datos {
+    font-size: 0.8rem;
+  }
+
+  .tabla-datos th,
+  .tabla-datos td {
+    padding: 6px 8px;
   }
 }
