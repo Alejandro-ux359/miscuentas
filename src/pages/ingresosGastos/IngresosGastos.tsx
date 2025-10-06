@@ -1,38 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../ingresosGastos/IngresosGastos.css";
+import { db, Movimiento } from "../../bdDexie";
+import { supabase } from "../../supaBase";
 
 function IngresosGastos() {
   const [openModal, setOpenModal] = useState(false);
-  const [tipo, setTipo] = useState("");
+  const [tipo, setTipo] = useState<"Ingreso" | "Gasto">("Ingreso");
   const [activeTab, setActiveTab] = useState("Ingresos");
-  const [datos, setDatos] = useState<any[]>([]);
+  const [datos, setDatos] = useState<Movimiento[]>([]);
   const [busqueda, setBusqueda] = useState("");
+  const [guardando, setGuardando] = useState(false);
 
-  const abrirModal = (tipoForm: string) => {
+  // Cargar datos de Dexie al iniciar
+  useEffect(() => {
+    const cargarDatos = async () => {
+      const todos = await db.movimientos.toArray();
+      setDatos(todos);
+    };
+    cargarDatos();
+  }, []);
+
+  const abrirModal = (tipoForm: "Ingreso" | "Gasto") => {
     setTipo(tipoForm);
     setOpenModal(true);
   };
 
   const cerrarModal = () => setOpenModal(false);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const form = new FormData(e.target);
-    const nuevo = {
-      categoria: form.get("categoria"),
-      monto: form.get("monto"),
-      metodo: form.get("paymentMethod"),
-      cuenta: form.get("cuenta"),
-      fecha: form.get("fecha"),
+
+    const nuevo: Movimiento = {
+      categoria: form.get("categoria") as string,
+      monto: Number(form.get("monto")),
+      metodo: form.get("paymentMethod") as string,
+      cuenta: form.get("cuenta") as string,
+      fecha: form.get("fecha") as string,
       tipo,
     };
-    setDatos([...datos, nuevo]);
-    cerrarModal();
+
+    try {
+      setGuardando(true);
+
+      // Guardar en Dexie
+      await db.movimientos.add(nuevo);
+
+      // Guardar en Supabase
+      const { error } = await supabase.from("movimientos").insert([nuevo]);
+      if (error) {
+        console.error("Error guardando en Supabase:", error);
+        alert("Error al guardar en Supabase");
+      }
+
+      // Actualizar estado local
+      const todos = await db.movimientos.toArray();
+      setDatos(todos);
+      cerrarModal();
+    } finally {
+      setGuardando(false);
+    }
   };
 
-  const filtrados = datos.filter((item) =>
-    item.categoria.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  // Filtrar por tipo y búsqueda
+  const filtrados = datos
+    .filter((item) => item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto"))
+    .filter((item) =>
+      item.categoria.toLowerCase().includes(busqueda.toLowerCase())
+    );
+
 
   return (
     <>
@@ -98,7 +134,9 @@ function IngresosGastos() {
         {/* Botón flotante */}
         <button
           className="btn-flotante"
-          onClick={() => abrirModal(activeTab === "Ingresos" ? "Ingreso" : "Gasto")}
+          onClick={() =>
+            abrirModal(activeTab === "Ingresos" ? "Ingreso" : "Gasto")
+          }
         >
           +
         </button>
