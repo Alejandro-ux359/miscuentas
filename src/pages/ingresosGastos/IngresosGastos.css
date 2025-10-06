@@ -35,7 +35,7 @@
   height: 40px;
   background: hsl(244, 100%, 46%);
   color: white;
-  font-size: 2.5rem; /* Tamaño grande para que el + casi toque */
+  font-size: 2.5rem; 
   border: none;
   border-radius: 50%;
   display: flex;
@@ -72,8 +72,8 @@
   width: 100%;
   max-width: 400px;
   display: flex;
-  flex-direction: column; /* organiza los campos en columna */
-  gap: 15px; /* espacio entre cada campo */
+  flex-direction: column; 
+  gap: 15px; 
 }
 
 /* Campos del formulario dentro del modal */
@@ -98,8 +98,8 @@
 /* Botones de acción dentro del modal */
 .acciones {
   display: flex;
-  justify-content: flex-end; /* alineados a la derecha */
-  gap: 10px; /* espacio entre botones */
+  justify-content: flex-end; 
+  gap: 10px; 
   margin-top: 15px;
 }
 
@@ -173,27 +173,47 @@
 }
 
 .tabla-datos thead {
-  background-color: hsl(244, 100%, 46%);
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .tabla-datos th,
 .tabla-datos td {
   padding: 10px;
   border-bottom: 1px solid #ddd;
+  text-align: center;
+  vertical-align: middle;
   min-width: 120px;
 }
 
-.tabla-datos tr:hover {
-  background-color: #f3f4f8;
-  transition: background 0.2s;
-}
 
 .sin-datos {
   text-align: center;
   color: gray;
   font-style: italic;
   padding: 15px;
+}
+
+/* Columna de acciones */
+.acciones-fila {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.icono-editar {
+  color: blue;
+  cursor: pointer;
+}
+
+.icono-eliminar {
+  color: red;
+  cursor: pointer;
+}
+
+.icono-editar:hover,
+.icono-eliminar:hover {
+  transform: scale(1.1);
+  transition: 0.2s;
 }
 
 
@@ -219,7 +239,7 @@
   width: 50px;
   height: 50px;
   font-size: 2rem;
-  background-color: #0057ff; /* Puedes ajustar el color */
+  background-color: #0057ff; 
   color: white;
   border-radius: 50%;
   display: flex;

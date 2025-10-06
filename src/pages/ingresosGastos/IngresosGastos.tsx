@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import "../ingresosGastos/IngresosGastos.css";
 import { db, Movimiento } from "../../bdDexie";
 import { supabase } from "../../supaBase";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 function IngresosGastos() {
   const [openModal, setOpenModal] = useState(false);
@@ -11,7 +13,6 @@ function IngresosGastos() {
   const [busqueda, setBusqueda] = useState("");
   const [guardando, setGuardando] = useState(false);
 
-  // Cargar datos de Dexie al iniciar
   useEffect(() => {
     const cargarDatos = async () => {
       const todos = await db.movimientos.toArray();
@@ -42,18 +43,10 @@ function IngresosGastos() {
 
     try {
       setGuardando(true);
-
-      // Guardar en Dexie
       await db.movimientos.add(nuevo);
-
-      // Guardar en Supabase
       const { error } = await supabase.from("movimientos").insert([nuevo]);
-      if (error) {
-        console.error("Error guardando en Supabase:", error);
-        alert("Error al guardar en Supabase");
-      }
+      if (error) console.error("Error guardando en Supabase:", error);
 
-      // Actualizar estado local
       const todos = await db.movimientos.toArray();
       setDatos(todos);
       cerrarModal();
@@ -62,17 +55,46 @@ function IngresosGastos() {
     }
   };
 
-  // Filtrar por tipo y búsqueda
-  const filtrados = datos
-    .filter((item) => item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto"))
-    .filter((item) =>
-      item.categoria.toLowerCase().includes(busqueda.toLowerCase())
-    );
+  const handleDelete = async (id: number) => {
+    await db.movimientos.delete(id);
+    const { error } = await supabase.from("movimientos").delete().eq("id", id);
+    if (error) console.error(error);
+    const todos = await db.movimientos.toArray();
+    setDatos(todos);
+  };
+
+  const handleEdit = (item: Movimiento) => {
+    alert(`Editar: ${item.categoria}`);
+  };
+
+ const filtrados = datos
+  .filter(item => item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto"))
+  .filter(item => {
+    if (!busqueda.trim()) return true;
+
+   
+    const terminos = busqueda
+      .toLowerCase()
+      .split(",")
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+
+    
+    return terminos.every((termino, index) => {
+      if (index === 0) {
+        return item.categoria.toLowerCase().includes(termino);
+      } else if (index === 1) {
+        return item.metodo.toLowerCase().includes(termino);
+      } else if (index === 2) {
+        return item.cuenta.toLowerCase().includes(termino);
+      }
+      return true;
+    });
+  });
 
 
   return (
     <>
-      {/* Menú de navegación */}
       <nav className="contenedor">
         <button
           className={`nav-btn ${activeTab === "Ingresos" ? "activo" : ""}`}
@@ -88,50 +110,59 @@ function IngresosGastos() {
         </button>
       </nav>
 
-      {/* Sección visible */}
       <div className="contenedor-principal">
         <div className="tabla-contenedor">
-          <div className="tabla-header">
-            <label>
-              <input type="checkbox" />
-            </label>
-            <span className="tabla-subtitulo">Categoría</span>
-            <span className="tabla-subtitulo">Monto</span>
-            <span className="tabla-subtitulo">Método de pago</span>
-            <span className="tabla-subtitulo">Cuenta</span>
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="buscador"
-            />
-          </div>
-          <hr />
-
-          {/* Tabla de datos */}
-          {filtrados.length > 0 ? (
-            <table className="tabla-datos">
-              <tbody>
-                {filtrados.map((item, i) => (
+          <table className="tabla-datos">
+            <thead>
+              <tr>
+               
+                <th>Categoría</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Cuenta</th>
+                <th>
+                  <input
+                    type="text"
+                    placeholder="Buscar... (separa términos con coma)"
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    className="buscador"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtrados.length > 0 ? (
+                filtrados.map((item, i) => (
                   <tr key={i}>
-                    <td>
-                      <input type="checkbox" />
-                    </td>
+                   
                     <td>{item.categoria}</td>
                     <td>{item.monto}</td>
                     <td>{item.metodo}</td>
                     <td>{item.cuenta}</td>
+                    <td className="acciones-fila">
+                      <EditIcon
+                        className="icono-editar"
+                        onClick={() => handleEdit(item)}
+                      />
+                      <DeleteIcon
+                        className="icono-eliminar"
+                        onClick={() => handleDelete(item.id!)}
+                      />
+                    </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="sin-datos">No hay datos registrados</p>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", padding: "20px" }}>
+                    No hay datos registrados
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* Botón flotante */}
         <button
           className="btn-flotante"
           onClick={() =>
@@ -142,7 +173,6 @@ function IngresosGastos() {
         </button>
       </div>
 
-      {/* Modal */}
       {openModal && (
         <div className="modal">
           <div className="modal-contenido">
@@ -163,23 +193,9 @@ function IngresosGastos() {
 
               <label>Método de pago:</label>
               <select name="paymentMethod" required>
-                <optgroup label="Efectivo">
-                  <option value="cash">Efectivo</option>
-                  <option value="cod">Contra entrega</option>
-                </optgroup>
-                <optgroup label="Tarjetas bancarias">
-                  <option value="visa">Visa</option>
-                  <option value="mastercard">Mastercard</option>
-                  <option value="amex">American Express</option>
-                </optgroup>
-                <optgroup label="Criptomonedas">
-                  <option value="btc">Bitcoin</option>
-                  <option value="eth">Ethereum</option>
-                </optgroup>
-                <optgroup label="Métodos en Cuba">
+                <optgroup label="Métodos en Pago">
                   <option value="transfermovil">Transfermóvil</option>
                   <option value="enzona">EnZona</option>
-                  <option value="qvapay">QvaPay</option>
                 </optgroup>
               </select>
 
@@ -193,7 +209,9 @@ function IngresosGastos() {
                 <button type="button" onClick={cerrarModal}>
                   Cancelar
                 </button>
-                <button type="submit">Guardar</button>
+                <button type="submit" disabled={guardando}>
+                  Guardar
+                </button>
               </div>
             </form>
           </div>
