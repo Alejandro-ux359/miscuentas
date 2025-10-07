@@ -1,6 +1,6 @@
 import { useState, useEffect, JSX } from "react";
 import "../ingresosGastos/IngresosGastos.css";
-import { db, Movimiento } from "../../bdDexie";
+import { db, Movimiento, syncDelete, syncInsert, syncUpdate } from "../../bdDexie";
 import { supabase } from "../../supaBase";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -14,7 +14,7 @@ function IngresosGastos(): JSX.Element {
   const [guardando, setGuardando] = useState(false);
   const [editando, setEditando] = useState<Movimiento | null>(null);
 
-  // Cargar datos locales al inicio
+  // 🔹 Cargar datos locales al inicio
   useEffect(() => {
     const cargarDatos = async () => {
       const todos = await db.movimientos.toArray();
@@ -35,100 +35,68 @@ function IngresosGastos(): JSX.Element {
     setEditando(null);
   };
 
-  // Guardar o actualizar (optimizado: Dexie primero, Supabase en background)
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const form = new FormData(e.target);
+  // 🔹 Guardar o actualizar registro
+ // Guardar o actualizar
+const handleSubmit = async (e: any) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
 
-    const nuevo: Movimiento = {
-      categoria: (form.get("categoria") as string) || "",
-      monto: Number(form.get("monto")) || 0,
-      metodo: (form.get("paymentMethod") as string) || "",
-      cuenta: (form.get("cuenta") as string) || "",
-      fecha: (form.get("fecha") as string) || "",
-      tipo,
-    };
+  const nuevo: Movimiento = {
+    categoria: (form.get("categoria") as string) || "",
+    monto: Number(form.get("monto")) || 0,
+    metodo: (form.get("paymentMethod") as string) || "",
+    cuenta: (form.get("cuenta") as string) || "",
+    fecha: (form.get("fecha") as string) || "",
+    tipo,
+  };
 
-    setGuardando(true);
-    try {
-      if (editando && editando.id !== undefined) {
-        // Actualiza localmente en Dexie (rápido)
-        await db.movimientos.update(editando.id, nuevo);
+  setGuardando(true);
 
-        // Actualiza UI inmediatamente
-        const todos = await db.movimientos.toArray();
-        setDatos(todos);
-        cerrarModal();
+  try {
+    if (editando && editando.id !== undefined) {
+      await db.movimientos.update(editando.id, nuevo);
+      setDatos(await db.movimientos.toArray());
+      cerrarModal();
 
-        // Sincroniza con Supabase en segundo plano (no await)
-        supabase
-          .from("movimientos")
-          .update(nuevo)
-          .eq("id", editando.id)
-          .then(({ error }) => {
-            if (error) {
-              console.error("Error actualizando en Supabase:", error);
-              // opcional: marcar para reintento
-            }
-          });
-      } else {
-        // Inserta primero en Dexie
-        const idDexie = await db.movimientos.add(nuevo);
+      // Sincronizar con Supabase
+      syncUpdate(editando.id, nuevo);
 
-        // Actualiza UI con la nueva lista local
-        const todos = await db.movimientos.toArray();
-        setDatos(todos);
-        cerrarModal();
+    } else {
+      const idDexie = await db.movimientos.add(nuevo);
+      setDatos(await db.movimientos.toArray());
+      cerrarModal();
 
-        // Inserta en Supabase en background. Si tu tabla en Supabase requiere su propio id
-        // y no acepta sobrescribirlo, quita `id: idDexie` del objeto insertado.
-        supabase
-          .from("movimientos")
-          .insert([{ ...nuevo, id: idDexie }])
-          .then(({ error }) => {
-            if (error) {
-              console.error("Error insertando en Supabase:", error);
-              // si falla, podrías intentar insertar sin id o guardar el fallo para reintento
-            }
-          });
-      }
-    } catch (err) {
-      console.error("Error guardando/actualizando:", err);
-      alert("Ocurrió un error al guardar. Revisa la consola.");
-    } finally {
-      setGuardando(false);
+      // Sincronizar con Supabase
+      syncInsert(nuevo, idDexie);
     }
-  };
+  } catch (err) {
+    console.error("Error guardando/actualizando:", err);
+  } finally {
+    setGuardando(false);
+  }
+};
 
-  const handleDelete = async (id?: number) => {
-    if (id === undefined) return;
-    if (!confirm("¿Eliminar este registro?")) return;
 
-    try {
-      // Borrar localmente
-      await db.movimientos.delete(id);
-      const todos = await db.movimientos.toArray();
-      setDatos(todos);
+  // 🔹 Eliminar registro (sincronizado Dexie + Supabase)
+ const handleDelete = async (id?: number) => {
+  if (id === undefined) return;
+  if (!confirm("¿Eliminar este registro?")) return;
 
-      // Borrar en Supabase en background
-      supabase
-        .from("movimientos")
-        .delete()
-        .eq("id", id)
-        .then(({ error }) => {
-          if (error) console.error("Error eliminando en Supabase:", error);
-        });
-    } catch (err) {
-      console.error("Error eliminando:", err);
-      alert("Error al eliminar. Revisa la consola.");
-    }
-  };
+  try {
+    await db.movimientos.delete(id);
+    setDatos(await db.movimientos.toArray());
 
-  const handleEdit = (item: Movimiento) => {
-    // Abrir modal con los datos cargados
-    abrirModal(item.tipo, item);
-  };
+    // Sincronizar con Supabase
+    syncDelete(id);
+  } catch (err) {
+    console.error("Error eliminando:", err);
+  }
+};
 
+
+  const handleEdit = (item: Movimiento) => abrirModal(item.tipo, item);
+
+  // 🔹 Filtro de búsqueda
   const filtrados = datos
     .filter((item) => item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto"))
     .filter((item) => {
