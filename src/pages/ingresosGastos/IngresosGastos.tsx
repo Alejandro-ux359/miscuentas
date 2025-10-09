@@ -1,8 +1,15 @@
 import { useState, useEffect, JSX } from "react";
 import "../ingresosGastos/IngresosGastos.css";
-import { db, Movimiento, syncDelete, syncInsert, syncUpdate } from "../../bdDexie";
+import {
+  db,
+  Movimiento,
+  syncDelete,
+  syncInsert,
+  syncUpdate,
+} from "../../bdDexie";
 import { supabase } from "../../supaBase";
 import DeleteIcon from "@mui/icons-material/Delete";
+import TuneIcon from "@mui/icons-material/Tune";
 import EditIcon from "@mui/icons-material/Edit";
 
 function IngresosGastos(): JSX.Element {
@@ -14,7 +21,27 @@ function IngresosGastos(): JSX.Element {
   const [guardando, setGuardando] = useState(false);
   const [editando, setEditando] = useState<Movimiento | null>(null);
 
-  // 🔹 Cargar datos locales al inicio
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState<boolean>(false);
+
+  const [mobileTipoSelection, setMobileTipoSelection] = useState<
+    Record<"Ingreso" | "Gasto", boolean>
+  >({
+    Ingreso: true,
+    Gasto: true,
+  });
+
+  const [catOptions, setCatOptions] = useState<Record<string, boolean>>({});
+  const [metOptions, setMetOptions] = useState<Record<string, boolean>>({});
+  const [ctaOptions, setCtaOptions] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 992);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     const cargarDatos = async () => {
       const todos = await db.movimientos.toArray();
@@ -22,6 +49,99 @@ function IngresosGastos(): JSX.Element {
     };
     cargarDatos();
   }, []);
+
+  useEffect(() => {
+    const makeOptions = (arr: string[], prev: Record<string, boolean>) => {
+      const next = { ...prev };
+      arr.forEach((k) => {
+        const key = k || "Otro";
+        if (!(key in next)) next[key] = true;
+      });
+      return next;
+    };
+
+    const cats = datos.map((d) => d.categoria || "Otro");
+    const mets = datos.map((d) => d.metodo || "Otro");
+    const ctas = datos.map((d) => d.cuenta || "Otro");
+
+    setCatOptions((prev) => makeOptions(cats, prev));
+    setMetOptions((prev) => makeOptions(mets, prev));
+    setCtaOptions((prev) => makeOptions(ctas, prev));
+  }, [datos]);
+
+  useEffect(() => {
+    const savedTipos = localStorage.getItem("mobileTipoSelection");
+    if (savedTipos) {
+      try {
+        setMobileTipoSelection(JSON.parse(savedTipos));
+      } catch {}
+    }
+    const savedFilters = localStorage.getItem("mobileFilters_v1");
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        if (parsed.catOptions) setCatOptions(parsed.catOptions);
+        if (parsed.metOptions) setMetOptions(parsed.metOptions);
+        if (parsed.ctaOptions) setCtaOptions(parsed.ctaOptions);
+      } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "mobileTipoSelection",
+        JSON.stringify(mobileTipoSelection)
+      );
+      localStorage.setItem(
+        "mobileFilters_v1",
+        JSON.stringify({
+          catOptions,
+          metOptions,
+          ctaOptions,
+        })
+      );
+    } catch {}
+  }, [mobileTipoSelection, catOptions, metOptions, ctaOptions]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    if (activeTab === "Ingresos") {
+      setMobileTipoSelection({ Ingreso: true, Gasto: false });
+    } else {
+      setMobileTipoSelection({ Ingreso: false, Gasto: true });
+    }
+  }, [activeTab, isMobile]);
+
+  const toggleMobileTipo = (t: "Ingreso" | "Gasto") =>
+    setMobileTipoSelection((prev) => ({ ...prev, [t]: !prev[t] }));
+
+  const toggleCat = (key: string) =>
+    setCatOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleMet = (key: string) =>
+    setMetOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleCta = (key: string) =>
+    setCtaOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const resetMobileFilters = () => {
+    setMobileTipoSelection({ Ingreso: true, Gasto: true });
+    setCatOptions((prev) => {
+      const next: Record<string, boolean> = {};
+      Object.keys(prev).forEach((k) => (next[k] = true));
+      return next;
+    });
+    setMetOptions((prev) => {
+      const next: Record<string, boolean> = {};
+      Object.keys(prev).forEach((k) => (next[k] = true));
+      return next;
+    });
+    setCtaOptions((prev) => {
+      const next: Record<string, boolean> = {};
+      Object.keys(prev).forEach((k) => (next[k] = true));
+      return next;
+    });
+  };
 
   const abrirModal = (tipoForm: "Ingreso" | "Gasto", itemEdit?: Movimiento) => {
     setTipo(tipoForm);
@@ -35,71 +155,85 @@ function IngresosGastos(): JSX.Element {
     setEditando(null);
   };
 
-  // 🔹 Guardar o actualizar registro
- // Guardar o actualizar
-const handleSubmit = async (e: any) => {
-  e.preventDefault();
-  const form = new FormData(e.target);
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
 
-  const nuevo: Movimiento = {
-    categoria: (form.get("categoria") as string) || "",
-    monto: Number(form.get("monto")) || 0,
-    metodo: (form.get("paymentMethod") as string) || "",
-    cuenta: (form.get("cuenta") as string) || "",
-    fecha: (form.get("fecha") as string) || "",
-    tipo,
+    const nuevo: Movimiento = {
+      categoria: (form.get("categoria") as string) || "",
+      monto: Number(form.get("monto")) || 0,
+      metodo: (form.get("paymentMethod") as string) || "",
+      cuenta: (form.get("cuenta") as string) || "",
+      fecha: (form.get("fecha") as string) || "",
+      tipo,
+    };
+
+    setGuardando(true);
+
+    try {
+      if (editando && editando.id !== undefined) {
+        await db.movimientos.update(editando.id, nuevo);
+        setDatos(await db.movimientos.toArray());
+        cerrarModal();
+
+        syncUpdate(editando.id, nuevo);
+      } else {
+        const idDexie = await db.movimientos.add(nuevo);
+        setDatos(await db.movimientos.toArray());
+        cerrarModal();
+
+        syncInsert(nuevo, idDexie);
+      }
+    } catch (err) {
+      console.error("Error guardando/actualizando:", err);
+    } finally {
+      setGuardando(false);
+    }
   };
 
-  setGuardando(true);
+  const handleDelete = async (id?: number) => {
+    if (id === undefined) return;
+    if (!confirm("¿Eliminar este registro?")) return;
 
-  try {
-    if (editando && editando.id !== undefined) {
-      await db.movimientos.update(editando.id, nuevo);
+    try {
+      await db.movimientos.delete(id);
       setDatos(await db.movimientos.toArray());
-      cerrarModal();
 
-      // Sincronizar con Supabase
-      syncUpdate(editando.id, nuevo);
-
-    } else {
-      const idDexie = await db.movimientos.add(nuevo);
-      setDatos(await db.movimientos.toArray());
-      cerrarModal();
-
-      // Sincronizar con Supabase
-      syncInsert(nuevo, idDexie);
+      syncDelete(id);
+    } catch (err) {
+      console.error("Error eliminando:", err);
     }
-  } catch (err) {
-    console.error("Error guardando/actualizando:", err);
-  } finally {
-    setGuardando(false);
-  }
-};
-
-
-  // 🔹 Eliminar registro (sincronizado Dexie + Supabase)
- const handleDelete = async (id?: number) => {
-  if (id === undefined) return;
-  if (!confirm("¿Eliminar este registro?")) return;
-
-  try {
-    await db.movimientos.delete(id);
-    setDatos(await db.movimientos.toArray());
-
-    // Sincronizar con Supabase
-    syncDelete(id);
-  } catch (err) {
-    console.error("Error eliminando:", err);
-  }
-};
-
+  };
 
   const handleEdit = (item: Movimiento) => abrirModal(item.tipo, item);
 
-  // 🔹 Filtro de búsqueda
   const filtrados = datos
-    .filter((item) => item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto"))
     .filter((item) => {
+      if (isMobile) {
+        if (!mobileTipoSelection[item.tipo]) return false;
+
+        const catKey = item.categoria || "Otro";
+        if (catOptions && Object.keys(catOptions).length > 0) {
+          if (!catOptions[catKey]) return false;
+        }
+
+        const metKey = item.metodo || "Otro";
+        if (metOptions && Object.keys(metOptions).length > 0) {
+          if (!metOptions[metKey]) return false;
+        }
+
+        const ctaKey = item.cuenta || "Otro";
+        if (ctaOptions && Object.keys(ctaOptions).length > 0) {
+          if (!ctaOptions[ctaKey]) return false;
+        }
+
+        return true;
+      }
+
+      return item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto");
+    })
+    .filter((item) => {
+      if (isMobile) return true;
       if (!busqueda.trim()) return true;
       const terminos = busqueda
         .toLowerCase()
@@ -116,7 +250,7 @@ const handleSubmit = async (e: any) => {
     });
 
   return (
-    <>
+    <div className="pagina-ingresos-gastos">
       <nav className="contenedor">
         <button
           className={`nav-btn ${activeTab === "Ingresos" ? "activo" : ""}`}
@@ -132,66 +266,228 @@ const handleSubmit = async (e: any) => {
         </button>
       </nav>
 
-      <div className="contenedor-principal">
-        <div className="tabla-contenedor">
-          <table className="tabla-datos">
-            <thead>
-              <tr>
-                <th>Categoría</th>
-                <th>Monto</th>
-                <th>Método</th>
-                <th>Cuenta</th>
-                <th>
+      {isMobile && (
+        <div className="mobile-filter-row">
+          <button
+            className="filtro-btn"
+            onClick={() => setMobileFilterOpen((v) => !v)}
+            aria-expanded={mobileFilterOpen}
+            aria-controls="mobile-filter-panel"
+          >
+            <TuneIcon />
+          </button>
+
+          {mobileFilterOpen && (
+            <div className="menu-filtro" id="mobile-filter-panel">
+              <div className="menu-section">
+                <div className="section-title">Tipo</div>
+                <label>
                   <input
-                    type="text"
-                    placeholder="Buscar... (separa términos con coma)"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    className="buscador"
+                    type="checkbox"
+                    checked={mobileTipoSelection.Ingreso}
+                    onChange={() => toggleMobileTipo("Ingreso")}
                   />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.length > 0 ? (
-                filtrados.map((item, i) => (
-                  <tr key={item.id ?? i}>
-                    <td>{item.categoria}</td>
-                    <td>{item.monto}</td>
-                    <td>{item.metodo}</td>
-                    <td>{item.cuenta}</td>
-                    <td className="acciones-fila">
-                      <EditIcon
-                        className="icono-editar"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleEdit(item)}
-                      />
-                      <DeleteIcon
-                        className="icono-eliminar"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleDelete(item.id)}
-                      />
+                  Ingresos
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={mobileTipoSelection.Gasto}
+                    onChange={() => toggleMobileTipo("Gasto")}
+                  />
+                  Gastos
+                </label>
+              </div>
+
+              <div className="menu-section">
+                <div className="section-title">Categoría</div>
+                <div className="options-scroll">
+                  {Object.keys(catOptions).length === 0 ? (
+                    <div className="sin-datos">No hay categorías</div>
+                  ) : (
+                    Object.keys(catOptions).map((k) => (
+                      <label key={k}>
+                        <input
+                          type="checkbox"
+                          checked={!!catOptions[k]}
+                          onChange={() => toggleCat(k)}
+                        />
+                        {k}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="menu-section">
+                <div className="section-title">Método</div>
+                <div className="options-scroll">
+                  {Object.keys(metOptions).length === 0 ? (
+                    <div className="sin-datos">No hay métodos</div>
+                  ) : (
+                    Object.keys(metOptions).map((k) => (
+                      <label key={k}>
+                        <input
+                          type="checkbox"
+                          checked={!!metOptions[k]}
+                          onChange={() => toggleMet(k)}
+                        />
+                        {k}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="menu-section">
+                <div className="section-title">Cuenta</div>
+                <div className="options-scroll">
+                  {Object.keys(ctaOptions).length === 0 ? (
+                    <div className="sin-datos">No hay cuentas</div>
+                  ) : (
+                    Object.keys(ctaOptions).map((k) => (
+                      <label key={k}>
+                        <input
+                          type="checkbox"
+                          checked={!!ctaOptions[k]}
+                          onChange={() => toggleCta(k)}
+                        />
+                        {k}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="menu-actions">
+                <button
+                  type="button"
+                  onClick={() => setMobileFilterOpen(false)}
+                >
+                  Cerrar
+                </button>
+                <button type="button" onClick={resetMobileFilters}>
+                  Reset
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="scroll-area">
+        <div className="tabla-contenedor">
+          {!isMobile ? (
+            <table className="tabla-datos">
+              <thead>
+                <tr>
+                  <th>Categoría</th>
+                  <th>Monto</th>
+                  <th>Método</th>
+                  <th>Cuenta</th>
+                  <th>
+                    <input
+                      type="text"
+                      placeholder="Buscar... (separa términos con coma)"
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
+                      className="buscador"
+                    />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtrados.length > 0 ? (
+                  filtrados.map((item, i) => (
+                    <tr key={item.id ?? i}>
+                      <td>{item.categoria}</td>
+                      <td>{item.monto}</td>
+                      <td>{item.metodo}</td>
+                      <td>{item.cuenta}</td>
+                      <td className="acciones-fila">
+                        <EditIcon
+                          className="icono-editar"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleEdit(item)}
+                        />
+                        <DeleteIcon
+                          className="icono-eliminar"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleDelete(item.id)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{ textAlign: "center", padding: 20 }}
+                    >
+                      No hay datos registrados
                     </td>
                   </tr>
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <div className="lista-movimientos-mobile">
+              {filtrados.length > 0 ? (
+                filtrados.map((item, i) => (
+                  <div className="mov-card" key={item.id ?? i}>
+                    <div className="mov-info">
+                      <div className="mov-top">
+                        <strong className="mov-categoria">
+                          {item.categoria}
+                        </strong>
+                        <span className="mov-monto">${item.monto}</span>
+                      </div>
+                      <div className="mov-bottom">
+                        <small className="mov-detalle">
+                          {item.metodo} • {item.cuenta}
+                        </small>
+                        <small className="mov-fecha">{item.fecha}</small>
+                      </div>
+                    </div>
+                    <div className="mov-acciones">
+                      <button
+                        className="icono-editar"
+                        onClick={() => handleEdit(item)}
+                        aria-label="Editar"
+                      >
+                        <EditIcon />
+                      </button>
+                      <button
+                        className="icono-eliminar"
+                        onClick={() => handleDelete(item.id)}
+                        aria-label="Eliminar"
+                      >
+                        <DeleteIcon />
+                      </button>
+                    </div>
+                  </div>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
-                    No hay datos registrados
-                  </td>
-                </tr>
+                <div
+                  className="sin-datos"
+                  style={{ padding: 16, textAlign: "center" }}
+                >
+                  No hay datos registrados
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
-
-        <button
-          className="btn-flotante"
-          onClick={() => abrirModal(activeTab === "Ingresos" ? "Ingreso" : "Gasto")}
-        >
-          +
-        </button>
       </div>
+
+      <button
+        className="btn-flotante"
+        onClick={() =>
+          abrirModal(activeTab === "Ingresos" ? "Ingreso" : "Gasto")
+        }
+      >
+        +
+      </button>
 
       {openModal && (
         <div className="modal">
@@ -199,7 +495,11 @@ const handleSubmit = async (e: any) => {
             <h3>{editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}</h3>
             <form onSubmit={handleSubmit}>
               <label>Categoría:</label>
-              <select name="categoria" required defaultValue={editando?.categoria ?? ""}>
+              <select
+                name="categoria"
+                required
+                defaultValue={editando?.categoria ?? ""}
+              >
                 <option value="">Seleccione...</option>
                 <option value="salario">Salario</option>
                 <option value="ventas">Ventas</option>
@@ -210,49 +510,66 @@ const handleSubmit = async (e: any) => {
               </select>
 
               <label>Monto:</label>
-              <input type="number" name="monto" required defaultValue={editando?.monto ?? ""} />
+              <input
+                type="number"
+                name="monto"
+                required
+                defaultValue={editando?.monto ?? ""}
+              />
 
               <label>Método de pago:</label>
-              <select name="paymentMethod" required defaultValue={editando?.metodo ?? ""}>
-                <optgroup label="Efectivo">
-                  <option value="cash">Efectivo</option>
-                  <option value="cod">Contra entrega</option>
-                </optgroup>
-                <optgroup label="Tarjetas bancarias">
-                  <option value="visa">Visa</option>
-                  <option value="mastercard">Mastercard</option>
-                  <option value="amex">American Express</option>
-                </optgroup>
-                <optgroup label="Criptomonedas">
-                  <option value="btc">Bitcoin</option>
-                  <option value="eth">Ethereum</option>
-                </optgroup>
-                <optgroup label="Métodos en Cuba">
-                  <option value="transfermovil">Transfermóvil</option>
-                  <option value="enzona">EnZona</option>
-                  <option value="qvapay">QvaPay</option>
-                </optgroup>
+              <select
+                name="paymentMethod"
+                required
+                defaultValue={editando?.metodo ?? ""}
+              >
+                <option value="">Seleccione...</option>
+                <option value="transfermovil">Transfermóvil</option>
+                <option value="enzona">EnZona</option>
+                <option value="qvapay">QvaPay</option>
+                <option value="tropipay">TropiPay</option>
+               
               </select>
 
               <label>Fecha:</label>
-              <input type="date" name="fecha" required defaultValue={editando?.fecha ?? ""} />
+              <input
+                type="date"
+                name="fecha"
+                required
+                defaultValue={editando?.fecha ?? ""}
+              />
 
               <label>Cuenta:</label>
-              <input type="text" name="cuenta" required defaultValue={editando?.cuenta ?? ""} />
+               <select
+                name="cuenta"
+                required
+                defaultValue={editando?.cuenta ?? ""}
+              >
+                <option value="">Seleccione...</option>
+                <option value="cup">CUP</option>
+                <option value="usd">USD</option>
+                <option value="eur">EUR</option>
+                <option value="cad">CAD</option>
+                <option value="mx">MX</option>
+              </select>
 
               <div className="acciones">
                 <button type="button" onClick={cerrarModal}>
                   Cancelar
                 </button>
                 <button type="submit" disabled={guardando}>
-                  {guardando ? "Guardando..." : editando ? "Actualizar" : "Guardar"}
+                  {guardando
+                    ? "Guardando..."
+                    : editando
+                    ? "Actualizar"
+                    : "Guardar"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
