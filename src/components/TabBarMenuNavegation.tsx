@@ -78,7 +78,7 @@ export default function TabBarMenuNavegation() {
 
       if (tabElement) {
         const tabCenter = tabElement.offsetLeft + tabElement.offsetWidth / 2;
-        const circleSize = 56;
+        const circleSize = 45;
         const position = tabCenter - circleSize / 2;
 
         setCirclePosition(position);
