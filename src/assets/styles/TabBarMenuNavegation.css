@@ -74,11 +74,19 @@
 }
 
 /* 🔔 Icono de notificaciones */
-.notification-icon {
+.icon-container {
+  display: flex;       /* pone los elementos en línea */
+  gap: 15px;           /* espacio entre los iconos */
+  align-items: center; /* alinea verticalmente */
+}
+
+.notification-icon,
+.setting-icon {
   font-size: 28px;
   color: #00bcd4;
   cursor: pointer;
 }
+
 
 
 

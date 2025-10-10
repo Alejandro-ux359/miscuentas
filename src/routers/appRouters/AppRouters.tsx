@@ -6,6 +6,7 @@ import Calculadora from "../../pages/calculadora/Calculadora";
 import Negocios from "../../pages/bussines/Negocios";
 import IngresosGastos from "../../pages/ingresosGastos/IngresosGastos";
 import Configuracion from "../../pages/configuracion/Configuracion";
+import Estadisticas from "../../pages/estadisticas/Estadisticas";
 
 
 
@@ -18,6 +19,7 @@ function AppRouter() {
       <Route path="/calculadora" element={<Calculadora />} />
       <Route path="/negocios" element={<Negocios />} />
       <Route path="/ingresosgastos" element={<IngresosGastos />} />
+      <Route path="/estadisticas" element={<Estadisticas />} />
       <Route path="/configuracion" element={<Configuracion />} />
 
    </Routes>

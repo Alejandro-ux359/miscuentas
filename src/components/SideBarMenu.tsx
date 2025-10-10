@@ -8,6 +8,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import { useNavigate, useLocation } from "react-router-dom";
 
 // 1️⃣ Definimos el tipo de props
@@ -26,6 +27,7 @@ export default function SideBarMenu({ isOpen, setIsOpen }: SidebarMenuProps) {
     { id: "ingresosgastos", icon: <AttachMoneyIcon />, label: "Ingresos", path: "/ingresosgastos" },
     { id: "negocios", icon: <WorkOutlineIcon />, label: "Negocios", path: "/negocios" },
     { id: "calculadora", icon: <CalculateIcon />, label: "Calculadora", path: "/calculadora" },
+    { id: "estadisticas", icon: <QueryStatsIcon />, label: "Estadisticas", path: "/estadisticas" },
     { id: "configuracion", icon: <SettingsIcon />, label: "Configuración", path: "/configuracion" },
   ];
 

@@ -1,14 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import "../assets/styles/TabBarMenuNavegation.css";
-
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import HomeIcon from "@mui/icons-material/Home";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import NightlightIcon from "@mui/icons-material/Nightlight";
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -28,7 +26,7 @@ export default function TabBarMenuNavegation() {
     },
     {
       id: "negocios",
-      icon: <WorkOutlineIcon style={{ color: "inherit" }} />,
+      icon: <StorefrontIcon style={{ color: "inherit" }} />,
       path: "/negocios",
     },
     {
@@ -42,9 +40,9 @@ export default function TabBarMenuNavegation() {
       path: "/calculadora",
     },
     {
-      id: "configuracion",
-      icon: <SettingsIcon style={{ color: "inherit" }} />,
-      path: "/configuracion",
+      id: "estadisticas",
+      icon: <QueryStatsIcon style={{ color: "inherit" }} />,
+      path: "/estadisticas",
     },
   ];
 
@@ -101,10 +99,16 @@ export default function TabBarMenuNavegation() {
             {isDarkMode ? <div className="moon" /> : <div className="sun" />}
           </div>
         </div>
-        <NotificationsNoneIcon
-          className="notification-icon"
-          onClick={() => navigate("/notificacion")}
-        />
+        <div className="icon-container">
+          <NotificationsNoneIcon
+            className="notification-icon"
+            onClick={() => navigate("/notificacion")}
+          />
+          <SettingsIcon
+            className="setting-icon"
+            onClick={() => navigate("/configuracion")}
+          />
+        </div>
       </div>
 
       <div className="bottom-menu-container">
