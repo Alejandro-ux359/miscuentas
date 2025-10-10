@@ -43,7 +43,7 @@ const Home: React.FC = () => {
   const monedaActual = monedas[index] || "CUP";
   const totalActual = totales[monedaActual] || 0;
 
-   return (
+  return (
     <div className="dashboard">
       {/* Pestañas */}
       <div className="tabs">
@@ -61,28 +61,38 @@ const Home: React.FC = () => {
         </button>
       </div>
 
-      {/* Tarjeta de total */}
-      <div className="total-card">
-        <button className="arrow-btn left" onClick={handlePrev}>
-          <ArrowBackIosIcon />
-        </button>
+      {activeTab === "Hogar" ? (
+        <>
+          {/* Tarjeta de total */}
+          <div className="total-card">
+            <button className="arrow-btn left" onClick={handlePrev}>
+              <ArrowBackIosIcon />
+            </button>
 
-        <div className="total-texto">
-          <h2>Total {monedaActual}</h2>
-          <p>${totalActual.toFixed(2)}</p>
+            <div className="total-texto">
+              <h2>Total {monedaActual}</h2>
+              <p>${totalActual.toFixed(2)}</p>
+            </div>
+
+            <button className="arrow-btn right" onClick={handleNext}>
+              <ArrowForwardIosIcon />
+            </button>
+          </div>
+
+          {/* Puntos indicadores */}
+          <div className="dots">
+            {monedas.map((_, i) => (
+              <div key={i} className={`dot ${i === index ? "active" : ""}`}></div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="desarrollo-message">
+          <h2>🚧 Disculpa</h2>
+          <p>La sección de Negocios está en desarrollo.</p>
+          <p>Gracias por tu paciencia 🙏</p>
         </div>
-
-        <button className="arrow-btn right" onClick={handleNext}>
-          <ArrowForwardIosIcon />
-        </button>
-      </div>
-
-      {/* Puntos indicadores */}
-      <div className="dots">
-        {monedas.map((_, i) => (
-          <div key={i} className={`dot ${i === index ? "active" : ""}`}></div>
-        ))}
-      </div>
+      )}
     </div>
   );
 };

@@ -189,3 +189,27 @@
 .tasa-variacion.neutral {
   color: #6c757d;
 }
+
+.desarrollo-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 300px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.desarrollo-message h2 {
+  color: #00bcd4;
+  margin-bottom: 10px;
+}
+
+.desarrollo-message p {
+  margin: 5px 0;
+}
