@@ -9,7 +9,7 @@
   height: 60px;
   background-color: transparent;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 0 20px;
   z-index: 20;
@@ -75,9 +75,10 @@
 
 /* 🔔 Icono de notificaciones */
 .icon-container {
-  display: flex;       /* pone los elementos en línea */
-  gap: 15px;           /* espacio entre los iconos */
-  align-items: center; /* alinea verticalmente */
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .notification-icon,
@@ -85,16 +86,9 @@
   font-size: 28px;
   color: #00bcd4;
   cursor: pointer;
+  justify-content: flex-end;
+  align-items: center;
 }
-
-
-
-
-
-
-
-
-
 
 /* BOTTOM MENU (Barra inferior) */
 .bottom-menu-container {

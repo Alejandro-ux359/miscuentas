@@ -91,14 +91,16 @@ export default function TabBarMenuNavegation() {
   return (
     <>
       <div className="top-bar">
-        <div
+
+        {/* <div
           className={`custom-toggle ${isDarkMode ? "dark" : "light"}`}
-          onClick={toggleTheme}
-        >
+          onClick={toggleTheme}>
           <div className="toggle-ball">
             {isDarkMode ? <div className="moon" /> : <div className="sun" />}
           </div>
-        </div>
+        </div> */}
+
+
         <div className="icon-container">
           <NotificationsNoneIcon
             className="notification-icon"
