@@ -7,7 +7,6 @@ import {
   syncInsert,
   syncUpdate,
 } from "../../bdDexie";
-import { supabase } from "../../supaBase";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TuneIcon from "@mui/icons-material/Tune";
 import EditIcon from "@mui/icons-material/Edit";
@@ -33,7 +32,7 @@ function IngresosGastos(): JSX.Element {
 
   const [catOptions, setCatOptions] = useState<Record<string, boolean>>({});
   const [metOptions, setMetOptions] = useState<Record<string, boolean>>({});
-  const [ctaOptions, setCtaOptions] = useState<Record<string, boolean>>({});
+  const [mndOptions, setMndOptions] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 992);
@@ -62,11 +61,11 @@ function IngresosGastos(): JSX.Element {
 
     const cats = datos.map((d) => d.categoria || "Otro");
     const mets = datos.map((d) => d.metodo || "Otro");
-    const ctas = datos.map((d) => d.cuenta || "Otro");
+    const mnds = datos.map((d) => d.moneda || "Otro");
 
     setCatOptions((prev) => makeOptions(cats, prev));
     setMetOptions((prev) => makeOptions(mets, prev));
-    setCtaOptions((prev) => makeOptions(ctas, prev));
+    setMndOptions((prev) => makeOptions(mnds, prev));
   }, [datos]);
 
   useEffect(() => {
@@ -76,13 +75,13 @@ function IngresosGastos(): JSX.Element {
         setMobileTipoSelection(JSON.parse(savedTipos));
       } catch {}
     }
-    const savedFilters = localStorage.getItem("mobileFilters_v1");
+    const savedFilters = localStorage.getItem("mobileFilters_v2");
     if (savedFilters) {
       try {
         const parsed = JSON.parse(savedFilters);
         if (parsed.catOptions) setCatOptions(parsed.catOptions);
         if (parsed.metOptions) setMetOptions(parsed.metOptions);
-        if (parsed.ctaOptions) setCtaOptions(parsed.ctaOptions);
+        if (parsed.mndOptions) setMndOptions(parsed.mndOptions);
       } catch {}
     }
   }, []);
@@ -94,19 +93,18 @@ function IngresosGastos(): JSX.Element {
         JSON.stringify(mobileTipoSelection)
       );
       localStorage.setItem(
-        "mobileFilters_v1",
+        "mobileFilters_v2",
         JSON.stringify({
           catOptions,
           metOptions,
-          ctaOptions,
+          mndOptions,
         })
       );
     } catch {}
-  }, [mobileTipoSelection, catOptions, metOptions, ctaOptions]);
+  }, [mobileTipoSelection, catOptions, metOptions, mndOptions]);
 
   useEffect(() => {
     if (!isMobile) return;
-
     if (activeTab === "Ingresos") {
       setMobileTipoSelection({ Ingreso: true, Gasto: false });
     } else {
@@ -121,32 +119,21 @@ function IngresosGastos(): JSX.Element {
     setCatOptions((prev) => ({ ...prev, [key]: !prev[key] }));
   const toggleMet = (key: string) =>
     setMetOptions((prev) => ({ ...prev, [key]: !prev[key] }));
-  const toggleCta = (key: string) =>
-    setCtaOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleMnd = (key: string) =>
+    setMndOptions((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const resetMobileFilters = () => {
     setMobileTipoSelection({ Ingreso: true, Gasto: true });
-    setCatOptions((prev) => {
-      const next: Record<string, boolean> = {};
-      Object.keys(prev).forEach((k) => (next[k] = true));
-      return next;
-    });
-    setMetOptions((prev) => {
-      const next: Record<string, boolean> = {};
-      Object.keys(prev).forEach((k) => (next[k] = true));
-      return next;
-    });
-    setCtaOptions((prev) => {
-      const next: Record<string, boolean> = {};
-      Object.keys(prev).forEach((k) => (next[k] = true));
-      return next;
-    });
+    const reset = (prev: Record<string, boolean>) =>
+      Object.keys(prev).reduce((acc, k) => ({ ...acc, [k]: true }), {});
+    setCatOptions((p) => reset(p));
+    setMetOptions((p) => reset(p));
+    setMndOptions((p) => reset(p));
   };
 
   const abrirModal = (tipoForm: "Ingreso" | "Gasto", itemEdit?: Movimiento) => {
     setTipo(tipoForm);
-    if (itemEdit) setEditando(itemEdit);
-    else setEditando(null);
+    setEditando(itemEdit ?? null);
     setOpenModal(true);
   };
 
@@ -163,8 +150,9 @@ function IngresosGastos(): JSX.Element {
       categoria: (form.get("categoria") as string) || "",
       monto: Number(form.get("monto")) || 0,
       metodo: (form.get("paymentMethod") as string) || "",
-      cuenta: (form.get("cuenta") as string) || "",
       fecha: (form.get("fecha") as string) || "",
+      moneda: (form.get("moneda") as string) || "",
+      cuenta: "",
       tipo,
     };
 
@@ -175,13 +163,11 @@ function IngresosGastos(): JSX.Element {
         await db.movimientos.update(editando.id, nuevo);
         setDatos(await db.movimientos.toArray());
         cerrarModal();
-
         syncUpdate(editando.id, nuevo);
       } else {
         const idDexie = await db.movimientos.add(nuevo);
         setDatos(await db.movimientos.toArray());
         cerrarModal();
-
         syncInsert(nuevo, idDexie);
       }
     } catch (err) {
@@ -192,13 +178,11 @@ function IngresosGastos(): JSX.Element {
   };
 
   const handleDelete = async (id?: number) => {
-    if (id === undefined) return;
+    if (!id) return;
     if (!confirm("¿Eliminar este registro?")) return;
-
     try {
       await db.movimientos.delete(id);
       setDatos(await db.movimientos.toArray());
-
       syncDelete(id);
     } catch (err) {
       console.error("Error eliminando:", err);
@@ -211,25 +195,11 @@ function IngresosGastos(): JSX.Element {
     .filter((item) => {
       if (isMobile) {
         if (!mobileTipoSelection[item.tipo]) return false;
-
-        const catKey = item.categoria || "Otro";
-        if (catOptions && Object.keys(catOptions).length > 0) {
-          if (!catOptions[catKey]) return false;
-        }
-
-        const metKey = item.metodo || "Otro";
-        if (metOptions && Object.keys(metOptions).length > 0) {
-          if (!metOptions[metKey]) return false;
-        }
-
-        const ctaKey = item.cuenta || "Otro";
-        if (ctaOptions && Object.keys(ctaOptions).length > 0) {
-          if (!ctaOptions[ctaKey]) return false;
-        }
-
+        if (!catOptions[item.categoria || "Otro"]) return false;
+        if (!metOptions[item.metodo || "Otro"]) return false;
+        if (!mndOptions[item.moneda || "Otro"]) return false;
         return true;
       }
-
       return item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto");
     })
     .filter((item) => {
@@ -244,7 +214,7 @@ function IngresosGastos(): JSX.Element {
       return terminos.every((termino, index) => {
         if (index === 0) return item.categoria.toLowerCase().includes(termino);
         if (index === 1) return item.metodo.toLowerCase().includes(termino);
-        if (index === 2) return item.cuenta.toLowerCase().includes(termino);
+        if (index === 2) return item.moneda.toLowerCase().includes(termino);
         return true;
       });
     });
@@ -266,19 +236,18 @@ function IngresosGastos(): JSX.Element {
         </button>
       </nav>
 
+      {/* Filtro móvil */}
       {isMobile && (
         <div className="mobile-filter-row">
           <button
             className="filtro-btn"
             onClick={() => setMobileFilterOpen((v) => !v)}
-            aria-expanded={mobileFilterOpen}
-            aria-controls="mobile-filter-panel"
           >
             <TuneIcon />
           </button>
 
           {mobileFilterOpen && (
-            <div className="menu-filtro" id="mobile-filter-panel">
+            <div className="menu-filtro">
               <div className="menu-section">
                 <div className="section-title">Tipo</div>
                 <label>
@@ -302,68 +271,53 @@ function IngresosGastos(): JSX.Element {
               <div className="menu-section">
                 <div className="section-title">Categoría</div>
                 <div className="options-scroll">
-                  {Object.keys(catOptions).length === 0 ? (
-                    <div className="sin-datos">No hay categorías</div>
-                  ) : (
-                    Object.keys(catOptions).map((k) => (
-                      <label key={k}>
-                        <input
-                          type="checkbox"
-                          checked={!!catOptions[k]}
-                          onChange={() => toggleCat(k)}
-                        />
-                        {k}
-                      </label>
-                    ))
-                  )}
+                  {Object.keys(catOptions).map((k) => (
+                    <label key={k}>
+                      <input
+                        type="checkbox"
+                        checked={!!catOptions[k]}
+                        onChange={() => toggleCat(k)}
+                      />
+                      {k}
+                    </label>
+                  ))}
                 </div>
               </div>
 
               <div className="menu-section">
                 <div className="section-title">Método</div>
                 <div className="options-scroll">
-                  {Object.keys(metOptions).length === 0 ? (
-                    <div className="sin-datos">No hay métodos</div>
-                  ) : (
-                    Object.keys(metOptions).map((k) => (
-                      <label key={k}>
-                        <input
-                          type="checkbox"
-                          checked={!!metOptions[k]}
-                          onChange={() => toggleMet(k)}
-                        />
-                        {k}
-                      </label>
-                    ))
-                  )}
+                  {Object.keys(metOptions).map((k) => (
+                    <label key={k}>
+                      <input
+                        type="checkbox"
+                        checked={!!metOptions[k]}
+                        onChange={() => toggleMet(k)}
+                      />
+                      {k}
+                    </label>
+                  ))}
                 </div>
               </div>
 
               <div className="menu-section">
-                <div className="section-title">Cuenta</div>
+                <div className="section-title">Moneda</div>
                 <div className="options-scroll">
-                  {Object.keys(ctaOptions).length === 0 ? (
-                    <div className="sin-datos">No hay cuentas</div>
-                  ) : (
-                    Object.keys(ctaOptions).map((k) => (
-                      <label key={k}>
-                        <input
-                          type="checkbox"
-                          checked={!!ctaOptions[k]}
-                          onChange={() => toggleCta(k)}
-                        />
-                        {k}
-                      </label>
-                    ))
-                  )}
+                  {Object.keys(mndOptions).map((k) => (
+                    <label key={k}>
+                      <input
+                        type="checkbox"
+                        checked={!!mndOptions[k]}
+                        onChange={() => toggleMnd(k)}
+                      />
+                      {k}
+                    </label>
+                  ))}
                 </div>
               </div>
 
               <div className="menu-actions">
-                <button
-                  type="button"
-                  onClick={() => setMobileFilterOpen(false)}
-                >
+                <button type="button" onClick={() => setMobileFilterOpen(false)}>
                   Cerrar
                 </button>
                 <button type="button" onClick={resetMobileFilters}>
@@ -375,6 +329,7 @@ function IngresosGastos(): JSX.Element {
         </div>
       )}
 
+      {/* Tabla / Lista */}
       <div className="scroll-area">
         <div className="tabla-contenedor">
           {!isMobile ? (
@@ -384,11 +339,11 @@ function IngresosGastos(): JSX.Element {
                   <th>Categoría</th>
                   <th>Monto</th>
                   <th>Método</th>
-                  <th>Cuenta</th>
+                  <th>Moneda</th>
                   <th>
                     <input
                       type="text"
-                      placeholder="Buscar... (separa términos con coma)"
+                      placeholder="Buscar... (cat, método, moneda)"
                       value={busqueda}
                       onChange={(e) => setBusqueda(e.target.value)}
                       className="buscador"
@@ -397,22 +352,20 @@ function IngresosGastos(): JSX.Element {
                 </tr>
               </thead>
               <tbody>
-                {filtrados.length > 0 ? (
+                {filtrados.length ? (
                   filtrados.map((item, i) => (
                     <tr key={item.id ?? i}>
                       <td>{item.categoria}</td>
                       <td>{item.monto}</td>
                       <td>{item.metodo}</td>
-                      <td>{item.cuenta}</td>
+                      <td>{item.moneda}</td>
                       <td className="acciones-fila">
                         <EditIcon
                           className="icono-editar"
-                          style={{ cursor: "pointer" }}
                           onClick={() => handleEdit(item)}
                         />
                         <DeleteIcon
                           className="icono-eliminar"
-                          style={{ cursor: "pointer" }}
                           onClick={() => handleDelete(item.id)}
                         />
                       </td>
@@ -420,10 +373,7 @@ function IngresosGastos(): JSX.Element {
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={5}
-                      style={{ textAlign: "center", padding: 20 }}
-                    >
+                    <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
                       No hay datos registrados
                     </td>
                   </tr>
@@ -432,48 +382,37 @@ function IngresosGastos(): JSX.Element {
             </table>
           ) : (
             <div className="lista-movimientos-mobile">
-              {filtrados.length > 0 ? (
+              {filtrados.length ? (
                 filtrados.map((item, i) => (
                   <div className="mov-card" key={item.id ?? i}>
                     <div className="mov-info">
                       <div className="mov-top">
-                        <strong className="mov-categoria">
-                          {item.categoria}
-                        </strong>
-                        <span className="mov-monto">${item.monto}</span>
+                        <strong>{item.categoria}</strong>
+                        <span>
+                          $ {item.monto} {item.moneda}
+                        </span>
                       </div>
                       <div className="mov-bottom">
-                        <small className="mov-detalle">
-                          {item.metodo} • {item.cuenta}
-                        </small>
-                        <small className="mov-fecha">{item.fecha}</small>
+                        <small>{item.metodo}</small>
+                        <small>{item.fecha}</small>
                       </div>
                     </div>
                     <div className="mov-acciones">
-                      <button
-                        className="icono-editar"
-                        onClick={() => handleEdit(item)}
-                        aria-label="Editar"
-                      >
+                      <button 
+                      className="icono-editar"
+                      onClick={() => handleEdit(item)}>
                         <EditIcon />
                       </button>
-                      <button
-                        className="icono-eliminar"
-                        onClick={() => handleDelete(item.id)}
-                        aria-label="Eliminar"
-                      >
+                      <button 
+                      className="icono-eliminar"
+                      onClick={() => handleDelete(item.id)}>
                         <DeleteIcon />
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
-                <div
-                  className="sin-datos"
-                  style={{ padding: 16, textAlign: "center" }}
-                >
-                  No hay datos registrados
-                </div>
+                <div className="sin-datos">No hay datos registrados</div>
               )}
             </div>
           )}
@@ -505,7 +444,7 @@ function IngresosGastos(): JSX.Element {
                 <option value="ventas">Ventas</option>
                 <option value="regalia">Regalía</option>
                 <option value="inversion">Inversión</option>
-                <option value="reenbolso">Reembolso</option>
+                <option value="reembolso">Reembolso</option>
                 <option value="otro">Otro</option>
               </select>
 
@@ -528,7 +467,6 @@ function IngresosGastos(): JSX.Element {
                 <option value="enzona">EnZona</option>
                 <option value="qvapay">QvaPay</option>
                 <option value="tropipay">TropiPay</option>
-               
               </select>
 
               <label>Fecha:</label>
@@ -539,18 +477,18 @@ function IngresosGastos(): JSX.Element {
                 defaultValue={editando?.fecha ?? ""}
               />
 
-              <label>Cuenta:</label>
-               <select
-                name="cuenta"
+              <label>Moneda:</label>
+              <select
+                name="moneda"
                 required
-                defaultValue={editando?.cuenta ?? ""}
+                defaultValue={editando?.moneda ?? ""}
               >
                 <option value="">Seleccione...</option>
-                <option value="cup">CUP</option>
-                <option value="usd">USD</option>
-                <option value="eur">EUR</option>
-                <option value="cad">CAD</option>
-                <option value="mx">MX</option>
+                <option value="CUP">CUP</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="CAD">CAD</option>
+                <option value="MXN">MXN</option>
               </select>
 
               <div className="acciones">

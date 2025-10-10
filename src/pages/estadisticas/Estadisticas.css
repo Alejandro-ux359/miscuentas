@@ -1,0 +1,184 @@
+/* ============================
+   📊 ESTADÍSTICAS - DISEÑO RESPONSIVO
+   ============================ */
+
+/* ======== VARIABLES DE COLOR ======== */
+:root {
+  --color-fondo: #f9fafb;
+  --color-texto: #333;
+  --color-primario: #36a2eb;
+  --color-secundario: #ff6384;
+  --color-borde: #e5e7eb;
+  --color-card: #ffffff;
+  --sombra-card: 0 4px 10px rgba(0, 0, 0, 0.05);
+  --radio: 12px;
+}
+
+/* ======== CONTENEDOR GENERAL ======== */
+.estadisticas-container {
+  width: 100%;
+  margin-top: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.estadisticas-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--color-primario);
+  margin-top: 50px;
+  font-weight: 700; 
+}
+
+/* ======== SECCIONES DE GRÁFICAS ======== */
+.secciones-graficas {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* ======== TARJETAS DE GRÁFICAS ======== */
+.grafica-card {
+  background-color: var(--color-card);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-card);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grafica-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.grafica-card h3 {
+  font-size: 1.2rem;
+  color: var(--color-secundario);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.grafica-card p {
+  color: #777;
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
+/* ======== GRÁFICAS ======== */
+.grafica-card canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 280px;
+}
+
+/* ============================
+   📱 MÓVIL (por defecto)
+   ============================ */
+@media (max-width: 600px) {
+  .estadisticas-container {
+    padding: 10px;
+  }
+
+  .estadisticas-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .grafica-card {
+    padding: 15px;
+  }
+
+  .grafica-card h3 {
+    font-size: 1rem;
+  }
+
+  .grafica-card canvas {
+    max-height: 240px;
+  }
+}
+
+/* ============================
+   💻 TABLET
+   ============================ */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .secciones-graficas {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .grafica-card {
+    width: 45%;
+    margin: 10px;
+  }
+
+  .grafica-card canvas {
+    max-height: 260px;
+  }
+}
+
+/* ============================
+   🖥️ ESCRITORIO GRANDE
+   ============================ */
+@media (min-width: 1025px) {
+  .secciones-graficas {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 25px;
+  }
+
+  .grafica-card {
+    flex: 1;
+    max-width: 32%;
+  }
+}
+
+/* ===== SELECTOR DE MONEDA ===== */
+.selector-moneda {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.selector-moneda label {
+  font-weight: 600;
+  color: var(--color-texto);
+  font-size: 1rem;
+}
+
+.selector-moneda select {
+  background: var(--color-card);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: 8px 12px;
+  font-size: 1rem;
+  box-shadow: var(--sombra-card);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.selector-moneda select:hover {
+  border-color: var(--color-primario);
+  box-shadow: 0 0 6px rgba(54, 162, 235, 0.3);
+}
+
+/* Móvil */
+@media (max-width: 600px) {
+  .selector-moneda {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .selector-moneda select {
+    width: 100%;
+  }
+}
+

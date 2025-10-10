@@ -4,6 +4,17 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { db, Movimiento } from "../../bdDexie";
 import "../home/Home.css";
 
+// Función para detectar la moneda de cada movimiento
+const detectarMoneda = (mov: Movimiento): string => {
+  if (mov.moneda) return mov.moneda;
+  const cuenta = mov.cuenta?.toUpperCase() || "";
+  if (cuenta.includes("USD")) return "USD";
+  if (cuenta.includes("EUR")) return "EUR";
+  if (cuenta.includes("MLC")) return "MLC";
+  if (cuenta.includes("CUP")) return "CUP";
+  return "CUP";
+};
+
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"Hogar" | "Negocios">("Hogar");
   const [monedas, setMonedas] = useState<string[]>([]);
@@ -17,13 +28,17 @@ const Home: React.FC = () => {
       const resumen: Record<string, number> = {};
 
       movimientos.forEach((mov) => {
-        if (!resumen[mov.cuenta]) resumen[mov.cuenta] = 0;
-        if (mov.tipo === "Ingreso") resumen[mov.cuenta] += mov.monto;
-        if (mov.tipo === "Gasto") resumen[mov.cuenta] -= mov.monto;
+        const moneda = detectarMoneda(mov); // ✅ Agrupar por moneda
+        if (!resumen[moneda]) resumen[moneda] = 0;
+        if (mov.tipo === "Ingreso") resumen[moneda] += mov.monto;
+        if (mov.tipo === "Gasto") resumen[moneda] -= mov.monto;
       });
 
       setTotales(resumen);
       setMonedas(Object.keys(resumen));
+      if (Object.keys(resumen).length > 0 && index >= Object.keys(resumen).length) {
+        setIndex(0); // Ajustar índice si la moneda actual desaparece
+      }
     };
 
     calcularTotales();

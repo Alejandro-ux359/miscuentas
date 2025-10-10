@@ -8,6 +8,7 @@ export interface Movimiento {
   metodo: string;
   cuenta: string;
   fecha: string;
+  moneda: string;
   tipo: "Ingreso" | "Gasto";
 }
 
@@ -16,8 +17,19 @@ class MiDB extends Dexie {
 
   constructor() {
     super("MiDB");
+
+    // Versión 1: esquema inicial sin 'moneda' (solo si existiera, sino omitir)
     this.version(1).stores({
       movimientos: "++id, categoria, monto, metodo, cuenta, fecha, tipo",
+    });
+
+    // Versión 2: añadimos 'moneda' y migramos datos antiguos
+    this.version(2).stores({
+      movimientos: "++id, categoria, monto, metodo, cuenta, fecha, moneda, tipo",
+    }).upgrade(async tx => {
+      await tx.table("movimientos").toCollection().modify(m => {
+        if (!m.moneda) m.moneda = "CUP"; // Inicializa registros antiguos
+      });
     });
   }
 }
