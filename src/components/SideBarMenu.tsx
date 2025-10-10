@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../assets/styles/SideBarMenu";
+import "../assets/styles/SideBarMenu.css";
 import HomeIcon from "@mui/icons-material/Home";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CalculateIcon from "@mui/icons-material/Calculate";
