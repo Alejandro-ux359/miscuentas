@@ -3,7 +3,7 @@ import SideBarMenu from "./components/SideBarMenu";
 import MobileBottomNav from "./components/TabBarMenuNavegation";
 import "./assets/styles/StyleApp.css";
 import AppRouter from "./routers/appRouters/AppRouters";
-import InstallButton from "./assets/InstallButton";
+
 
 function App(): JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -28,8 +28,7 @@ function App(): JSX.Element {
         </main>
       </div>
 
-      {/* 👇 Botón flotante para instalar la PWA */}
-      <InstallButton />
+     
     </div>
   );
 }
