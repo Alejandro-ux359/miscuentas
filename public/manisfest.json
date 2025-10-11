@@ -3,12 +3,12 @@
   "name": "Mis Cuentas App",
   "icons": [
     {
-      "src": "/192x192.png",
+      "src": "/192x192.svg",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/512x512.png",
+      "src": "/512x512.svg",
       "type": "image/png",
       "sizes": "512x512"
     }
