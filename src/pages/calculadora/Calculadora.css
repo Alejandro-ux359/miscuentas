@@ -57,19 +57,3 @@
   margin-top: 20px;
 }
 
-/* ====== 🌙 MODO OSCURO ====== */
-body.dark-mode .calculadora {
-  background-color: #000000;   /* Fondo blanco */
-  color: #ffffff;              /* Texto oscuro */
-}
-
-body.light-mode .calculadora {
-  background-color: #ffffff;   /* Fondo blanco */
-  color: #000;              /* Texto oscuro */
-}
-
-body.dark-mode .calculadora input {
-  background-color: #f9f9f9;
-  border-color: #bbb;
-  color: #000;
-}

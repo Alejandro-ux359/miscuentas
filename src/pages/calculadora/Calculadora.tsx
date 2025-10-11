@@ -43,8 +43,7 @@ function Calculadora() {
       <div className="calculadora-header">
         <h3>Total: ${total}</h3>
         <Button
-          className="eliminar"
-          variant="outlined"
+          className="icono-eliminar"
           color="error"
           startIcon={<DeleteIcon />}
           onClick={handleEliminarTodo}
