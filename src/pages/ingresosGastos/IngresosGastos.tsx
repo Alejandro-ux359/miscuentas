@@ -1,5 +1,6 @@
 import { useState, useEffect, JSX } from "react";
 import "../ingresosGastos/IngresosGastos.css";
+import GenericForm from "../../components/GenericForms";
 import {
   db,
   Movimiento,
@@ -10,6 +11,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import TuneIcon from "@mui/icons-material/Tune";
 import EditIcon from "@mui/icons-material/Edit";
+import { IGenericControls } from "../../components/controls.types";
 
 function IngresosGastos(): JSX.Element {
   const [openModal, setOpenModal] = useState(false);
@@ -152,7 +154,6 @@ function IngresosGastos(): JSX.Element {
       metodo: (form.get("paymentMethod") as string) || "",
       fecha: (form.get("fecha") as string) || "",
       moneda: (form.get("moneda") as string) || "",
-      cuenta: "",
       tipo,
     };
 
@@ -218,6 +219,62 @@ function IngresosGastos(): JSX.Element {
         return true;
       });
     });
+
+  const ingresosGastos: IGenericControls[] = [
+    {
+      type: "select",
+      label: "Categoría",
+      name: "categoria",
+      checkValues: [
+        { label: "Salario", value: "salario" },
+        { label: "Ventas", value: "ventas" },
+        { label: "Regalía", value: "regalia" },
+        { label: "Inversión", value: "inversion" },
+        { label: "Reembolso", value: "reembolso" },
+        { label: "Otro", value: "otro" },
+      ],
+      
+    },
+    {
+      type: "number",
+      label: "Monto",
+      name: "monto",
+      format:"finance"
+     
+    },
+    {
+      type: "select",
+      label: "Método de pago",
+      name: "metodo",
+      checkValues: [
+        { label: "Efectivo", value: "efectivo" },
+        { label: "Transfermóvil", value: "transfermovil" },
+        { label: "EnZona", value: "enzona" },
+        { label: "QvaPay", value: "qvapay" },
+        { label: "TropiPay", value: "tropipay" },
+      ],
+     
+    },
+    {
+      type: "date",
+      label: "Fecha",
+      name: "fecha",
+      
+    },
+    {
+      type: "select",
+      label: "Moneda",
+      name: "moneda",
+      checkValues: [
+        { label: "CUP", value: "CUP" },
+        { label: "USD", value: "USD" },
+        { label: "EUR", value: "EUR" },
+        { label: "CAD", value: "CAD" },
+        { label: "MXN", value: "MXN" },
+      ],
+      
+    },
+  ];
 
   return (
     <div className="pagina-ingresos-gastos">
@@ -317,7 +374,10 @@ function IngresosGastos(): JSX.Element {
               </div>
 
               <div className="menu-actions">
-                <button type="button" onClick={() => setMobileFilterOpen(false)}>
+                <button
+                  type="button"
+                  onClick={() => setMobileFilterOpen(false)}
+                >
                   Cerrar
                 </button>
                 <button type="button" onClick={resetMobileFilters}>
@@ -373,7 +433,10 @@ function IngresosGastos(): JSX.Element {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
+                    <td
+                      colSpan={5}
+                      style={{ textAlign: "center", padding: 20 }}
+                    >
                       No hay datos registrados
                     </td>
                   </tr>
@@ -398,14 +461,16 @@ function IngresosGastos(): JSX.Element {
                       </div>
                     </div>
                     <div className="mov-acciones">
-                      <button 
-                      className="icono-editar"
-                      onClick={() => handleEdit(item)}>
+                      <button
+                        className="icono-editar"
+                        onClick={() => handleEdit(item)}
+                      >
                         <EditIcon />
                       </button>
-                      <button 
-                      className="icono-eliminar"
-                      onClick={() => handleDelete(item.id)}>
+                      <button
+                        className="icono-eliminar"
+                        onClick={() => handleDelete(item.id)}
+                      >
                         <DeleteIcon />
                       </button>
                     </div>
@@ -431,79 +496,42 @@ function IngresosGastos(): JSX.Element {
       {openModal && (
         <div className="modal">
           <div className="modal-contenido">
-            <h3>{editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}</h3>
-            <form onSubmit={handleSubmit}>
-              <label>Categoría:</label>
-              <select
-                name="categoria"
-                required
-                defaultValue={editando?.categoria ?? ""}
-              >
-                <option value="">Seleccione...</option>
-                <option value="salario">Salario</option>
-                <option value="ventas">Ventas</option>
-                <option value="regalia">Regalía</option>
-                <option value="inversion">Inversión</option>
-                <option value="reembolso">Reembolso</option>
-                <option value="otro">Otro</option>
-              </select>
+            <GenericForm
+              title={editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}
+              controls={ingresosGastos} 
+              values={editando ?? {}}
+              submitLabel={editando ? "Actualizar" : "Guardar"}
+              onSubmit={async (values) => {
+                const nuevo: Movimiento = {
+                  categoria: values.categoria || "",
+                  monto: Number(values.monto) || 0,
+                  metodo: values.metodo || "",
+                  fecha: values.fecha || "",
+                  moneda: values.moneda || "",
+                  tipo,
+                };
 
-              <label>Monto:</label>
-              <input
-                type="number"
-                name="monto"
-                required
-                defaultValue={editando?.monto ?? ""}
-              />
-
-              <label>Método de pago:</label>
-              <select
-                name="paymentMethod"
-                required
-                defaultValue={editando?.metodo ?? ""}
-              >
-                <option value="">Seleccione...</option>
-                <option value="transfermovil">Transfermóvil</option>
-                <option value="enzona">EnZona</option>
-                <option value="qvapay">QvaPay</option>
-                <option value="tropipay">TropiPay</option>
-              </select>
-
-              <label>Fecha:</label>
-              <input
-                type="date"
-                name="fecha"
-                required
-                defaultValue={editando?.fecha ?? ""}
-              />
-
-              <label>Moneda:</label>
-              <select
-                name="moneda"
-                required
-                defaultValue={editando?.moneda ?? ""}
-              >
-                <option value="">Seleccione...</option>
-                <option value="CUP">CUP</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="CAD">CAD</option>
-                <option value="MXN">MXN</option>
-              </select>
-
-              <div className="acciones">
-                <button type="button" onClick={cerrarModal}>
-                  Cancelar
-                </button>
-                <button type="submit" disabled={guardando}>
-                  {guardando
-                    ? "Guardando..."
-                    : editando
-                    ? "Actualizar"
-                    : "Guardar"}
-                </button>
-              </div>
-            </form>
+                setGuardando(true);
+                try {
+                  if (editando && editando.id !== undefined) {
+                    await db.movimientos.update(editando.id, nuevo);
+                    setDatos(await db.movimientos.toArray());
+                    cerrarModal();
+                    syncUpdate(editando.id, nuevo);
+                  } else {
+                    const idDexie = await db.movimientos.add(nuevo);
+                    setDatos(await db.movimientos.toArray());
+                    cerrarModal();
+                    syncInsert(nuevo, idDexie);
+                  }
+                } catch (err) {
+                  console.error("Error guardando/actualizando:", err);
+                } finally {
+                  setGuardando(false);
+                }
+              }}
+              onCancel={cerrarModal}
+            />
           </div>
         </div>
       )}

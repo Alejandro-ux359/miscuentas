@@ -21,6 +21,7 @@
     "axios": "^1.12.2",
     "chart.js": "^4.5.0",
     "dexie": "^4.2.0",
+    "formik": "^2.4.6",
     "framer-motion": "^12.23.22",
     "lucide-react": "^0.544.0",
     "postcss": "^8.5.6",
@@ -33,7 +34,8 @@
     "workbox-core": "^7.3.0",
     "workbox-precaching": "^7.3.0",
     "workbox-routing": "^7.3.0",
-    "workbox-strategies": "^7.3.0"
+    "workbox-strategies": "^7.3.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
