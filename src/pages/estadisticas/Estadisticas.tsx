@@ -24,11 +24,11 @@ interface RangoPorMoneda {
 // Detectar moneda de cada movimiento
 const detectarMoneda = (mov: Movimiento): string => {
   if (mov.moneda) return mov.moneda;
-  const cuenta = mov.cuenta?.toUpperCase() || "";
-  if (cuenta.includes("USD")) return "USD";
-  if (cuenta.includes("EUR")) return "EUR";
-  if (cuenta.includes("MLC")) return "MLC";
-  if (cuenta.includes("CUP")) return "CUP";
+  const mony = mov.moneda?.toUpperCase() || "";
+  if (mony.includes("USD")) return "USD";
+  if (mony.includes("EUR")) return "EUR";
+  if (mony.includes("MLC")) return "MLC";
+  if (mony.includes("CUP")) return "CUP";
   return "CUP";
 };
 

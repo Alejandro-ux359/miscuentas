@@ -7,11 +7,11 @@ import "../home/Home.css";
 // Función para detectar la moneda de cada movimiento
 const detectarMoneda = (mov: Movimiento): string => {
   if (mov.moneda) return mov.moneda;
-  const cuenta = mov.cuenta?.toUpperCase() || "";
-  if (cuenta.includes("USD")) return "USD";
-  if (cuenta.includes("EUR")) return "EUR";
-  if (cuenta.includes("MLC")) return "MLC";
-  if (cuenta.includes("CUP")) return "CUP";
+  const money = mov.moneda?.toUpperCase() || "";
+  if (money.includes("USD")) return "USD";
+  if (money.includes("EUR")) return "EUR";
+  if (money.includes("MLC")) return "MLC";
+  if (money.includes("CUP")) return "CUP";
   return "CUP";
 };
 
