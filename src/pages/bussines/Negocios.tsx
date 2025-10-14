@@ -1,93 +1,572 @@
 import React, { useState } from "react";
-import "../bussines/Negocios.css";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import { Modal, Box, TextField, Button } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-interface Negocio {
-  nombre: string;
-  categoria: string;
-  balance: number;
-}
+// Importas los formularios
+import {
+  NombreNegocio,
+  TipoNegocio,
+  Propietario,
+  Direccion,
+  Email,
+  FechaCreacion,
+  Descripcion,
+  HorarioApertura,
+  HorarioCierre,
+  SitioWeb,
+  Trabajadores,
+  MovilTrabajador,
+  Producto,
+  Dinero,
+  Cuenta,
+  TBussines,
+  Tipos,
+  NombreCliente,
+  ApellidoCliente,
+  Cedula,
+  MovilCliente,
+  EmailCliente,
+  DireccionCliente,
+  TipoCliente,
+  MetodoPAgoCliente,
+  HistorialCompraCliente,
+  DeudaCliente,
+  NombreProducto,
+  DescripcionProducto,
+  CategoriaProducto,
+  PrecioProducto,
+  Unidad,
+  StockMaximo,
+  StockMinimo,
+  FechaIngresos,
+  FechaActualizacion,
+  NombreEmpleado,
+  CargoEmpleado,
+  SalarioEmpleado,
+  FechaIngresosEmpleado,
+  MovilEmpleaado,
+  EmailEmpleado,
+  DireccionEmpleado,
+  RolUsuario,
+  NombreProveedor,
+  ContactoProveedor,
+  MovilProveedor,
+  EmailProveedor,
+  DireccionProveedor,
+  ProductosSuministrado,
+  MetodosPago,
+  TotalIngresos,
+  TotalGastos,
+  BalanceGeneral,
+  VentasMensuales,
+  MargenGanancias,
+  HistorialDeCaja,
+} from "./FormBusines";
 
-const Negocios: React.FC = () => {
-  const [open, setOpen] = useState(false);
-  const [negocios, setNegocios] = useState<Negocio[]>([]);
-  const [formData, setFormData] = useState({
-    nombre: "",
-    categoria: "",
-  });
+export default function NegocioModal() {
+  const [openMain, setOpenMain] = useState(false);
+  const [openCampos, setOpenCampos] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [tipoNegocio, setTipoNegocio] = useState("");
+  const [camposPersonalizados, setCamposPersonalizados] = useState<any[]>([]);
+  const [valoresCampos, setValoresCampos] = useState<{ [key: string]: any }>(
+    {}
+  );
+  const [formulariosSeleccionados, setFormulariosSeleccionados] = useState<
+    string[]
+  >([]);
+  const formulariosDisponibles = [
+    
+    { id: "Propietario", nombre: "Propietario", campos: Propietario },
+    { id: "Direccion", nombre: "Dirección", campos: Direccion },
+    { id: "Email", nombre: "Correo Electrónico", campos: Email },
+    { id: "FechaCreacion", nombre: "Fecha de Creación", campos: FechaCreacion },
+    {
+      id: "Descripcion",
+      nombre: "Descripción del Negocio",
+      campos: Descripcion,
+    },
+    {
+      id: "HorarioApertura",
+      nombre: "Horario de Apertura",
+      campos: HorarioApertura,
+    },
+    { id: "HorarioCierre", nombre: "Horario de Cierre", campos: HorarioCierre },
+    { id: "SitioWeb", nombre: "Sitio Web", campos: SitioWeb },
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+    {
+      id: "Trabajadores",
+      nombre: "Cantidad de Trabajadores",
+      campos: Trabajadores,
+    },
+    {
+      id: "MovilTrabajador",
+      nombre: "Teléfono del Trabajador",
+      campos: MovilTrabajador,
+    },
+    {
+      id: "NombreEmpleado",
+      nombre: "Nombre del Empleado",
+      campos: NombreEmpleado,
+    },
+    {
+      id: "CargoEmpleado",
+      nombre: "Cargo del Empleado",
+      campos: CargoEmpleado,
+    },
+    {
+      id: "SalarioEmpleado",
+      nombre: "Salario del Empleado",
+      campos: SalarioEmpleado,
+    },
+    {
+      id: "FechaIngresosEmpleado",
+      nombre: "Fecha de Ingreso del Empleado",
+      campos: FechaIngresosEmpleado,
+    },
+    {
+      id: "MovilEmpleaado",
+      nombre: "Teléfono del Empleado",
+      campos: MovilEmpleaado,
+    },
+    {
+      id: "EmailEmpleado",
+      nombre: "Correo del Empleado",
+      campos: EmailEmpleado,
+    },
+    {
+      id: "DireccionEmpleado",
+      nombre: "Dirección del Empleado",
+      campos: DireccionEmpleado,
+    },
+    {
+      id: "RolUsuario",
+      nombre: "Rol del Usuario / Empleado",
+      campos: RolUsuario,
+    },
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    {
+      id: "NombreCliente",
+      nombre: "Nombre del Cliente",
+      campos: NombreCliente,
+    },
+    {
+      id: "ApellidoCliente",
+      nombre: "Apellido del Cliente",
+      campos: ApellidoCliente,
+    },
+    { id: "Cedula", nombre: "Cédula del Cliente", campos: Cedula },
+    {
+      id: "MovilCliente",
+      nombre: "Teléfono del Cliente",
+      campos: MovilCliente,
+    },
+    { id: "EmailCliente", nombre: "Correo del Cliente", campos: EmailCliente },
+    {
+      id: "DireccionCliente",
+      nombre: "Dirección del Cliente",
+      campos: DireccionCliente,
+    },
+    { id: "TipoCliente", nombre: "Tipo de Cliente", campos: TipoCliente },
+    {
+      id: "MetodoPAgoCliente",
+      nombre: "Método de Pago del Cliente",
+      campos: MetodoPAgoCliente,
+    },
+    {
+      id: "HistorialCompraCliente",
+      nombre: "Historial de Compras",
+      campos: HistorialCompraCliente,
+    },
+    { id: "DeudaCliente", nombre: "Deuda del Cliente", campos: DeudaCliente },
+
+    {
+      id: "NombreProducto",
+      nombre: "Nombre del Producto",
+      campos: NombreProducto,
+    },
+    {
+      id: "DescripcionProducto",
+      nombre: "Descripción del Producto",
+      campos: DescripcionProducto,
+    },
+    {
+      id: "CategoriaProducto",
+      nombre: "Categoría del Producto",
+      campos: CategoriaProducto,
+    },
+    {
+      id: "PrecioProducto",
+      nombre: "Precio del Producto",
+      campos: PrecioProducto,
+    },
+    { id: "Unidad", nombre: "Unidad de Medida", campos: Unidad },
+    { id: "StockMaximo", nombre: "Stock Máximo", campos: StockMaximo },
+    { id: "StockMinimo", nombre: "Stock Mínimo", campos: StockMinimo },
+    {
+      id: "FechaIngresos",
+      nombre: "Fecha de Ingreso del Producto",
+      campos: FechaIngresos,
+    },
+    {
+      id: "FechaActualizacion",
+      nombre: "Fecha de Actualización",
+      campos: FechaActualizacion,
+    },
+
+    {
+      id: "NombreProveedor",
+      nombre: "Nombre del Proveedor",
+      campos: NombreProveedor,
+    },
+    {
+      id: "ContactoProveedor",
+      nombre: "Contacto del Proveedor",
+      campos: ContactoProveedor,
+    },
+    {
+      id: "MovilProveedor",
+      nombre: "Teléfono del Proveedor",
+      campos: MovilProveedor,
+    },
+    {
+      id: "EmailProveedor",
+      nombre: "Correo del Proveedor",
+      campos: EmailProveedor,
+    },
+    {
+      id: "DireccionProveedor",
+      nombre: "Dirección del Proveedor",
+      campos: DireccionProveedor,
+    },
+    {
+      id: "ProductosSuministrado",
+      nombre: "Productos Suministrados",
+      campos: ProductosSuministrado,
+    },
+    { id: "MetodosPago", nombre: "Métodos de Pago", campos: MetodosPago },
+
+    { id: "Dinero", nombre: "Dinero Disponible", campos: Dinero },
+    { id: "Cuenta", nombre: "Cuenta Bancaria", campos: Cuenta },
+    { id: "TBussines", nombre: "Tipo de Empresa", campos: TBussines },
+    { id: "Tipos", nombre: "Tipos de Operaciones", campos: Tipos },
+    { id: "TotalIngresos", nombre: "Total de Ingresos", campos: TotalIngresos },
+    { id: "TotalGastos", nombre: "Total de Gastos", campos: TotalGastos },
+    { id: "BalanceGeneral", nombre: "Balance General", campos: BalanceGeneral },
+    {
+      id: "VentasMensuales",
+      nombre: "Ventas Mensuales",
+      campos: VentasMensuales,
+    },
+    {
+      id: "MargenGanancias",
+      nombre: "Margen de Ganancias",
+      campos: MargenGanancias,
+    },
+    {
+      id: "HistorialDeCaja",
+      nombre: "Historial de Caja",
+      campos: HistorialDeCaja,
+    },
+  ];
+
+  // abrir/cerrar modales
+  const handleAbrirPrincipal = () => setOpenMain(true);
+  const handleCerrarPrincipal = () => setOpenMain(false);
+  const handleAbrirCampos = () => setOpenCampos(true);
+  const handleCerrarCampos = () => setOpenCampos(false);
+
+  // Toggle selección de formulario
+  const toggleFormulario = (id: string) => {
+    setFormulariosSeleccionados((prev) =>
+      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
+    );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const nuevoNegocio: Negocio = {
-      nombre: formData.nombre,
-      categoria: formData.categoria,
-      balance: 0,
+  // Agregar campos desde los formularios seleccionados
+  const agregarCamposSeleccionados = () => {
+    const nuevosCampos = formulariosSeleccionados.flatMap((id) => {
+      const form = formulariosDisponibles.find((f) => f.id === id);
+
+      if (!form || !form.campos) return [];
+
+      const campo = form.campos;
+
+      return [
+        {
+          id: `${id}_${campo.name}`,
+          nombre: campo.label,
+          tipo: campo.type,
+        },
+      ];
+    });
+
+    setCamposPersonalizados((prev) => [...prev, ...nuevosCampos]);
+    setFormulariosSeleccionados([]);
+    setOpenCampos(false);
+  };
+
+  const eliminarCampo = (id: string) => {
+    setCamposPersonalizados(camposPersonalizados.filter((c) => c.id !== id));
+    const newValores = { ...valoresCampos };
+    delete newValores[id];
+    setValoresCampos(newValores);
+  };
+
+  const handleValorCampo = (id: string, valor: any) => {
+    setValoresCampos((prev) => ({ ...prev, [id]: valor }));
+  };
+
+  const handleGuardarNegocio = () => {
+    const negocio = {
+      nombre,
+      tipoNegocio,
+      campos: camposPersonalizados.map((c) => ({
+        ...c,
+        valor: valoresCampos[c.id] ?? "",
+      })),
     };
-    setNegocios([...negocios, nuevoNegocio]);
-    setFormData({ nombre: "", categoria: "" });
-    handleClose();
+    setOpenMain(false);
+    setCamposPersonalizados([]);
+    setValoresCampos({});
+    setNombre("");
+    setTipoNegocio("");
   };
 
   return (
-    <div className="negocios-container">
-      {/* Lista de negocios */}
-      <div className="tarjetas-container">
-        {negocios.map((neg, index) => (
-          <div key={index} className="tarjeta-negocio">
-            <h3>{neg.nombre}</h3>
-            <p>{neg.categoria}</p>
-            <h2>${neg.balance.toFixed(2)}</h2>
-          </div>
-        ))}
-      </div>
+    <div style={{ padding: 20 }}>
+      <IconButton
+        color="primary"
+        onClick={() => setOpenMain(true)}
+        style={{
+          position: "fixed",
+          bottom: 30,
+          right: 30,
+          width: 60,
+          height: 60,
+          borderRadius: "50%",
+          backgroundColor: "#1976d2",
+          color: "white",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
+          fontSize: 30,
+        }}
+      >
+        <AddIcon style={{ fontSize: 30 }} />
+      </IconButton>
 
-      {/* Botón flotante */}
-      <button className="floating-button" onClick={handleOpen}>
-        <AddCircleIcon fontSize="large" />
-      </button>
+      {/* MODAL PRINCIPAL */}
+      <Dialog open={openMain} onClose={handleCerrarPrincipal} fullWidth>
+        <DialogTitle
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          Nuevo Negocio
+          <Button
+            startIcon={<AddIcon />}
+            variant="outlined"
+            size="small"
+            onClick={handleAbrirCampos}
+          >
+            Agregar campos
+          </Button>
+        </DialogTitle>
 
-      {/* Modal con formulario */}
-      <Modal open={open} onClose={handleClose}>
-        <Box className="modal-box">
-          <h2>Agregar negocio</h2>
-          <form onSubmit={handleSubmit} className="formulario">
-            <TextField
-              label="Nombre del negocio"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Categoría"
-              name="categoria"
-              value={formData.categoria}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-            <div className="form-buttons">
-              <Button type="submit" variant="contained" color="primary">
-                Guardar
-              </Button>
-              <Button onClick={handleClose} variant="outlined" color="secondary">
-                Cancelar
-              </Button>
+        <DialogContent>
+        <TextField
+  id= "NombreNegocio"
+  label="Nombre del negocio"
+  fullWidth
+  margin="dense"
+  value={valoresCampos["NombreNegocio"] || nombre}
+  onChange={(e) => {
+    setNombre(e.target.value);
+    setValoresCampos((prev) => ({
+      ...prev,
+      ["NombreNegocio"]: e.target.value,
+    }));
+  }}
+/>
+
+<TextField
+  id="TipoNegocio" 
+  label="Tipo de negocio"
+  fullWidth
+  margin="dense"
+  value={valoresCampos["TipoNegocio"] || tipoNegocio}
+  onChange={(e) => {
+    setTipoNegocio(e.target.value);
+    setValoresCampos((prev) => ({
+      ...prev,
+      ["TipoNegocio"]: e.target.value,
+    }));
+  }}
+/>
+
+
+          {camposPersonalizados.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <h4>Campos personalizados:</h4>
+              {camposPersonalizados.map((campo) => (
+                <div
+                  key={campo.id}
+                  style={{
+                    marginBottom: 10,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  {/* Render dinámico según tipo */}
+                  {["text", "time"].includes(campo.tipo) && (
+                    <TextField
+                      label={campo.nombre}
+                      fullWidth
+                      value={valoresCampos[campo.id] || ""}
+                      onChange={(e) =>
+                        handleValorCampo(campo.id, e.target.value)
+                      }
+                    />
+                  )}
+                  {campo.tipo === "number" && (
+                    <TextField
+                      type="number"
+                      label={campo.nombre}
+                      fullWidth
+                      value={valoresCampos[campo.id] || ""}
+                      onChange={(e) =>
+                        handleValorCampo(campo.id, e.target.value)
+                      }
+                    />
+                  )}
+                  {campo.tipo === "date" && (
+                    <TextField
+                      type="date"
+                      label={campo.nombre}
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      value={valoresCampos[campo.id] || ""}
+                      onChange={(e) =>
+                        handleValorCampo(campo.id, e.target.value)
+                      }
+                    />
+                  )}
+                  {campo.tipo === "select" && (
+                    <TextField
+                      select
+                      label={campo.nombre}
+                      fullWidth
+                      value={valoresCampos[campo.id] || ""}
+                      onChange={(e) =>
+                        handleValorCampo(campo.id, e.target.value)
+                      }
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="op1">Opción 1</option>
+                      <option value="op2">Opción 2</option>
+                      <option value="op3">Opción 3</option>
+                    </TextField>
+                  )}
+                  {campo.tipo === "checkbox" && (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={!!valoresCampos[campo.id]}
+                          onChange={(e) =>
+                            handleValorCampo(campo.id, e.target.checked)
+                          }
+                        />
+                      }
+                      label={campo.nombre}
+                    />
+                  )}
+
+                  {/* Botón eliminar */}
+                  <IconButton
+                    color="error"
+                    onClick={() => eliminarCampo(campo.id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+
+                  {/* Botón duplicar */}
+                  <Button
+                    variant="outlined"
+                    style={{
+                      borderRadius: 8,
+                      minWidth: 40,
+                      padding: "6px 8px",
+                      textTransform: "none",
+                    }}
+                    onClick={() => {
+                      const nuevoCampo = {
+                        ...campo,
+                        id: `${campo.id}_copy_${Date.now()}`, // ID único
+                      };
+                      setCamposPersonalizados((prev) => [...prev, nuevoCampo]);
+                      setValoresCampos((prev) => ({
+                        ...prev,
+                        [nuevoCampo.id]: valoresCampos[campo.id] || "",
+                      }));
+                    }}
+                  >
+                    +
+                  </Button>
+                </div>
+              ))}
             </div>
-          </form>
-        </Box>
-      </Modal>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCerrarPrincipal}>Cancelar</Button>
+          <Button variant="contained" onClick={handleGuardarNegocio}>
+            Guardar negocio
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* MODAL SECUNDARIO (checkboxes con formularios) */}
+      <Dialog open={openCampos} onClose={handleCerrarCampos} fullWidth>
+        <DialogTitle>Seleccionar formularios</DialogTitle>
+        <DialogContent>
+          {formulariosDisponibles.map((form) => (
+            <FormControlLabel
+              key={form.id}
+              control={
+                <Checkbox
+                  checked={formulariosSeleccionados.includes(form.id)}
+                  onChange={() => toggleFormulario(form.id)}
+                />
+              }
+              label={form.nombre}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCerrarCampos}>Cancelar</Button>
+          <Button
+            variant="contained"
+            disabled={formulariosSeleccionados.length === 0}
+            onClick={agregarCamposSeleccionados}
+          >
+            Agregar campos
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
-};
-
-export default Negocios;
+}

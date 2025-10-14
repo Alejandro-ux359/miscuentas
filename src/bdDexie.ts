@@ -52,23 +52,23 @@ export interface ProductosServicios {
   nombre_producto: string;
   descripcion_producto: string;
   categoria_producto: string;
-  precio_compra_producto: number;
+  precio_compra_producto: number; //quitar
   precio_venta_producto: number;
   unidad_producto: string;
   stock_actual_producto: number;
   stock_mínimo_producto: number;
-  proveedor_id_producto: string;
-  codigo_barras_producto: string;
+  proveedor_id_producto: string; //quitar
+  codigo_barras_producto: string; //quitar
   fecha_ingreso_producto: number;
   fecha_actualizacion_producto: number;
-  imagen_producto_producto: string;
-  impuesto_producto: number;
+  imagen_producto_producto: string; //quitar
+  impuesto_producto: number; //quitar
 }
 
 export interface EmpleadosUsuarios {
   id_usuario?: number;
   nombre_usuario: string;
-  apellidos_usuario: string;
+  apellidos_usuario: string; //quitar
   cargo_usuario: string;
   salario_usuario: number;
   fecha_ingreso_usuario: number;
@@ -95,9 +95,9 @@ export interface ReportesFinanzas {
   total_gastos: number;
   balance_general: number;
   ventas_mensuales: number;
-  producto_más_vendido: string;
-  clientes_frecuentes: string;
-  margen_de_ganancia: number;
+  producto_más_vendido: string; //quitar
+  clientes_frecuentes: string; //quitar
+  margen_de_ganancia: number; 
   historial_caja_diaria: string;
 }
 
