@@ -66,9 +66,9 @@ export const Trabajadores = {
   name: "trabajadores",
 };
 
-export const MovilTrabajador = {
+export const Movil = {
   type: "number",
-  label: "Móvil del trabajador",
+  label: "Móvil ",
   name: "movil",
   format: "other",
 };
@@ -92,6 +92,12 @@ export const Cuenta = {
   format: "other",
 };
 
+export const MetodosPago = {
+  type: "select",
+  label: "Registro de Ganancias",
+  name: "metodo_pago",
+};
+
 export const TBussines = {
   type: "select",
   label: "Registro de Ganancias",
@@ -106,16 +112,10 @@ export const Tipos = {
 
 //#region Clientes
 
-export const NombreCliente = {
-  type: "text",
-  name: "nombre_cliente",
-  label: "Nombre del cliente",
-};
-
-export const ApellidoCliente = {
+export const Apellido = {
   type: "text",
   label: "Apellidos del cliente",
-  name: "apellidos_cliente",
+  name: "apellidos",
 };
 
 export const Cedula = {
@@ -125,35 +125,10 @@ export const Cedula = {
   format: "other",
 };
 
-export const MovilCliente = {
-  type: "number",
-  label: "Móvil del cliente",
-  name: "movil_cliente",
-  format: "other",
-};
-
-export const EmailCliente = {
-  type: "text",
-  label: "Emeil del cliente",
-  name: "email_cliente",
-};
-
-export const DireccionCliente = {
-  type: "text",
-  name: "direccion_cliente",
-  label: "Dirección del cliente",
-};
-
 export const TipoCliente = {
   type: "select",
   name: "tipo_cliente",
   label: "Frecuencia con la que visita el cliente",
-};
-
-export const MetodoPAgoCliente = {
-  type: "text",
-  label: "Metodo de pago del cliente",
-  name: "metodo_pago_cliente",
 };
 
 export const HistorialCompraCliente = {
@@ -229,9 +204,9 @@ export const FechaActualizacion = {
 
 //#region Empleados y Usuarios
 
-export const NombreEmpleado = {
+export const Nombre = {
   type: "text",
-  label: "Nombre y apellido del empleado",
+  label: "Nombre",
   name: "nombre_usuario",
 };
 
@@ -243,7 +218,7 @@ export const CargoEmpleado = {
 
 export const SalarioEmpleado = {
   type: "number",
-  label: "Salario del trabajador",
+  label: "Salario",
   name: "salario_usuario",
   format: "finance",
 };
@@ -254,25 +229,6 @@ export const FechaIngresosEmpleado = {
   name: "fecha_ingreso_usuario",
 };
 
-export const MovilEmpleaado = {
-  type: "number",
-  label: "Movil del empleado",
-  name: "movil_usuario",
-  format: "other",
-};
-
-export const EmailEmpleado = {
-  type: "text",
-  label: "Email del empleado",
-  name: "correo_usuario",
-};
-
-export const DireccionEmpleado = {
-  type: "text",
-  label: "Dirección del empleado",
-  name: "direccion_usuario",
-};
-
 export const RolUsuario = {
   type: "text",
   label: "Rol del empleado",
@@ -281,48 +237,10 @@ export const RolUsuario = {
 
 //#region Proveedores
 
-export const NombreProveedor = {
-  type: "text",
-  label: "Nombre del proveedor",
-  name: "nombre_proveedor",
-};
-
-export const ContactoProveedor = {
-  type: "number",
-  label: "Contacto del proveedor",
-  name: "contacto_proveedor",
-  format: "other",
-};
-
-export const MovilProveedor = {
-  type: "number",
-  label: "Movil del proveedor",
-  name: "movil_proveedor",
-  format: "other",
-};
-
-export const EmailProveedor = {
-  type: "text",
-  label: "Email del proveedor",
-  name: "email_proveedor",
-};
-
-export const DireccionProveedor = {
-  type: "text",
-  label: "Dirección del proveedor",
-  name: "direccion_proveedor",
-};
-
 export const ProductosSuministrado = {
   type: "text",
   label: "Productos suministrados",
   name: "productos_suministrados_proveedor",
-};
-
-export const MetodosPago = {
-  type: "select",
-  label: "Metodos de pago",
-  name: "condiciones_pago_proveedor",
 };
 
 //#region ReportesFinanzas

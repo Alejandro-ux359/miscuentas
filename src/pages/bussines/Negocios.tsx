@@ -26,24 +26,16 @@ import {
   HorarioCierre,
   SitioWeb,
   Trabajadores,
-  MovilTrabajador,
-  Producto,
+  Movil,
   Dinero,
   Cuenta,
   TBussines,
   Tipos,
-  NombreCliente,
-  ApellidoCliente,
   Cedula,
-  MovilCliente,
-  EmailCliente,
-  DireccionCliente,
   TipoCliente,
-  MetodoPAgoCliente,
   HistorialCompraCliente,
   DeudaCliente,
   NombreProducto,
-  DescripcionProducto,
   CategoriaProducto,
   PrecioProducto,
   Unidad,
@@ -51,19 +43,10 @@ import {
   StockMinimo,
   FechaIngresos,
   FechaActualizacion,
-  NombreEmpleado,
   CargoEmpleado,
   SalarioEmpleado,
   FechaIngresosEmpleado,
-  MovilEmpleaado,
-  EmailEmpleado,
-  DireccionEmpleado,
   RolUsuario,
-  NombreProveedor,
-  ContactoProveedor,
-  MovilProveedor,
-  EmailProveedor,
-  DireccionProveedor,
   ProductosSuministrado,
   MetodosPago,
   TotalIngresos,
@@ -72,6 +55,8 @@ import {
   VentasMensuales,
   MargenGanancias,
   HistorialDeCaja,
+  Apellido,
+  Nombre,
 } from "./FormBusines";
 
 export default function NegocioModal() {
@@ -94,7 +79,7 @@ export default function NegocioModal() {
     { id: "FechaCreacion", nombre: "Fecha de Creación", campos: FechaCreacion },
     {
       id: "Descripcion",
-      nombre: "Descripción del Negocio",
+      nombre: "Descripción",
       campos: Descripcion,
     },
     {
@@ -110,16 +95,7 @@ export default function NegocioModal() {
       nombre: "Cantidad de Trabajadores",
       campos: Trabajadores,
     },
-    {
-      id: "MovilTrabajador",
-      nombre: "Teléfono del Trabajador",
-      campos: MovilTrabajador,
-    },
-    {
-      id: "NombreEmpleado",
-      nombre: "Nombre del Empleado",
-      campos: NombreEmpleado,
-    },
+  
     {
       id: "CargoEmpleado",
       nombre: "Cargo del Empleado",
@@ -127,7 +103,7 @@ export default function NegocioModal() {
     },
     {
       id: "SalarioEmpleado",
-      nombre: "Salario del Empleado",
+      nombre: "Salario",
       campos: SalarioEmpleado,
     },
     {
@@ -137,53 +113,27 @@ export default function NegocioModal() {
     },
     {
       id: "MovilEmpleaado",
-      nombre: "Teléfono del Empleado",
-      campos: MovilEmpleaado,
-    },
-    {
-      id: "EmailEmpleado",
-      nombre: "Correo del Empleado",
-      campos: EmailEmpleado,
-    },
-    {
-      id: "DireccionEmpleado",
-      nombre: "Dirección del Empleado",
-      campos: DireccionEmpleado,
+      nombre: "Móvil o Teléfono",
+      campos: Movil,
     },
     {
       id: "RolUsuario",
       nombre: "Rol del Usuario / Empleado",
       campos: RolUsuario,
     },
-
-    {
-      id: "NombreCliente",
-      nombre: "Nombre del Cliente",
-      campos: NombreCliente,
+      {
+      id: "Nombre",
+      nombre: "Nombre",
+      campos: Nombre,
     },
     {
-      id: "ApellidoCliente",
-      nombre: "Apellido del Cliente",
-      campos: ApellidoCliente,
+      id: "Apellido",
+      nombre: "Apellido",
+      campos: Apellido,
     },
     { id: "Cedula", nombre: "Cédula del Cliente", campos: Cedula },
-    {
-      id: "MovilCliente",
-      nombre: "Teléfono del Cliente",
-      campos: MovilCliente,
-    },
-    { id: "EmailCliente", nombre: "Correo del Cliente", campos: EmailCliente },
-    {
-      id: "DireccionCliente",
-      nombre: "Dirección del Cliente",
-      campos: DireccionCliente,
-    },
+   
     { id: "TipoCliente", nombre: "Tipo de Cliente", campos: TipoCliente },
-    {
-      id: "MetodoPAgoCliente",
-      nombre: "Método de Pago del Cliente",
-      campos: MetodoPAgoCliente,
-    },
     {
       id: "HistorialCompraCliente",
       nombre: "Historial de Compras",
@@ -195,11 +145,6 @@ export default function NegocioModal() {
       id: "NombreProducto",
       nombre: "Nombre del Producto",
       campos: NombreProducto,
-    },
-    {
-      id: "DescripcionProducto",
-      nombre: "Descripción del Producto",
-      campos: DescripcionProducto,
     },
     {
       id: "CategoriaProducto",
@@ -223,32 +168,6 @@ export default function NegocioModal() {
       id: "FechaActualizacion",
       nombre: "Fecha de Actualización",
       campos: FechaActualizacion,
-    },
-
-    {
-      id: "NombreProveedor",
-      nombre: "Nombre del Proveedor",
-      campos: NombreProveedor,
-    },
-    {
-      id: "ContactoProveedor",
-      nombre: "Contacto del Proveedor",
-      campos: ContactoProveedor,
-    },
-    {
-      id: "MovilProveedor",
-      nombre: "Teléfono del Proveedor",
-      campos: MovilProveedor,
-    },
-    {
-      id: "EmailProveedor",
-      nombre: "Correo del Proveedor",
-      campos: EmailProveedor,
-    },
-    {
-      id: "DireccionProveedor",
-      nombre: "Dirección del Proveedor",
-      campos: DireccionProveedor,
     },
     {
       id: "ProductosSuministrado",
