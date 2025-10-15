@@ -4,9 +4,9 @@ import GenericForm from "../../components/GenericForms";
 import {
   db,
   Movimiento,
-  syncDelete,
-  syncInsert,
-  syncUpdate,
+  syncDeleteMovimiento,
+  syncInsertMovimiento,
+  syncUpdateMovimiento,
 } from "../../bdDexie";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -164,12 +164,12 @@ function IngresosGastos(): JSX.Element {
         await db.movimientos.update(editando.id, nuevo);
         setDatos(await db.movimientos.toArray());
         cerrarModal();
-        syncUpdate(editando.id, nuevo);
+        syncUpdateMovimiento(editando.id, nuevo);
       } else {
         const idDexie = await db.movimientos.add(nuevo);
         setDatos(await db.movimientos.toArray());
         cerrarModal();
-        syncInsert(nuevo, idDexie);
+        syncInsertMovimiento(nuevo, idDexie);
       }
     } catch (err) {
       console.error("Error guardando/actualizando:", err);
@@ -184,7 +184,7 @@ function IngresosGastos(): JSX.Element {
     try {
       await db.movimientos.delete(id);
       setDatos(await db.movimientos.toArray());
-      syncDelete(id);
+      syncDeleteMovimiento(id);
     } catch (err) {
       console.error("Error eliminando:", err);
     }
@@ -517,12 +517,12 @@ function IngresosGastos(): JSX.Element {
                     await db.movimientos.update(editando.id, nuevo);
                     setDatos(await db.movimientos.toArray());
                     cerrarModal();
-                    syncUpdate(editando.id, nuevo);
+                    syncUpdateMovimiento(editando.id, nuevo);
                   } else {
                     const idDexie = await db.movimientos.add(nuevo);
                     setDatos(await db.movimientos.toArray());
                     cerrarModal();
-                    syncInsert(nuevo, idDexie);
+                    syncInsertMovimiento(nuevo, idDexie);
                   }
                 } catch (err) {
                   console.error("Error guardando/actualizando:", err);
