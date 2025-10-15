@@ -84,12 +84,23 @@ function Calculadora() {
         <DialogTitle>ℹ️ Explicación</DialogTitle>
         <DialogContent>
           <p>
-            En el cuadro numerico vamos a introducir un valor (X) el cual se nos
-            va a multiplicar por la cifra que tenemos a nuestra izquierda de la
-            pantalla dandonos a ver los resultados de la cantidad de billetes
-            que tenemos a nuestras derecha, y en la parte superior podemos
-            apreciar la suma de los campos introdicidos dandonos a conocer el
-            total de billetes
+            En esta interfaz contamos con un cuadro numérico (campo de entrada)
+            donde el usuario puede introducir un valor denominado X. Este valor
+            representa una cantidad o factor que será utilizado para realizar un
+            cálculo automático. Al ingresar el valor X, el sistema toma esa
+            cifra y la multiplica por el número que se encuentra a la izquierda
+            de la pantalla, el cual representa el valor nominal de un billete o
+            denominación específica (por ejemplo: 1, 5, 10, 20, 50, 100, etc.).
+            
+            Como resultado de esa multiplicación, el sistema muestra en la
+            columna derecha la cantidad total correspondiente a esa
+            denominación, es decir, el monto total en billetes de ese valor.
+
+            Además, en la parte superior de la pantalla se encuentra un campo
+            que suma automáticamente todos los totales de las distintas
+            denominaciones, mostrando así el monto total de billetes
+            introducidos. Este valor global permite conocer de forma inmediata
+            el total general del dinero contado o registrado.
           </p>
         </DialogContent>
         <DialogActions>
