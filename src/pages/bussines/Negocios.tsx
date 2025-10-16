@@ -16,6 +16,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { db, syncInsertNegocio } from "../../bdDexie";
+import EditIcon from "@mui/icons-material/Edit";
 
 import {
   Propietario,
@@ -66,10 +67,16 @@ export default function NegocioModal() {
   const [nombre, setNombre] = useState("");
   const [tipoNegocio, setTipoNegocio] = useState("");
   const [camposPersonalizados, setCamposPersonalizados] = useState<any[]>([]);
-  const [valoresCampos, setValoresCampos] = useState<{ [key: string]: any }>({});
-  const [formulariosSeleccionados, setFormulariosSeleccionados] = useState<string[]>([]);
+  const [valoresCampos, setValoresCampos] = useState<{ [key: string]: any }>(
+    {}
+  );
+  const [formulariosSeleccionados, setFormulariosSeleccionados] = useState<
+    string[]
+  >([]);
   const [negocios, setNegocios] = useState<any[]>([]);
   const [selectedNegocio, setSelectedNegocio] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableNegocio, setEditableNegocio] = useState<any>(null);
 
   const formulariosDisponibles = [
     { id: "Propietario", nombre: "Propietario", campos: Propietario },
@@ -77,30 +84,78 @@ export default function NegocioModal() {
     { id: "Email", nombre: "Correo Electrónico", campos: Email },
     { id: "FechaCreacion", nombre: "Fecha de Creación", campos: FechaCreacion },
     { id: "Descripcion", nombre: "Descripción", campos: Descripcion },
-    { id: "HorarioApertura", nombre: "Horario de Apertura", campos: HorarioApertura },
+    {
+      id: "HorarioApertura",
+      nombre: "Horario de Apertura",
+      campos: HorarioApertura,
+    },
     { id: "HorarioCierre", nombre: "Horario de Cierre", campos: HorarioCierre },
     { id: "SitioWeb", nombre: "Sitio Web", campos: SitioWeb },
-    { id: "Trabajadores", nombre: "Cantidad de Trabajadores", campos: Trabajadores },
-    { id: "CargoEmpleado", nombre: "Cargo del Empleado", campos: CargoEmpleado },
+    {
+      id: "Trabajadores",
+      nombre: "Cantidad de Trabajadores",
+      campos: Trabajadores,
+    },
+    {
+      id: "CargoEmpleado",
+      nombre: "Cargo del Empleado",
+      campos: CargoEmpleado,
+    },
     { id: "SalarioEmpleado", nombre: "Salario", campos: SalarioEmpleado },
-    { id: "FechaIngresosEmpleado", nombre: "Fecha de Ingreso del Empleado", campos: FechaIngresosEmpleado },
+    {
+      id: "FechaIngresosEmpleado",
+      nombre: "Fecha de Ingreso del Empleado",
+      campos: FechaIngresosEmpleado,
+    },
     { id: "MovilEmpleado", nombre: "Móvil o Teléfono", campos: Movil },
-    { id: "RolUsuario", nombre: "Rol del Usuario / Empleado", campos: RolUsuario },
+    {
+      id: "RolUsuario",
+      nombre: "Rol del Usuario / Empleado",
+      campos: RolUsuario,
+    },
     { id: "Nombre", nombre: "Nombre", campos: Nombre },
     { id: "Apellido", nombre: "Apellido", campos: Apellido },
     { id: "Cedula", nombre: "Cédula del Cliente", campos: Cedula },
     { id: "TipoCliente", nombre: "Tipo de Cliente", campos: TipoCliente },
-    { id: "HistorialCompraCliente", nombre: "Historial de Compras", campos: HistorialCompraCliente },
+    {
+      id: "HistorialCompraCliente",
+      nombre: "Historial de Compras",
+      campos: HistorialCompraCliente,
+    },
     { id: "DeudaCliente", nombre: "Deuda del Cliente", campos: DeudaCliente },
-    { id: "NombreProducto", nombre: "Nombre del Producto", campos: NombreProducto },
-    { id: "CategoriaProducto", nombre: "Categoría del Producto", campos: CategoriaProducto },
-    { id: "PrecioProducto", nombre: "Precio del Producto", campos: PrecioProducto },
+    {
+      id: "NombreProducto",
+      nombre: "Nombre del Producto",
+      campos: NombreProducto,
+    },
+    {
+      id: "CategoriaProducto",
+      nombre: "Categoría del Producto",
+      campos: CategoriaProducto,
+    },
+    {
+      id: "PrecioProducto",
+      nombre: "Precio del Producto",
+      campos: PrecioProducto,
+    },
     { id: "Unidad", nombre: "Unidad de Medida", campos: Unidad },
     { id: "StockMaximo", nombre: "Stock Máximo", campos: StockMaximo },
     { id: "StockMinimo", nombre: "Stock Mínimo", campos: StockMinimo },
-    { id: "FechaIngresos", nombre: "Fecha de Ingreso del Producto", campos: FechaIngresos },
-    { id: "FechaActualizacion", nombre: "Fecha de Actualización", campos: FechaActualizacion },
-    { id: "ProductosSuministrado", nombre: "Productos Suministrados", campos: ProductosSuministrado },
+    {
+      id: "FechaIngresos",
+      nombre: "Fecha de Ingreso del Producto",
+      campos: FechaIngresos,
+    },
+    {
+      id: "FechaActualizacion",
+      nombre: "Fecha de Actualización",
+      campos: FechaActualizacion,
+    },
+    {
+      id: "ProductosSuministrado",
+      nombre: "Productos Suministrados",
+      campos: ProductosSuministrado,
+    },
     { id: "MetodosPago", nombre: "Métodos de Pago", campos: MetodosPago },
     { id: "Dinero", nombre: "Dinero Disponible", campos: Dinero },
     { id: "Cuenta", nombre: "Cuenta Bancaria", campos: Cuenta },
@@ -109,9 +164,21 @@ export default function NegocioModal() {
     { id: "TotalIngresos", nombre: "Total de Ingresos", campos: TotalIngresos },
     { id: "TotalGastos", nombre: "Total de Gastos", campos: TotalGastos },
     { id: "BalanceGeneral", nombre: "Balance General", campos: BalanceGeneral },
-    { id: "VentasMensuales", nombre: "Ventas Mensuales", campos: VentasMensuales },
-    { id: "MargenGanancias", nombre: "Margen de Ganancias", campos: MargenGanancias },
-    { id: "HistorialDeCaja", nombre: "Historial de Caja", campos: HistorialDeCaja },
+    {
+      id: "VentasMensuales",
+      nombre: "Ventas Mensuales",
+      campos: VentasMensuales,
+    },
+    {
+      id: "MargenGanancias",
+      nombre: "Margen de Ganancias",
+      campos: MargenGanancias,
+    },
+    {
+      id: "HistorialDeCaja",
+      nombre: "Historial de Caja",
+      campos: HistorialDeCaja,
+    },
   ];
 
   useEffect(() => {
@@ -121,6 +188,12 @@ export default function NegocioModal() {
     };
     cargarNegocios();
   }, []);
+
+  // Inicializar editableNegocio cuando se selecciona un negocio
+  useEffect(() => {
+    if (selectedNegocio) setEditableNegocio(selectedNegocio);
+    setIsEditing(false);
+  }, [selectedNegocio]);
 
   const handleAbrirPrincipal = () => setOpenMain(true);
   const handleCerrarPrincipal = () => setOpenMain(false);
@@ -138,7 +211,9 @@ export default function NegocioModal() {
       const form = formulariosDisponibles.find((f) => f.id === id);
       if (!form || !form.campos) return [];
 
-      const camposArray = Array.isArray(form.campos) ? form.campos : [form.campos];
+      const camposArray = Array.isArray(form.campos)
+        ? form.campos
+        : [form.campos];
 
       return camposArray.map((campo: any, index: number) => ({
         id: `${id}_${index}`,
@@ -203,13 +278,15 @@ export default function NegocioModal() {
         onClick={handleAbrirPrincipal}
         style={{
           position: "fixed",
-          bottom: 30,
-          right: 30,
-          width: 60,
-          height: 60,
+          bottom: 100,
+          right: 20,
+          width: 50,
+          height: 50,
           borderRadius: "50%",
-          backgroundColor: "#1976d2",
+          backgroundColor: "#1000eb",
           color: "white",
+          fontFamily: "Arial, sans-serif",
+          fontSize: 2.5,
           boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
         }}
       >
@@ -241,9 +318,16 @@ export default function NegocioModal() {
 
       {/* MODAL PRINCIPAL */}
       <Dialog open={openMain} onClose={handleCerrarPrincipal} fullWidth>
-        <DialogTitle style={{ display: "flex", justifyContent: "space-between" }}>
+        <DialogTitle
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
           Nuevo Negocio
-          <Button startIcon={<AddIcon />} variant="outlined" size="small" onClick={handleAbrirCampos}>
+          <Button
+            startIcon={<AddIcon />}
+            variant="outlined"
+            size="small"
+            onClick={handleAbrirCampos}
+          >
             Agregar campos
           </Button>
         </DialogTitle>
@@ -269,14 +353,21 @@ export default function NegocioModal() {
               {camposPersonalizados.map((campo) => (
                 <div
                   key={campo.id}
-                  style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}
+                  style={{
+                    marginBottom: 10,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
                 >
                   {["text", "time"].includes(campo.tipo) && (
                     <TextField
                       label={campo.nombre}
                       fullWidth
                       value={valoresCampos[campo.id] || ""}
-                      onChange={(e) => handleValorCampo(campo.id, e.target.value)}
+                      onChange={(e) =>
+                        handleValorCampo(campo.id, e.target.value)
+                      }
                     />
                   )}
                   {campo.tipo === "number" && (
@@ -285,7 +376,9 @@ export default function NegocioModal() {
                       label={campo.nombre}
                       fullWidth
                       value={valoresCampos[campo.id] || ""}
-                      onChange={(e) => handleValorCampo(campo.id, e.target.value)}
+                      onChange={(e) =>
+                        handleValorCampo(campo.id, e.target.value)
+                      }
                     />
                   )}
                   {campo.tipo === "date" && (
@@ -295,7 +388,9 @@ export default function NegocioModal() {
                       fullWidth
                       InputLabelProps={{ shrink: true }}
                       value={valoresCampos[campo.id] || ""}
-                      onChange={(e) => handleValorCampo(campo.id, e.target.value)}
+                      onChange={(e) =>
+                        handleValorCampo(campo.id, e.target.value)
+                      }
                     />
                   )}
                   {campo.tipo === "checkbox" && (
@@ -303,13 +398,18 @@ export default function NegocioModal() {
                       control={
                         <Checkbox
                           checked={!!valoresCampos[campo.id]}
-                          onChange={(e) => handleValorCampo(campo.id, e.target.checked)}
+                          onChange={(e) =>
+                            handleValorCampo(campo.id, e.target.checked)
+                          }
                         />
                       }
                       label={campo.nombre}
                     />
                   )}
-                  <IconButton color="error" onClick={() => eliminarCampo(campo.id)}>
+                  <IconButton
+                    color="error"
+                    onClick={() => eliminarCampo(campo.id)}
+                  >
                     <DeleteIcon />
                   </IconButton>
                 </div>
@@ -354,23 +454,101 @@ export default function NegocioModal() {
         </DialogActions>
       </Dialog>
 
-      {/* MODAL DETALLE NEGOCIO */}
-      <Dialog open={!!selectedNegocio} onClose={() => setSelectedNegocio(null)} fullWidth>
-        <DialogTitle>{selectedNegocio?.nombre_negocio}</DialogTitle>
+      {/* MODAL DETALLE NEGOCIO EDITABLE */}
+      <Dialog
+        open={!!selectedNegocio}
+        onClose={() => setSelectedNegocio(null)}
+        fullWidth
+      >
+        <DialogTitle
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {selectedNegocio?.nombre_negocio}
+          <IconButton onClick={() => setIsEditing((prev) => !prev)}>
+            <EditIcon color={isEditing ? "error" : "primary"} />
+          </IconButton>
+        </DialogTitle>
+
         <DialogContent>
           <div>
-            <strong>Tipo de negocio:</strong> {selectedNegocio?.tipo_negocio}
+            <strong>Tipo de negocio:</strong>{" "}
+            {isEditing ? (
+              <TextField
+                value={editableNegocio?.tipo_negocio || ""}
+                onChange={(e) =>
+                  setEditableNegocio({
+                    ...editableNegocio,
+                    tipo_negocio: e.target.value,
+                  })
+                }
+                fullWidth
+                margin="dense"
+              />
+            ) : (
+              selectedNegocio?.tipo_negocio
+            )}
           </div>
+
           {selectedNegocio?.campos
             ?.filter((c: any) => c.valor !== "" && c.valor !== null)
             .map((c: any) => (
               <div key={c.id} style={{ marginTop: 6 }}>
                 <strong>{c.nombre}: </strong>
-                <span>{c.valor}</span>
+                {isEditing ? (
+                  <TextField
+                    value={
+                      editableNegocio?.campos.find(
+                        (campo: any) => campo.id === c.id
+                      )?.valor || ""
+                    }
+                    onChange={(e) => {
+                      const nuevosCampos = editableNegocio.campos.map(
+                        (campo: any) =>
+                          campo.id === c.id
+                            ? { ...campo, valor: e.target.value }
+                            : campo
+                      );
+                      setEditableNegocio({
+                        ...editableNegocio,
+                        campos: nuevosCampos,
+                      });
+                    }}
+                    fullWidth
+                    margin="dense"
+                  />
+                ) : (
+                  c.valor
+                )}
               </div>
             ))}
         </DialogContent>
         <DialogActions>
+          {isEditing && (
+            <Button
+              variant="contained"
+              onClick={async () => {
+                await db.bpropietario.update(
+                  selectedNegocio.id_negocio,
+                  editableNegocio
+                );
+                setNegocios((prev) =>
+                  prev.map((n) =>
+                    n.id_negocio === selectedNegocio.id_negocio
+                      ? { ...n, ...editableNegocio }
+                      : n
+                  )
+                );
+                setSelectedNegocio(editableNegocio);
+                setIsEditing(false);
+              }}
+            >
+              Guardar
+            </Button>
+          )}
           <Button onClick={() => setSelectedNegocio(null)}>Cerrar</Button>
         </DialogActions>
       </Dialog>

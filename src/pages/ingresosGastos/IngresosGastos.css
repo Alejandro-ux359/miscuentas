@@ -214,18 +214,15 @@
     gap: 10px;
     margin: 0px;
     margin-top: 45px;
-    
   }
-
-
 
   .btn-flotante {
     position: fixed;
     bottom: 100px;
     right: 20px;
-    width: 40px;
-    height: 40px;
-    background: hsl(244, 100%, 46%);
+    width: 50px;
+    height: 50px;
+    background: #1000eb;
     color: white;
     font-size: 2.5rem;
     border: none;
@@ -323,7 +320,6 @@
 
   .tabla-datos {
     display: none;
-    
   }
 
   .lista-movimientos-mobile {
@@ -331,7 +327,6 @@
     flex-direction: column;
     gap: 10px;
     padding: 6px 10px 40px;
-    
   }
 
   .mov-card {
