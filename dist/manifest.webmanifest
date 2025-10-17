@@ -1,0 +1,15 @@
+{
+  "name": "Mis Cuentas",
+  "short_name": "MisCuentas",
+  "description": "App para gestionar ingresos y gastos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00bcd4",
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    { "src": "favicon.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "favicon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

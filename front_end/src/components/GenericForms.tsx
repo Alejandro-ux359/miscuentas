@@ -11,10 +11,8 @@ import { Formik, FormikProps } from "formik";
 import * as Yup from "yup";
 import {
   IGenericControls,
-  ITextField,
-  INumberField,
   ISelect,
-  IDatePicker,
+
 } from "./controls.types";
 
 type GenericFormProps = {
@@ -41,8 +39,6 @@ const GenericForm = (props: GenericFormProps) => {
     controls,
     hideButtons,
     onSubmit,
-    nextButton,
-    prevButton,
     values,
     submitLabel,
     onCancel,

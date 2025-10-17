@@ -6,8 +6,9 @@
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
-  height: 60px;
-  background-color: transparent;
+  height: 70px;
+ /* background-color: #00bcd4;*/
+  border-radius: 60px 0px 0px 60px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -84,7 +85,7 @@
 .notification-icon,
 .setting-icon {
   font-size: 28px;
-  color: #00bcd4;
+  color: #000000;
   cursor: pointer;
   justify-content: flex-end;
   align-items: center;

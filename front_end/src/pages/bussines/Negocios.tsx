@@ -216,13 +216,22 @@ export default function NegocioModal() {
         : [form.campos];
 
       return camposArray.map((campo: any, index: number) => ({
-        id: `${id}_${index}`,
+        id: `${id}_${index}_${Date.now()}`,
         nombre: campo.label || campo.nombre || id,
         tipo: campo.type || "text",
+        valor: "",
       }));
     });
 
-    setCamposPersonalizados((prev) => [...prev, ...nuevosCampos]);
+    if (isEditing && editableNegocio) {
+      setEditableNegocio({
+        ...editableNegocio,
+        campos: [...(editableNegocio.campos || []), ...nuevosCampos],
+      });
+    } else {
+      setCamposPersonalizados((prev) => [...prev, ...nuevosCampos]);
+    }
+
     setFormulariosSeleccionados([]);
     setOpenCampos(false);
   };
@@ -306,7 +315,14 @@ export default function NegocioModal() {
             </CardContent>
             {/* Botón eliminar */}
             <IconButton
-              onClick={() => handleEliminarNegocio(neg.id_negocio)}
+              onClick={() => {
+                const confirmado = window.confirm(
+                  `¿Estás seguro de que quieres eliminar el negocio "${neg.nombre_negocio}"?`
+                );
+                if (confirmado) {
+                  handleEliminarNegocio(neg.id_negocio);
+                }
+              }}
               style={{ position: "absolute", top: 0, right: 0 }}
               color="error"
             >
@@ -468,9 +484,22 @@ export default function NegocioModal() {
           }}
         >
           {selectedNegocio?.nombre_negocio}
-          <IconButton onClick={() => setIsEditing((prev) => !prev)}>
-            <EditIcon color={isEditing ? "error" : "primary"} />
-          </IconButton>
+          <div>
+            <IconButton onClick={() => setIsEditing((prev) => !prev)}>
+              <EditIcon color={isEditing ? "error" : "primary"} />
+            </IconButton>
+            {isEditing && (
+              <Button
+                startIcon={<AddIcon />}
+                variant="outlined"
+                size="small"
+                onClick={handleAbrirCampos}
+                style={{ marginLeft: 8 }}
+              >
+                Agregar campos
+              </Button>
+            )}
+          </div>
         </DialogTitle>
 
         <DialogContent>
@@ -493,18 +522,22 @@ export default function NegocioModal() {
             )}
           </div>
 
-          {selectedNegocio?.campos
-            ?.filter((c: any) => c.valor !== "" && c.valor !== null)
-            .map((c: any) => (
-              <div key={c.id} style={{ marginTop: 6 }}>
-                <strong>{c.nombre}: </strong>
-                {isEditing ? (
+          {/* Campos existentes + nuevos */}
+          {(editableNegocio?.campos || []).map((c: any) => (
+            <div
+              key={c.id}
+              style={{
+                marginTop: 6,
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+              }}
+            >
+              <strong>{c.nombre}: </strong>
+              {isEditing ? (
+                <>
                   <TextField
-                    value={
-                      editableNegocio?.campos.find(
-                        (campo: any) => campo.id === c.id
-                      )?.valor || ""
-                    }
+                    value={c.valor || ""}
                     onChange={(e) => {
                       const nuevosCampos = editableNegocio.campos.map(
                         (campo: any) =>
@@ -520,12 +553,28 @@ export default function NegocioModal() {
                     fullWidth
                     margin="dense"
                   />
-                ) : (
-                  c.valor
-                )}
-              </div>
-            ))}
+                  <IconButton
+                    color="error"
+                    onClick={() => {
+                      const nuevosCampos = editableNegocio.campos.filter(
+                        (campo: any) => campo.id !== c.id
+                      );
+                      setEditableNegocio({
+                        ...editableNegocio,
+                        campos: nuevosCampos,
+                      });
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </>
+              ) : (
+                c.valor
+              )}
+            </div>
+          ))}
         </DialogContent>
+
         <DialogActions>
           {isEditing && (
             <Button

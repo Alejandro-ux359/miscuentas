@@ -1,0 +1,25 @@
+{
+  "short_name": "MisCuentas",
+  "name": "Mis Cuentas App",
+  "description": "Aplicación para gestionar el dinero en casa y los negocios.",
+  "orientation": "portrait",
+  "scope": "/",
+  "id": "/",
+
+  "icons": [
+    {
+      "src": "/192x192.svg",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/512x512.svg",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2"
+}
