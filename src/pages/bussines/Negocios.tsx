@@ -17,6 +17,10 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { db, syncInsertNegocio } from "../../bdDexie";
 import EditIcon from "@mui/icons-material/Edit";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 import {
   Propietario,
@@ -60,6 +64,7 @@ import {
   MargenGanancias,
   HistorialDeCaja,
 } from "./FormBusines";
+import { TimeField } from "@mui/x-date-pickers";
 
 export default function NegocioModal() {
   const [openMain, setOpenMain] = useState(false);
@@ -376,16 +381,40 @@ export default function NegocioModal() {
                     gap: 8,
                   }}
                 >
-                  {["text", "time"].includes(campo.tipo) && (
+                  {campo.tipo === "text" && (
                     <TextField
+                      type="text"
                       label={campo.nombre}
                       fullWidth
+                      margin="dense"
                       value={valoresCampos[campo.id] || ""}
                       onChange={(e) =>
                         handleValorCampo(campo.id, e.target.value)
                       }
                     />
                   )}
+
+                  {campo.tipo === "time" && (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <TimeField
+                        label={campo.nombre}
+                        value={
+                          valoresCampos[campo.id]
+                            ? dayjs(`2023-01-01T${valoresCampos[campo.id]}`)
+                            : null
+                        }
+                        onChange={(newValue: Dayjs | null) => {
+                          handleValorCampo(
+                            campo.id,
+                            newValue ? newValue.format("HH:mm") : ""
+                          );
+                        }}
+                        fullWidth
+                        ampm={false}
+                      />
+                    </LocalizationProvider>
+                  )}
+
                   {campo.tipo === "number" && (
                     <TextField
                       type="number"
@@ -402,7 +431,6 @@ export default function NegocioModal() {
                       type="date"
                       label={campo.nombre}
                       fullWidth
-                      InputLabelProps={{ shrink: true }}
                       value={valoresCampos[campo.id] || ""}
                       onChange={(e) =>
                         handleValorCampo(campo.id, e.target.value)

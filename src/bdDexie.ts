@@ -75,6 +75,15 @@ export interface ReportesFinanzas {
   historial_caja_diaria: string;
 }
 
+export interface Tasa {
+  id_tasa?:number;
+  codigo: string;
+  nombre_tasa: string;
+  compras_tasa: number;
+  ventas_tasa: number;
+  tasa: number;
+}
+
 /* -------------------------
    Clase Dexie con versiones
    ------------------------- */
@@ -84,6 +93,7 @@ class MiDB extends Dexie {
   cliente!: Dexie.Table<Clientes, number>;
   productosservicios!: Dexie.Table<ProductosServicios, number>;
   reportesfinanzas!: Dexie.Table<ReportesFinanzas, number>;
+  tasa!:Dexie.Table<Tasa, number>;
 
   constructor() {
     super("MiDB");
@@ -97,7 +107,8 @@ class MiDB extends Dexie {
       productosservicios:
         "++id_producto,  nombre_producto,  categoria_producto,  precio_venta_producto,  unidad_producto,  stock_actual_producto,  stock_mínimo_producto,  fecha_ingreso_producto,  fecha_actualizacion_producto,  productos_suministrados_proveedor",
       reportesfinanzas:
-        "++id_reportes_finanzas,  total_ingresos,  total_gastos,  balance_general,  ventas_mensuales,  margen_de_ganancia,  historial_caja_diaria",
+      "++id_reportes_finanzas,  total_ingresos,  total_gastos,  balance_general,  ventas_mensuales,  margen_de_ganancia,  historial_caja_diaria",
+      tasa: "++id_tasa, codigo, nombre_tasa, compras_tasa, ventas_tasa, tasa",
     });
 
     // ===== Versiones históricas (migraciones)

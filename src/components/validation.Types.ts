@@ -66,6 +66,19 @@ export type IDateValidation = {
 } & ILimitsValidation &
   ICustomValidation;
 
+/** Validaciones para campos de hora */
+export type ITimeValidation = {
+  required?: IRequiredValidation;
+  minTime?: {
+    value: string;
+    message: string;
+  };
+  maxTime?: {
+    value: string;
+    message: string;
+  };
+} & ICustomValidation;
+
 /** Validaciones para radios */
 export type IRadioValidations = {
   required?: IRequiredValidation;
@@ -85,7 +98,9 @@ export type IMultiSelectValidation = {
   ICustomValidation;
 
 /** Validaciones para rating y slider */
-export type IRatingValidations = ILimitsValidation & IComparativeValidations & ICustomValidation;
+export type IRatingValidations = ILimitsValidation &
+  IComparativeValidations &
+  ICustomValidation;
 export type ISliderValidations = IRatingValidations & ICustomValidation;
 
 /** Tipos internos de validación */
@@ -173,20 +188,45 @@ export type EValidations =
   | "tests"
   | "oneOf";
 
-export type IValidationFunctions = Record<string, (schema: any, params: any) => any>;
+export type IValidationFunctions = Record<
+  string,
+  (schema: any, params: any) => any
+>;
 
 /** Yup schema mappings */
-export type IRequiredSchema = { required: (schema: any, { message }: any) => any };
-export type ILengthSchema = { length: (schema: any, { message, value, ref }: any) => any };
-export type IMinSchema = { min: (schema: any, { message, value, ref }: any) => any };
-export type IMaxSchema = { max: (schema: any, { message, value, ref }: any) => any };
-export type IMoreThanSchema = { moreThan: (schema: any, { message, value, ref }: any) => any };
-export type ILessThanSchema = { lessThan: (schema: any, { message, value, ref }: any) => any };
-export type IIntegerSchema = { integer: (schema: any, { message }: any) => any };
-export type IPositiveSchema = { positive: (schema: any, { message }: any) => any };
-export type INegativeSchema = { negative: (schema: any, { message }: any) => any };
-export type IRegExpSchema = { regular_expression: (schema: any, { message, value, ref }: any) => any };
+export type IRequiredSchema = {
+  required: (schema: any, { message }: any) => any;
+};
+export type ILengthSchema = {
+  length: (schema: any, { message, value, ref }: any) => any;
+};
+export type IMinSchema = {
+  min: (schema: any, { message, value, ref }: any) => any;
+};
+export type IMaxSchema = {
+  max: (schema: any, { message, value, ref }: any) => any;
+};
+export type IMoreThanSchema = {
+  moreThan: (schema: any, { message, value, ref }: any) => any;
+};
+export type ILessThanSchema = {
+  lessThan: (schema: any, { message, value, ref }: any) => any;
+};
+export type IIntegerSchema = {
+  integer: (schema: any, { message }: any) => any;
+};
+export type IPositiveSchema = {
+  positive: (schema: any, { message }: any) => any;
+};
+export type INegativeSchema = {
+  negative: (schema: any, { message }: any) => any;
+};
+export type IRegExpSchema = {
+  regular_expression: (schema: any, { message, value, ref }: any) => any;
+};
 export type IEmailSchema = { email: (schema: any, { message }: any) => any };
 export type IUrlSchema = { url: (schema: any, { message }: any) => any };
-export type IOneOfSchema = { oneOf: (schema: any, { message, value, ref }: any) => any };
+export type IOneOfSchema = {
+  oneOf: (schema: any, { message, value, ref }: any) => any;
+};
 export type ITestsSchema = { tests: (schema: any, tests: ITest[]) => any };

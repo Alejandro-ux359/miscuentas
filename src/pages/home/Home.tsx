@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { db, Movimiento } from "../../bdDexie";
+import { db, Movimiento, Tasa } from "../../bdDexie";
 import "../home/Home.css";
+import { fetchTasaToque } from "../../servicios/Api";
 
 // Función para detectar la moneda de cada movimiento
 const detectarMoneda = (mov: Movimiento): string => {
@@ -20,6 +21,21 @@ const Home: React.FC = () => {
   const [monedas, setMonedas] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [totales, setTotales] = useState<Record<string, number>>({});
+  const [tasas, setTasas] = useState<Tasa[]>([]);
+  const [tasaActual, setTasaActual] = useState<Tasa | null>(null);
+
+  // mostrar la tasa de cambio del toque
+
+  useEffect(() => {
+    const obtenerTasas = async () => {
+      const data = await fetchTasaToque();
+       console.log("Datos de la API:", data)
+      setTasas(data);
+      if (data.length > 0) setTasaActual(data[0]); // Mostrar la primera tasa
+    };
+
+    obtenerTasas();
+  }, []);
 
   // Calcular totales de cada moneda
   useEffect(() => {
@@ -36,7 +52,10 @@ const Home: React.FC = () => {
 
       setTotales(resumen);
       setMonedas(Object.keys(resumen));
-      if (Object.keys(resumen).length > 0 && index >= Object.keys(resumen).length) {
+      if (
+        Object.keys(resumen).length > 0 &&
+        index >= Object.keys(resumen).length
+      ) {
         setIndex(0); // Ajustar índice si la moneda actual desaparece
       }
     };
@@ -97,9 +116,21 @@ const Home: React.FC = () => {
           {/* Puntos indicadores */}
           <div className="dots">
             {monedas.map((_, i) => (
-              <div key={i} className={`dot ${i === index ? "active" : ""}`}></div>
+              <div
+                key={i}
+                className={`dot ${i === index ? "active" : ""}`}
+              ></div>
             ))}
           </div>
+          {tasaActual && (
+            <div className="tasa-card">
+              <h3>Tasa de Cambio (TOQUE)</h3>
+              <p>
+                {tasaActual.codigo} - Compra: {tasaActual.compras_tasa} | Venta:{" "}
+                {tasaActual.ventas_tasa}
+              </p>
+            </div>
+          )}
         </>
       ) : (
         <div className="desarrollo-message">

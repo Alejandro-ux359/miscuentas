@@ -52,6 +52,7 @@ export const HorarioCierre = {
   type: "time",
   label: "Horario de cierre",
   name: "horario_cierre",
+  
 };
 
 export const SitioWeb = {

@@ -102,6 +102,7 @@ export type IDatePicker = {
 export type ITimePicker = {
   type: "time";
   validations?: IDateValidation;
+  onChangeCallback?: IOnChangeFunction;
 } & ITimeControls;
 
 export type IRadio = {
