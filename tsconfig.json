@@ -12,7 +12,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
   },
   "include": ["src", "public/service-worker.js", "vite-env.d.ts"],
   "exclude": ["node_modules"]
