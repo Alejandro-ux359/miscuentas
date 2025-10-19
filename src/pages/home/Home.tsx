@@ -22,27 +22,27 @@ const Home: React.FC = () => {
 
   const fetchTasas = async () => {
     setCargando(true);
-    setError(null);
 
     try {
-      // Revisa si ya hay datos en localStorage
+      // 1️⃣ Cargar datos desde localStorage si existen
       const local = localStorage.getItem("tasas");
-      if (local && !cancelado) setTasas(JSON.parse(local));
+      if (local && !cancelado) {
+        setTasas(JSON.parse(local));
+      }
 
-      // Pide al backend
+      // 2️⃣ Intentar actualizar desde el backend
       const res = await fetch("https://api-miscuentas.onrender.com/api/tasa");
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data = await res.json();
-
       if (!Array.isArray(data)) throw new Error("Datos inválidos del servidor");
 
       if (!cancelado) {
-        setTasas(data);
-        localStorage.setItem("tasas", JSON.stringify(data));
+        setTasas(data); // Actualizar estado
+        localStorage.setItem("tasas", JSON.stringify(data)); // Guardar localmente
       }
     } catch (err) {
-      console.error("❌ Error al obtener tasas:", err);
-      if (!cancelado) setError("No se pudieron cargar las tasas");
+      console.warn("⚠️ No se pudo actualizar desde el servidor, usando datos locales si existen.", err);
+      // No sobreescribimos error si ya hay datos locales
     } finally {
       if (!cancelado) setCargando(false);
     }
@@ -51,6 +51,7 @@ const Home: React.FC = () => {
   fetchTasas();
   return () => { cancelado = true; };
 }, []);
+
 
 
   // 🔹 Calcular totales por moneda
