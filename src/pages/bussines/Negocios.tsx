@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,59 +12,16 @@ import {
   Card,
   CardContent,
   Typography,
+  Divider,
 } from "@mui/material";
+import { FixedSizeList as List } from "react-window";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { db, syncInsertNegocio } from "../../bdDexie";
 import EditIcon from "@mui/icons-material/Edit";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs, { Dayjs } from "dayjs";
-
-import {
-  Propietario,
-  Direccion,
-  Email,
-  FechaCreacion,
-  Descripcion,
-  HorarioApertura,
-  HorarioCierre,
-  SitioWeb,
-  Trabajadores,
-  CargoEmpleado,
-  SalarioEmpleado,
-  FechaIngresosEmpleado,
-  Movil,
-  RolUsuario,
-  Nombre,
-  Apellido,
-  Cedula,
-  TipoCliente,
-  HistorialCompraCliente,
-  DeudaCliente,
-  NombreProducto,
-  CategoriaProducto,
-  PrecioProducto,
-  Unidad,
-  StockMaximo,
-  StockMinimo,
-  FechaIngresos,
-  FechaActualizacion,
-  ProductosSuministrado,
-  MetodosPago,
-  Dinero,
-  Cuenta,
-  TBussines,
-  Tipos,
-  TotalIngresos,
-  TotalGastos,
-  BalanceGeneral,
-  VentasMensuales,
-  MargenGanancias,
-  HistorialDeCaja,
-} from "./FormBusines";
-import { TimeField } from "@mui/x-date-pickers";
+import { v4 as uuidv4 } from "uuid";
+import { db, syncInsertNegocio } from "../../bdDexie";
+import GenericForm, { CampoItem } from "../../components/GenericForms";
+import { formulariosDisponibles } from "./ListadeFormulario";
 
 export default function NegocioModal() {
   const [openMain, setOpenMain] = useState(false);
@@ -83,109 +40,13 @@ export default function NegocioModal() {
   const [isEditing, setIsEditing] = useState(false);
   const [editableNegocio, setEditableNegocio] = useState<any>(null);
 
-  const formulariosDisponibles = [
-    { id: "Propietario", nombre: "Propietario", campos: Propietario },
-    { id: "Direccion", nombre: "Dirección", campos: Direccion },
-    { id: "Email", nombre: "Correo Electrónico", campos: Email },
-    { id: "FechaCreacion", nombre: "Fecha de Creación", campos: FechaCreacion },
-    { id: "Descripcion", nombre: "Descripción", campos: Descripcion },
-    {
-      id: "HorarioApertura",
-      nombre: "Horario de Apertura",
-      campos: HorarioApertura,
-    },
-    { id: "HorarioCierre", nombre: "Horario de Cierre", campos: HorarioCierre },
-    { id: "SitioWeb", nombre: "Sitio Web", campos: SitioWeb },
-    {
-      id: "Trabajadores",
-      nombre: "Cantidad de Trabajadores",
-      campos: Trabajadores,
-    },
-    {
-      id: "CargoEmpleado",
-      nombre: "Cargo del Empleado",
-      campos: CargoEmpleado,
-    },
-    { id: "SalarioEmpleado", nombre: "Salario", campos: SalarioEmpleado },
-    {
-      id: "FechaIngresosEmpleado",
-      nombre: "Fecha de Ingreso del Empleado",
-      campos: FechaIngresosEmpleado,
-    },
-    { id: "MovilEmpleado", nombre: "Móvil o Teléfono", campos: Movil },
-    {
-      id: "RolUsuario",
-      nombre: "Rol del Usuario / Empleado",
-      campos: RolUsuario,
-    },
-    { id: "Nombre", nombre: "Nombre", campos: Nombre },
-    { id: "Apellido", nombre: "Apellido", campos: Apellido },
-    { id: "Cedula", nombre: "Cédula del Cliente", campos: Cedula },
-    { id: "TipoCliente", nombre: "Tipo de Cliente", campos: TipoCliente },
-    {
-      id: "HistorialCompraCliente",
-      nombre: "Historial de Compras",
-      campos: HistorialCompraCliente,
-    },
-    { id: "DeudaCliente", nombre: "Deuda del Cliente", campos: DeudaCliente },
-    {
-      id: "NombreProducto",
-      nombre: "Nombre del Producto",
-      campos: NombreProducto,
-    },
-    {
-      id: "CategoriaProducto",
-      nombre: "Categoría del Producto",
-      campos: CategoriaProducto,
-    },
-    {
-      id: "PrecioProducto",
-      nombre: "Precio del Producto",
-      campos: PrecioProducto,
-    },
-    { id: "Unidad", nombre: "Unidad de Medida", campos: Unidad },
-    { id: "StockMaximo", nombre: "Stock Máximo", campos: StockMaximo },
-    { id: "StockMinimo", nombre: "Stock Mínimo", campos: StockMinimo },
-    {
-      id: "FechaIngresos",
-      nombre: "Fecha de Ingreso del Producto",
-      campos: FechaIngresos,
-    },
-    {
-      id: "FechaActualizacion",
-      nombre: "Fecha de Actualización",
-      campos: FechaActualizacion,
-    },
-    {
-      id: "ProductosSuministrado",
-      nombre: "Productos Suministrados",
-      campos: ProductosSuministrado,
-    },
-    { id: "MetodosPago", nombre: "Métodos de Pago", campos: MetodosPago },
-    { id: "Dinero", nombre: "Dinero Disponible", campos: Dinero },
-    { id: "Cuenta", nombre: "Cuenta Bancaria", campos: Cuenta },
-    { id: "TBussines", nombre: "Tipo de Empresa", campos: TBussines },
-    { id: "Tipos", nombre: "Tipos de Operaciones", campos: Tipos },
-    { id: "TotalIngresos", nombre: "Total de Ingresos", campos: TotalIngresos },
-    { id: "TotalGastos", nombre: "Total de Gastos", campos: TotalGastos },
-    { id: "BalanceGeneral", nombre: "Balance General", campos: BalanceGeneral },
-    {
-      id: "VentasMensuales",
-      nombre: "Ventas Mensuales",
-      campos: VentasMensuales,
-    },
-    {
-      id: "MargenGanancias",
-      nombre: "Margen de Ganancias",
-      campos: MargenGanancias,
-    },
-    {
-      id: "HistorialDeCaja",
-      nombre: "Historial de Caja",
-      campos: HistorialDeCaja,
-    },
-  ];
+  // --- Funciones de apertura/cierre de modales ---
+  const handleAbrirPrincipal = () => setOpenMain(true);
+  const handleCerrarPrincipal = () => setOpenMain(false);
+  const handleAbrirCampos = () => setOpenCampos(true);
+  const handleCerrarCampos = () => setOpenCampos(false);
 
+  // --- Cargar negocios desde la DB ---
   useEffect(() => {
     const cargarNegocios = async () => {
       const lista = await db.bpropietario.toArray();
@@ -194,36 +55,31 @@ export default function NegocioModal() {
     cargarNegocios();
   }, []);
 
-  // Inicializar editableNegocio cuando se selecciona un negocio
   useEffect(() => {
     if (selectedNegocio) setEditableNegocio(selectedNegocio);
     setIsEditing(false);
   }, [selectedNegocio]);
 
-  const handleAbrirPrincipal = () => setOpenMain(true);
-  const handleCerrarPrincipal = () => setOpenMain(false);
-  const handleAbrirCampos = () => setOpenCampos(true);
-  const handleCerrarCampos = () => setOpenCampos(false);
-
-  const toggleFormulario = (id: string) => {
+  // --- Toggle formularios seleccionados ---
+  const toggleFormulario = useCallback((id: string) => {
     setFormulariosSeleccionados((prev) =>
       prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
     );
-  };
+  }, []);
 
-  const agregarCamposSeleccionados = () => {
+  // --- Agregar campos seleccionados ---
+  const agregarCamposSeleccionados = useCallback(() => {
     const nuevosCampos = formulariosSeleccionados.flatMap((id) => {
       const form = formulariosDisponibles.find((f) => f.id === id);
       if (!form || !form.campos) return [];
-
       const camposArray = Array.isArray(form.campos)
         ? form.campos
         : [form.campos];
-
       return camposArray.map((campo: any, index: number) => ({
-        id: `${id}_${index}_${Date.now()}`,
-        nombre: campo.label || campo.nombre || id,
-        tipo: campo.type || "text",
+        id: `${id}_${index}_${uuidv4()}`,
+        label: campo.label || campo.nombre || id,
+        name: campo.name || `${id}_${index}_${uuidv4()}`,
+        type: campo.type || "text",
         valor: "",
       }));
     });
@@ -238,21 +94,26 @@ export default function NegocioModal() {
     }
 
     setFormulariosSeleccionados([]);
-    setOpenCampos(false);
-  };
+    handleCerrarCampos();
+  }, [formulariosSeleccionados, editableNegocio, isEditing]);
 
-  const eliminarCampo = (id: string) => {
-    setCamposPersonalizados(camposPersonalizados.filter((c) => c.id !== id));
-    const newValores = { ...valoresCampos };
-    delete newValores[id];
-    setValoresCampos(newValores);
-  };
+  // --- Eliminar campo ---
+  const eliminarCampo = useCallback((id: string) => {
+    setCamposPersonalizados((prev) => prev.filter((c) => c.id !== id));
+    setValoresCampos((prev) => {
+      const newValores = { ...prev };
+      delete newValores[id];
+      return newValores;
+    });
+  }, []);
 
-  const handleValorCampo = (id: string, valor: any) => {
+  // --- Actualizar valor de campo ---
+  const handleValorCampo = useCallback((id: string, valor: any) => {
     setValoresCampos((prev) => ({ ...prev, [id]: valor }));
-  };
+  }, []);
 
-  const handleGuardarNegocio = async () => {
+  // --- Guardar negocio ---
+  const handleGuardarNegocio = useCallback(async () => {
     const nuevoNegocio = {
       nombre_negocio: nombre,
       tipo_negocio: tipoNegocio,
@@ -264,25 +125,28 @@ export default function NegocioModal() {
 
     const id = await db.bpropietario.add(nuevoNegocio as any);
     await syncInsertNegocio(nuevoNegocio as any, id);
-
     const lista = await db.bpropietario.toArray();
     setNegocios(lista);
 
+    // Reset
     setNombre("");
     setTipoNegocio("");
     setCamposPersonalizados([]);
     setValoresCampos({});
-    setOpenMain(false);
-  };
+    handleCerrarPrincipal();
+  }, [nombre, tipoNegocio, camposPersonalizados, valoresCampos]);
 
-  const handleEliminarNegocio = async (id: number) => {
-    try {
-      await db.bpropietario.delete(id);
-      setNegocios((prev) => prev.filter((neg) => neg.id_negocio !== id));
-    } catch (error) {
-      console.error("Error eliminando negocio:", error);
-    }
-  };
+  // --- Eliminar negocio ---
+  const handleEliminarNegocio = useCallback(async (id: number) => {
+    await db.bpropietario.delete(id);
+    setNegocios((prev) => prev.filter((neg) => neg.id_negocio !== id));
+  }, []);
+
+  // --- Formularios disponibles (puedes mover esto a un archivo separado) ---
+  const formulariosMemo = React.useMemo(() => formulariosDisponibles, []);
+
+  // --- CampoItem memoizado ---
+  const MemoCampoItem = memo(CampoItem);
 
   return (
     <div style={{ padding: 20 }}>
@@ -299,8 +163,6 @@ export default function NegocioModal() {
           borderRadius: "50%",
           backgroundColor: "#1000eb",
           color: "white",
-          fontFamily: "Arial, sans-serif",
-          fontSize: 2.5,
           boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
         }}
       >
@@ -318,13 +180,11 @@ export default function NegocioModal() {
               <Typography variant="h6">{neg.nombre_negocio}</Typography>
               <Typography color="textSecondary">{neg.tipo_negocio}</Typography>
             </CardContent>
-            {/* Botón eliminar */}
             <IconButton
               onClick={() => {
-                const confirmado = window.confirm(
-                  `¿Estás seguro de que quieres eliminar el negocio "${neg.nombre_negocio}"?`
-                );
-                if (confirmado) {
+                if (
+                  window.confirm(`¿Eliminar negocio "${neg.nombre_negocio}"?`)
+                ) {
                   handleEliminarNegocio(neg.id_negocio);
                 }
               }}
@@ -343,14 +203,10 @@ export default function NegocioModal() {
           style={{ display: "flex", justifyContent: "space-between" }}
         >
           Nuevo Negocio
-          <Button
-            startIcon={<AddIcon />}
-            variant="outlined"
-            size="small"
-            onClick={handleAbrirCampos}
-          >
-            Agregar campos
+          <Button onClick={handleAbrirCampos}>
+            <AddIcon />
           </Button>
+          <Divider />
         </DialogTitle>
         <DialogContent>
           <TextField
@@ -369,94 +225,17 @@ export default function NegocioModal() {
           />
 
           {camposPersonalizados.length > 0 && (
-            <div style={{ marginTop: 20 }}>
+            <div style={{ marginTop: 20, maxHeight: 300, overflowY: "auto" }}>
               <h4>Campos personalizados:</h4>
               {camposPersonalizados.map((campo) => (
-                <div
+                <MemoCampoItem
                   key={campo.id}
-                  style={{
-                    marginBottom: 10,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  {campo.tipo === "text" && (
-                    <TextField
-                      type="text"
-                      label={campo.nombre}
-                      fullWidth
-                      margin="dense"
-                      value={valoresCampos[campo.id] || ""}
-                      onChange={(e) =>
-                        handleValorCampo(campo.id, e.target.value)
-                      }
-                    />
-                  )}
-
-                  {campo.tipo === "time" && (
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <TimeField
-                        label={campo.nombre}
-                        value={
-                          valoresCampos[campo.id]
-                            ? dayjs(`2023-01-01T${valoresCampos[campo.id]}`)
-                            : null
-                        }
-                        onChange={(newValue: Dayjs | null) => {
-                          handleValorCampo(
-                            campo.id,
-                            newValue ? newValue.format("HH:mm") : ""
-                          );
-                        }}
-                        fullWidth
-                        ampm={false}
-                      />
-                    </LocalizationProvider>
-                  )}
-
-                  {campo.tipo === "number" && (
-                    <TextField
-                      type="number"
-                      label={campo.nombre}
-                      fullWidth
-                      value={valoresCampos[campo.id] || ""}
-                      onChange={(e) =>
-                        handleValorCampo(campo.id, e.target.value)
-                      }
-                    />
-                  )}
-                  {campo.tipo === "date" && (
-                    <TextField
-                      type="date"
-                      label={campo.nombre}
-                      fullWidth
-                      value={valoresCampos[campo.id] || ""}
-                      onChange={(e) =>
-                        handleValorCampo(campo.id, e.target.value)
-                      }
-                    />
-                  )}
-                  {campo.tipo === "checkbox" && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={!!valoresCampos[campo.id]}
-                          onChange={(e) =>
-                            handleValorCampo(campo.id, e.target.checked)
-                          }
-                        />
-                      }
-                      label={campo.nombre}
-                    />
-                  )}
-                  <IconButton
-                    color="error"
-                    onClick={() => eliminarCampo(campo.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </div>
+                  campo={campo}
+                  valor={valoresCampos[campo.id]}
+                  onChange={(valor) => handleValorCampo(campo.id, valor)}
+                  onDelete={() => eliminarCampo(campo.id)}
+                  editable={true}
+                />
               ))}
             </div>
           )}
@@ -472,19 +251,37 @@ export default function NegocioModal() {
       {/* MODAL CAMPOS PERSONALIZADOS */}
       <Dialog open={openCampos} onClose={handleCerrarCampos} fullWidth>
         <DialogTitle>Seleccionar formularios</DialogTitle>
-        <DialogContent>
-          {formulariosDisponibles.map((form) => (
-            <FormControlLabel
-              key={form.id}
-              control={
-                <Checkbox
-                  checked={formulariosSeleccionados.includes(form.id)}
-                  onChange={() => toggleFormulario(form.id)}
-                />
-              }
-              label={form.nombre}
-            />
-          ))}
+        <Divider />
+        <DialogContent style={{ height: 430, padding: 20 }}>
+          <List
+            height={400}
+            itemCount={formulariosDisponibles.length}
+            itemSize={45}
+            width="90%"
+          >
+            {({
+              index,
+              style,
+            }: {
+              index: number;
+              style: React.CSSProperties;
+            }) => {
+              const form = formulariosDisponibles[index];
+              return (
+                <div style={style} key={form.id}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formulariosSeleccionados.includes(form.id)}
+                        onChange={() => toggleFormulario(form.id)}
+                      />
+                    }
+                    label={form.nombre}
+                  />
+                </div>
+              );
+            }}
+          </List>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCerrarCampos}>Cancelar</Button>
@@ -505,17 +302,15 @@ export default function NegocioModal() {
         fullWidth
       >
         <DialogTitle
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+          style={{ display: "flex", justifyContent: "space-between" }}
         >
           {selectedNegocio?.nombre_negocio}
-          <div>
-            <IconButton onClick={() => setIsEditing((prev) => !prev)}>
-              <EditIcon color={isEditing ? "error" : "primary"} />
-            </IconButton>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {!isEditing && (
+              <IconButton onClick={() => setIsEditing(true)}>
+                <EditIcon color="primary" />
+              </IconButton>
+            )}
             {isEditing && (
               <Button
                 startIcon={<AddIcon />}
@@ -550,20 +345,21 @@ export default function NegocioModal() {
             )}
           </div>
 
-          {/* Campos existentes + nuevos */}
           {(editableNegocio?.campos || []).map((c: any) => (
             <div
               key={c.id}
               style={{
-                marginTop: 6,
+                marginTop: 10,
                 display: "flex",
-                gap: 8,
                 alignItems: "center",
+                gap: 10,
               }}
             >
-              <strong>{c.nombre}: </strong>
-              {isEditing ? (
-                <>
+              <div style={{ flex: 1, }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  {c.label || c.nombre || c.name}:
+                </Typography>
+                {isEditing ? (
                   <TextField
                     value={c.valor || ""}
                     onChange={(e) => {
@@ -579,31 +375,48 @@ export default function NegocioModal() {
                       });
                     }}
                     fullWidth
+                    size="small"
                     margin="dense"
                   />
-                  <IconButton
-                    color="error"
-                    onClick={() => {
-                      const nuevosCampos = editableNegocio.campos.filter(
-                        (campo: any) => campo.id !== c.id
-                      );
-                      setEditableNegocio({
-                        ...editableNegocio,
-                        campos: nuevosCampos,
-                      });
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </>
-              ) : (
-                c.valor
+                ) : (
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {c.valor || "—"}
+                  </Typography>
+                )}
+              </div>
+
+              {isEditing && (
+                <IconButton
+                  color="error"
+                  onClick={() => {
+                    const nuevosCampos = editableNegocio.campos.filter(
+                      (campo: any) => campo.id !== c.id
+                    );
+                    setEditableNegocio({
+                      ...editableNegocio,
+                      campos: nuevosCampos,
+                    });
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
               )}
             </div>
           ))}
         </DialogContent>
 
         <DialogActions>
+          <Button
+            onClick={() => {
+              if (isEditing) {
+                setIsEditing(false);
+              } else {
+                setSelectedNegocio(null);
+              }
+            }}
+          >
+            Cerrar
+          </Button>
           {isEditing && (
             <Button
               variant="contained"
@@ -626,7 +439,6 @@ export default function NegocioModal() {
               Guardar
             </Button>
           )}
-          <Button onClick={() => setSelectedNegocio(null)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
     </div>

@@ -1,5 +1,5 @@
 // src/_pwa-framework/genforms/components/GenericForm.tsx
-import React from "react";
+import React, { memo } from "react";
 import {
   Box,
   Button,
@@ -9,22 +9,79 @@ import {
   DialogTitle,
   TextField,
   TextFieldProps,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { Formik, FormikProps } from "formik";
 import * as Yup from "yup";
 import { IGenericControls, ISelect } from "./controls.types";
 import {
   LocalizationProvider,
-  DesktopTimePicker,
   DatePicker,
+  MobileTimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import TimePicker from "react-time-picker"; // 🔹 NO usar TimePicker de MUI
-import "react-time-picker/dist/TimePicker.css"; // estilos del reloj
-import "react-clock/dist/Clock.css"; // estilos del reloj
-import { MobileTimePicker } from "@mui/x-date-pickers/MobileTimePicker";
+import DeleteIcon from "@mui/icons-material/Delete";
 
+// Componente CampoItem memoizado
+export const CampoItem: React.FC<{
+  campo: { id?: string; label: string; name: string; type?: string };
+  valor: any;
+  onChange: (v: any) => void;
+  onDelete?: () => void;
+  editable?: boolean;
+}> = memo(({ campo, valor, onChange, onDelete, editable = true }) => {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+      {campo.type === "date" ? (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label={campo.label}
+            value={valor ? dayjs(valor) : null}
+            onChange={(newValue) =>
+              onChange(newValue ? newValue.format("YYYY-MM-DD") : "")
+            }
+            slotProps={{
+              textField: { fullWidth: true, size: "small", margin: "dense" } as TextFieldProps,
+            }}
+          />
+        </LocalizationProvider>
+      ) : campo.type === "time" ? (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <MobileTimePicker
+            ampm={false}
+            label={campo.label}
+            value={valor ? dayjs(valor, "HH:mm") : null}
+            onChange={(newValue) =>
+              onChange(newValue ? newValue.format("HH:mm") : "")
+            }
+            slotProps={{
+              textField: { fullWidth: true, size: "small", margin: "dense" } as TextFieldProps,
+            }}
+          />
+        </LocalizationProvider>
+      ) : (
+        <TextField
+          label={campo.label}
+          type={campo.type || "text"}
+          value={valor || ""}
+          onChange={(e) => onChange(e.target.value)}
+          fullWidth
+          size="small"
+          margin="dense"
+          disabled={!editable}
+        />
+      )}
+
+      {editable && onDelete && (
+        <Button onClick={onDelete} color="error">
+          <DeleteIcon />
+        </Button>
+      )}
+    </div>
+  );
+});
 
 type GenericFormProps = {
   title?: string;
@@ -48,7 +105,8 @@ const GenericForm: React.FC<GenericFormProps> = ({
   onCancel,
 }) => {
   const initialValues: Record<string, any> = controls.reduce((acc, control) => {
-    acc[control.name] = values?.[control.name] ?? "";
+    acc[control.name] =
+      values?.[control.name] ?? (control.type === "check" || control.type === "switch" ? false : "");
     return acc;
   }, {} as Record<string, any>);
 
@@ -71,128 +129,104 @@ const GenericForm: React.FC<GenericFormProps> = ({
         onSubmit={onSubmit}
       >
         {(formikProps: FormikProps<Record<string, any>>) => {
-          const { values, handleChange, handleSubmit, setFieldValue } =
-            formikProps;
+          const { values, handleChange, handleSubmit, setFieldValue } = formikProps;
 
           return (
             <form onSubmit={handleSubmit}>
               <DialogContent>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  {controls.map((control) => {
-                    switch (control.type) {
-                      case "text":
-                      case "number":
-                        return (
-                          <div key={control.name} style={{ marginBottom: 12 }}>
-                            <TextField
-                              label={control.label}
-                              type={control.type}
-                              name={control.name}
-                              value={values[control.name]}
-                              onChange={handleChange}
-                              fullWidth
-                            />
-                          </div>
-                        );
+                {controls.map((control) => {
+                  switch (control.type) {
+                    case "text":
+                    case "number":
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <TextField
+                            label={control.label}
+                            type={control.type}
+                            name={control.name}
+                            value={values[control.name]}
+                            onChange={handleChange}
+                            fullWidth
+                          />
+                        </div>
+                      );
 
-                      case "date":
-                        return (
-                          <div key={control.name} style={{ marginBottom: 12 }}>
-                            <DatePicker
-                              label={control.label}
-                              value={
-                                values[control.name]
-                                  ? dayjs(values[control.name])
-                                  : null
-                              }
-                              onChange={(newValue: Dayjs | null) =>
-                                setFieldValue(
-                                  control.name,
-                                  newValue ? newValue.format("YYYY-MM-DD") : ""
-                                )
-                              }
-                              slotProps={{
-                                textField: {
-                                  fullWidth: true,
-                                } as TextFieldProps,
-                              }}
-                            />
-                          </div>
-                        );
-case "time":
-  return (
-    <div key={control.name} style={{ marginBottom: 12 }}>
-      <label>{control.label}</label>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <MobileTimePicker
-          ampm={false} // formato 24h
-          value={
-            values[control.name]
-              ? dayjs(values[control.name], "HH:mm")
-              : null
-          }
-          onChange={(newValue) => {
-            const formatted = newValue ? newValue.format("HH:mm") : "";
-            setFieldValue(control.name, formatted);
-          }}
-          slotProps={{
-            textField: {
-              fullWidth: true,
-              size: "small",
-              error:
-                !!(
-                  formikProps.touched[control.name] &&
-                  formikProps.errors[control.name]
-                ),
-              helperText:
-                formikProps.touched[control.name] &&
-                formikProps.errors[control.name]
-                  ? String(formikProps.errors[control.name])
-                  : "",
-            },
-          }}
-        />
-      </LocalizationProvider>
-    </div>
-  );
+                    case "date":
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <CampoItem
+                            campo={control}
+                            valor={values[control.name]}
+                            onChange={(v) => setFieldValue(control.name, v)}
+                          />
+                        </div>
+                      );
 
-                      case "select":
-                        const selectControl = control as ISelect;
-                        return (
-                          <div key={control.name} style={{ marginBottom: 12 }}>
-                            <TextField
-                              select
-                              label={control.label}
-                              name={control.name}
-                              value={values[control.name]}
-                              onChange={handleChange}
-                              fullWidth
-                              SelectProps={{ native: true }}
-                            >
-                              {selectControl.checkValues?.map((opt: any) => (
-                                <option key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </option>
-                              ))}
-                            </TextField>
-                          </div>
-                        );
+                    case "time":
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <CampoItem
+                            campo={control}
+                            valor={values[control.name]}
+                            onChange={(v) => setFieldValue(control.name, v)}
+                          />
+                        </div>
+                      );
 
-                      default:
-                        return (
-                          <div key={control.name} style={{ marginBottom: 12 }}>
-                            <TextField
-                              label={control.label}
-                              name={control.name}
-                              value={values[control.name]}
-                              onChange={handleChange}
-                              fullWidth
-                            />
-                          </div>
-                        );
-                    }
-                  })}
-                </LocalizationProvider>
+                    case "select":
+                      const selectControl = control as ISelect;
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <TextField
+                            select
+                            label={control.label}
+                            name={control.name}
+                            value={values[control.name]}
+                            onChange={handleChange}
+                            fullWidth
+                            SelectProps={{ native: true }}
+                          >
+                            {selectControl.checkValues?.map((opt: any) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </TextField>
+                        </div>
+                      );
+
+                    case "check":
+                    case "switch":
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={!!values[control.name]}
+                                onChange={(e) =>
+                                  setFieldValue(control.name, e.target.checked)
+                                }
+                              />
+                            }
+                            label={control.label}
+                          />
+                        </div>
+                      );
+
+                    default:
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <TextField
+                            label={control.label}
+                            name={control.name}
+                            value={values[control.name]}
+                            onChange={handleChange}
+                            fullWidth
+                          />
+                        </div>
+                      );
+                  }
+                })}
               </DialogContent>
 
               <Box sx={{ flexGrow: 1 }} />

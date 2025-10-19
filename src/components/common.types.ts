@@ -82,7 +82,8 @@ export type EControls =
   | "switch"
   | "slider"
   | "rating"
-  | "component";
+  | "component"
+  | "checkbox";
 export type EControlsForValidate =
   | "text"
   | "number"
@@ -96,7 +97,8 @@ export type EControlsForValidate =
   | "switch"
   | "slider"
   | "component"
-  | "rating";
+  | "rating"
+  | "checkbox";
 
 type IAlternateIcons = {
   outlinedIcon: IconNames;

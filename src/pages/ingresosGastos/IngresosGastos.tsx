@@ -12,6 +12,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import TuneIcon from "@mui/icons-material/Tune";
 import EditIcon from "@mui/icons-material/Edit";
 import { IGenericControls } from "../../components/controls.types";
+import React from "react";
+import  {ingresosGastos} from "./FormIngresosGastos"
+
 
 function IngresosGastos(): JSX.Element {
   const [openModal, setOpenModal] = useState(false);
@@ -220,61 +223,7 @@ function IngresosGastos(): JSX.Element {
       });
     });
 
-  const ingresosGastos: IGenericControls[] = [
-    {
-      type: "select",
-      label: "Categoría",
-      name: "categoria",
-      checkValues: [
-        { label: "Salario", value: "salario" },
-        { label: "Ventas", value: "ventas" },
-        { label: "Regalía", value: "regalia" },
-        { label: "Inversión", value: "inversion" },
-        { label: "Reembolso", value: "reembolso" },
-        { label: "Otro", value: "otro" },
-      ],
-      
-    },
-    {
-      type: "number",
-      label: "Monto",
-      name: "monto",
-      format:"finance"
-     
-    },
-    {
-      type: "select",
-      label: "Método de pago",
-      name: "metodo",
-      checkValues: [
-        { label: "Efectivo", value: "efectivo" },
-        { label: "Transfermóvil", value: "transfermovil" },
-        { label: "EnZona", value: "enzona" },
-        { label: "QvaPay", value: "qvapay" },
-        { label: "TropiPay", value: "tropipay" },
-      ],
-     
-    },
-    {
-      type: "date",
-      label: "Fecha",
-      name: "fecha",
-      
-    },
-    {
-      type: "select",
-      label: "Moneda",
-      name: "moneda",
-      checkValues: [
-        { label: "CUP", value: "CUP" },
-        { label: "USD", value: "USD" },
-        { label: "EUR", value: "EUR" },
-        { label: "CAD", value: "CAD" },
-        { label: "MXN", value: "MXN" },
-      ],
-      
-    },
-  ];
+  const Lista = React.useMemo(() => ingresosGastos, []);
 
   return (
     <div className="pagina-ingresos-gastos">
@@ -498,7 +447,7 @@ function IngresosGastos(): JSX.Element {
           <div className="modal-contenido">
             <GenericForm
               title={editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}
-              controls={ingresosGastos} 
+              controls={ingresosGastos}
               values={editando ?? {}}
               submitLabel={editando ? "Actualizar" : "Guardar"}
               onSubmit={async (values) => {
