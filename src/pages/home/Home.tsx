@@ -30,7 +30,7 @@ const Home: React.FC = () => {
       if (local && !cancelado) setTasas(JSON.parse(local));
 
       // Pide al backend
-      const res = await fetch("http://192.168.1.102:3001/api/tasa");
+      const res = await fetch("https://api-miscuentas.onrender.com/api/tasa");
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data = await res.json();
 
