@@ -223,3 +223,146 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   text-align: center;
 }
+
+/* ===== Fondo azul del recuadro ===== */
+.fondo-tabla-mercado {
+  background-color: #4a64ff; /* azul moderno */
+  border-radius: 25px;
+  padding: 15px;
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Contenedor blanco con la tabla ===== */
+.tabla-mercado {
+  background: #f9f9f9;
+  border-radius: 18px;
+  padding: 20px;
+  width: 100%;
+  text-align: center;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.tabla-mercado h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 15px;
+}
+
+/* ===== Tabla ===== */
+.tabla-mercado table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: #222;
+  background-color: transparent;
+}
+
+.tabla-mercado th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  padding: 10px 5px;
+  border-bottom: 2px solid #ccc;
+}
+
+.tabla-mercado td {
+  padding: 8px 5px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabla-mercado tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+  .fondo-tabla-mercado {
+    padding: 12px;
+    max-width: 95%;
+  }
+
+  .tabla-mercado {
+    padding: 15px;
+  }
+
+  .tabla-mercado table {
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== Estilos para móviles ===== */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: "Poppins", sans-serif;
+  background-color: #f0f2f5;
+}
+
+/* Fondo azul del recuadro */
+.fondo-tabla-mercado {
+  background-color: #4a64ff; /* azul moderno */
+  border-radius: 25px;
+  padding: 12px;
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 95%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Contenedor blanco de la tabla */
+.tabla-mercado {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 15px;
+  width: 100%;
+  text-align: center;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Título */
+.tabla-mercado h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+/* Tabla */
+.tabla-mercado table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  color: #222;
+  background-color: transparent;
+  word-wrap: break-word;
+  table-layout: fixed;
+}
+
+/* Encabezados */
+.tabla-mercado th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  padding: 8px 5px;
+  border-bottom: 2px solid #ccc;
+}
+
+/* Celdas */
+.tabla-mercado td {
+  padding: 6px 5px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Última fila sin borde */
+.tabla-mercado tr:last-child td {
+  border-bottom: none;
+}
+

@@ -4,9 +4,8 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { db, Movimiento, Tasa } from "../../bdDexie";
 import "../home/Home.css";
 
-const detectarMoneda = (mov: Movimiento): string => {
-  return mov.moneda ? mov.moneda.toUpperCase() : "CUP";
-};
+const detectarMoneda = (mov: Movimiento): string =>
+  mov.moneda ? mov.moneda.toUpperCase() : "CUP";
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"Hogar" | "Negocios">("Hogar");
@@ -17,71 +16,42 @@ const Home: React.FC = () => {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔹 Traer datos de la API (una sola vez)
-useEffect(() => {
-  let cancelado = false; // Para evitar setState si el componente se desmonta
+  // 🔹 Traer tasas del backend y sincronizar con localStorage
+ useEffect(() => {
+  let cancelado = false;
 
   const fetchTasas = async () => {
     setCargando(true);
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:3001/api/tasa");
-      console.log("Respuesta raw:", res);
+      // Revisa si ya hay datos en localStorage
+      const local = localStorage.getItem("tasas");
+      if (local && !cancelado) setTasas(JSON.parse(local));
 
+      // Pide al backend
+      const res = await fetch("http://192.168.1.102:3001/api/tasa");
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-
       const data = await res.json();
-      console.log("Datos crudos del servidor:", data);
 
       if (!Array.isArray(data)) throw new Error("Datos inválidos del servidor");
 
-      // Normalizar datos: todos los elementos deben tener codigo, compras_tasa, ventas_tasa
-      const tasasNormalizadas: Tasa[] = data
-        .map((t: any) => {
-          // Si viene con codigo y compras/ventas
-          if (t.codigo && (t.compras_tasa || t.ventas_tasa)) {
-            return {
-              codigo: t.codigo,
-              compras_tasa: t.compras_tasa ?? t.valor ?? 0,
-              ventas_tasa: t.ventas_tasa ?? t.valor ?? 0,
-            };
-          }
-
-          // Si viene del scraping
-          if (t.moneda && t.valor) {
-            return {
-              codigo: t.moneda,
-              compras_tasa: parseFloat(t.valor),
-              ventas_tasa: parseFloat(t.valor),
-            };
-          }
-
-          return null;
-        })
-        .filter(Boolean) as Tasa[];
-
-      if (!cancelado) setTasas(tasasNormalizadas);
+      if (!cancelado) {
+        setTasas(data);
+        localStorage.setItem("tasas", JSON.stringify(data));
+      }
     } catch (err) {
-      console.error("Error al obtener la tasa:", err);
-      if (!cancelado)
-        setError("No se pudieron cargar las tasas. Intenta más tarde.");
+      console.error("❌ Error al obtener tasas:", err);
+      if (!cancelado) setError("No se pudieron cargar las tasas");
     } finally {
       if (!cancelado) setCargando(false);
     }
   };
 
   fetchTasas();
-
-  return () => {
-    cancelado = true;
-  };
+  return () => { cancelado = true; };
 }, []);
 
-
-
-
- // ✅ vacío: solo se ejecuta una vez
 
   // 🔹 Calcular totales por moneda
   useEffect(() => {
@@ -91,8 +61,9 @@ useEffect(() => {
 
       movimientos.forEach((mov) => {
         const moneda = detectarMoneda(mov);
-        if (!resumen[moneda]) resumen[moneda] = 0;
-        resumen[moneda] += mov.tipo === "Ingreso" ? mov.monto : -mov.monto;
+        resumen[moneda] =
+          (resumen[moneda] || 0) +
+          (mov.tipo === "Ingreso" ? mov.monto : -mov.monto);
       });
 
       setTotales(resumen);
@@ -105,7 +76,6 @@ useEffect(() => {
 
   const handleNext = () =>
     setIndex((prev) => (monedas.length ? (prev + 1) % monedas.length : 0));
-
   const handlePrev = () =>
     setIndex((prev) =>
       monedas.length ? (prev - 1 + monedas.length) % monedas.length : 0
@@ -116,7 +86,6 @@ useEffect(() => {
 
   return (
     <div className="dashboard">
-      {/* Pestañas */}
       <div className="tabs">
         <button
           className={`tab-btn ${activeTab === "Hogar" ? "active" : ""}`}
@@ -134,7 +103,6 @@ useEffect(() => {
 
       {activeTab === "Hogar" ? (
         <>
-          {/* Total por moneda */}
           <div className="total-card">
             <button className="arrow-btn left" onClick={handlePrev}>
               <ArrowBackIosIcon />
@@ -148,19 +116,17 @@ useEffect(() => {
             </button>
           </div>
 
-          {/* Puntos indicadores */}
           <div className="dots">
             {monedas.map((_, i) => (
               <div key={i} className={`dot ${i === index ? "active" : ""}`} />
             ))}
           </div>
 
-          {/* Estado de carga o error */}
           {cargando && <p>🔄 Cargando tasas...</p>}
           {error && <p style={{ color: "red" }}>{error}</p>}
 
-          {/* Tabla de mercado informal */}
           {!cargando && !error && tasas.length > 0 && (
+            <div className="fondo-tabla-mercado">
             <div className="tabla-mercado">
               <h3>📊 Mercado informal</h3>
               <table>
@@ -181,6 +147,8 @@ useEffect(() => {
                   ))}
                 </tbody>
               </table>
+            </div>
+              
             </div>
           )}
         </>
