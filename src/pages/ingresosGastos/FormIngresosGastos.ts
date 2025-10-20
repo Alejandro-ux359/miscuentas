@@ -5,15 +5,6 @@ export const ingresosGastos: IGenericControls[] = [
       type: "select",
       label: "Categoría",
       name: "categoria",
-      checkValues: [
-        { label: "Salario", value: "salario" },
-        { label: "Ventas", value: "ventas" },
-        { label: "Regalía", value: "regalia" },
-        { label: "Inversión", value: "inversion" },
-        { label: "Reembolso", value: "reembolso" },
-        { label: "Otro", value: "otro" },
-      ],
-      
     },
     {
       type: "number",
@@ -26,13 +17,6 @@ export const ingresosGastos: IGenericControls[] = [
       type: "select",
       label: "Método de pago",
       name: "metodo",
-      checkValues: [
-        { label: "Efectivo", value: "efectivo" },
-        { label: "Transfermóvil", value: "transfermovil" },
-        { label: "EnZona", value: "enzona" },
-        { label: "QvaPay", value: "qvapay" },
-        { label: "TropiPay", value: "tropipay" },
-      ],
      
     },
     {
@@ -45,14 +29,7 @@ export const ingresosGastos: IGenericControls[] = [
       type: "select",
       label: "Moneda",
       name: "moneda",
-      checkValues: [
-        { label: "CUP", value: "CUP" },
-        { label: "USD", value: "USD" },
-        { label: "EUR", value: "EUR" },
-        { label: "CAD", value: "CAD" },
-        { label: "MXN", value: "MXN" },
-      ],
-      
+     
     },
 ]
 

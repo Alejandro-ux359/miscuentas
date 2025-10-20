@@ -1,44 +1,60 @@
-import { useState, useEffect, JSX } from "react";
-import "../ingresosGastos/IngresosGastos.css";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Divider,
+  IconButton,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import TuneIcon from "@mui/icons-material/Tune";
 import GenericForm from "../../components/GenericForms";
 import {
   db,
   Movimiento,
-  syncDeleteMovimiento,
   syncInsertMovimiento,
   syncUpdateMovimiento,
+  syncDeleteMovimiento,
 } from "../../bdDexie";
-import DeleteIcon from "@mui/icons-material/Delete";
-import TuneIcon from "@mui/icons-material/Tune";
-import EditIcon from "@mui/icons-material/Edit";
-import { IGenericControls } from "../../components/controls.types";
-import React from "react";
-import  {ingresosGastos} from "./FormIngresosGastos"
+import { ingresosGastos } from "./FormIngresosGastos";
+import "./IngresosGastos.css";
 
+// Item memoizado para evitar re-renders innecesarios
+const MovimientoItem = React.memo(({ item, onEdit, onDelete }: any) => (
+  <div className="item-movimiento">
+    <div className="info">
+      <strong>{item.categoria}</strong> - {item.monto} {item.moneda} -{" "}
+      {item.metodo} - {item.fecha}
+    </div>
+    <IconButton onClick={() => onEdit(item.tipo, item)}>
+      <EditIcon color="primary" />
+    </IconButton>
+    <IconButton onClick={() => onDelete(item)}>
+      <DeleteIcon color="error" />
+    </IconButton>
+  </div>
+));
 
-function IngresosGastos(): JSX.Element {
-  const [openModal, setOpenModal] = useState(false);
-  const [tipo, setTipo] = useState<"Ingreso" | "Gasto">("Ingreso");
-  const [activeTab, setActiveTab] = useState("Ingresos");
+export default function IngresosGastos() {
+  const [activeTab, setActiveTab] = useState<"Ingresos" | "Gastos">("Ingresos");
   const [datos, setDatos] = useState<Movimiento[]>([]);
-  const [busqueda, setBusqueda] = useState("");
-  const [guardando, setGuardando] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [editando, setEditando] = useState<Movimiento | null>(null);
+  const [tipo, setTipo] = useState<"Ingreso" | "Gasto">("Ingreso");
 
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [mobileFilterOpen, setMobileFilterOpen] = useState<boolean>(false);
-
-  const [mobileTipoSelection, setMobileTipoSelection] = useState<
-    Record<"Ingreso" | "Gasto", boolean>
-  >({
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [mobileTipoSelection, setMobileTipoSelection] = useState({
     Ingreso: true,
     Gasto: true,
   });
-
   const [catOptions, setCatOptions] = useState<Record<string, boolean>>({});
   const [metOptions, setMetOptions] = useState<Record<string, boolean>>({});
   const [mndOptions, setMndOptions] = useState<Record<string, boolean>>({});
 
+  // --- Detectar móvil ---
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 992);
     handleResize();
@@ -46,223 +62,217 @@ function IngresosGastos(): JSX.Element {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // --- Cargar datos ---
+  const cargarDatos = useCallback(async () => {
+    const lista = await db.movimientos.toArray();
+    const cat: Record<string, boolean> = {};
+    const met: Record<string, boolean> = {};
+    const mnd: Record<string, boolean> = {};
+
+    lista.forEach(d => {
+      cat[d.categoria || "Otro"] ??= true;
+      met[d.metodo || "Otro"] ??= true;
+      mnd[d.moneda || "Otro"] ??= true;
+    });
+
+    setDatos(lista);
+    setCatOptions(cat);
+    setMetOptions(met);
+    setMndOptions(mnd);
+  }, []);
+
   useEffect(() => {
-    const cargarDatos = async () => {
-      const todos = await db.movimientos.toArray();
-      setDatos(todos);
-    };
     cargarDatos();
+  }, [cargarDatos]);
+
+  // --- Sincronizar pestaña con filtro móvil ---
+  useEffect(() => {
+    setMobileTipoSelection({
+      Ingreso: activeTab === "Ingresos",
+      Gasto: activeTab === "Gastos",
+    });
+  }, [activeTab]);
+
+  // --- Modal ---
+  const abrirModal = useCallback((t: "Ingreso" | "Gasto", item?: Movimiento) => {
+    setTipo(t);
+    setEditando(item ?? null);
+    setOpenModal(true);
+  }, []);
+  const cerrarModal = useCallback(() => {
+    setOpenModal(false);
+    setEditando(null);
   }, []);
 
-  useEffect(() => {
-    const makeOptions = (arr: string[], prev: Record<string, boolean>) => {
-      const next = { ...prev };
-      arr.forEach((k) => {
-        const key = k || "Otro";
-        if (!(key in next)) next[key] = true;
-      });
-      return next;
-    };
+  // --- Guardar / Actualizar ---
+  const handleSubmit = useCallback(
+    async (values: any) => {
+      const nuevo: Movimiento = {
+        categoria: values.categoria || "",
+        monto: Number(values.monto) || 0,
+        metodo: values.metodo || "",
+        fecha: values.fecha || "",
+        moneda: values.moneda || "",
+        tipo,
+      };
 
-    const cats = datos.map((d) => d.categoria || "Otro");
-    const mets = datos.map((d) => d.metodo || "Otro");
-    const mnds = datos.map((d) => d.moneda || "Otro");
+      if (editando && editando.id !== undefined) {
+        await db.movimientos.update(editando.id, nuevo);
+        syncUpdateMovimiento(editando.id, nuevo);
+        setDatos(prev => prev.map(d => (d.id === editando.id ? { ...d, ...nuevo } : d)));
+      } else {
+        const idDexie = await db.movimientos.add(nuevo);
+        syncInsertMovimiento(nuevo, idDexie);
+        setDatos(prev => [...prev, { ...nuevo, id: idDexie }]);
+      }
+      cerrarModal();
+    },
+    [editando, tipo, cerrarModal]
+  );
 
-    setCatOptions((prev) => makeOptions(cats, prev));
-    setMetOptions((prev) => makeOptions(mets, prev));
-    setMndOptions((prev) => makeOptions(mnds, prev));
-  }, [datos]);
+  // --- Eliminar ---
+  const handleDelete = useCallback(
+    async (item: Movimiento) => {
+      if (!item.id || !confirm("¿Eliminar este registro?")) return;
+      await db.movimientos.delete(item.id);
+      syncDeleteMovimiento(item.id);
+      setDatos(prev => prev.filter(d => d.id !== item.id));
+    },
+    []
+  );
 
-  useEffect(() => {
-    const savedTipos = localStorage.getItem("mobileTipoSelection");
-    if (savedTipos) {
-      try {
-        setMobileTipoSelection(JSON.parse(savedTipos));
-      } catch {}
-    }
-    const savedFilters = localStorage.getItem("mobileFilters_v2");
-    if (savedFilters) {
-      try {
-        const parsed = JSON.parse(savedFilters);
-        if (parsed.catOptions) setCatOptions(parsed.catOptions);
-        if (parsed.metOptions) setMetOptions(parsed.metOptions);
-        if (parsed.mndOptions) setMndOptions(parsed.mndOptions);
-      } catch {}
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "mobileTipoSelection",
-        JSON.stringify(mobileTipoSelection)
-      );
-      localStorage.setItem(
-        "mobileFilters_v2",
-        JSON.stringify({
-          catOptions,
-          metOptions,
-          mndOptions,
-        })
-      );
-    } catch {}
-  }, [mobileTipoSelection, catOptions, metOptions, mndOptions]);
-
-  useEffect(() => {
-    if (!isMobile) return;
-    if (activeTab === "Ingresos") {
-      setMobileTipoSelection({ Ingreso: true, Gasto: false });
-    } else {
-      setMobileTipoSelection({ Ingreso: false, Gasto: true });
-    }
-  }, [activeTab, isMobile]);
-
-  const toggleMobileTipo = (t: "Ingreso" | "Gasto") =>
-    setMobileTipoSelection((prev) => ({ ...prev, [t]: !prev[t] }));
-
-  const toggleCat = (key: string) =>
-    setCatOptions((prev) => ({ ...prev, [key]: !prev[key] }));
-  const toggleMet = (key: string) =>
-    setMetOptions((prev) => ({ ...prev, [key]: !prev[key] }));
-  const toggleMnd = (key: string) =>
-    setMndOptions((prev) => ({ ...prev, [key]: !prev[key] }));
-
-  const resetMobileFilters = () => {
+  // --- Filtros móviles ---
+  const toggleMobileTipo = useCallback(
+    (t: "Ingreso" | "Gasto") =>
+      setMobileTipoSelection(prev => ({ ...prev, [t]: !prev[t] })),
+    []
+  );
+  const toggleCat = useCallback((k: string) => setCatOptions(prev => ({ ...prev, [k]: !prev[k] })), []);
+  const toggleMet = useCallback((k: string) => setMetOptions(prev => ({ ...prev, [k]: !prev[k] })), []);
+  const toggleMnd = useCallback((k: string) => setMndOptions(prev => ({ ...prev, [k]: !prev[k] })), []);
+  const resetMobileFilters = useCallback(() => {
     setMobileTipoSelection({ Ingreso: true, Gasto: true });
     const reset = (prev: Record<string, boolean>) =>
       Object.keys(prev).reduce((acc, k) => ({ ...acc, [k]: true }), {});
-    setCatOptions((p) => reset(p));
-    setMetOptions((p) => reset(p));
-    setMndOptions((p) => reset(p));
-  };
+    setCatOptions(prev => reset(prev));
+    setMetOptions(prev => reset(prev));
+    setMndOptions(prev => reset(prev));
+  }, []);
 
-  const abrirModal = (tipoForm: "Ingreso" | "Gasto", itemEdit?: Movimiento) => {
-    setTipo(tipoForm);
-    setEditando(itemEdit ?? null);
-    setOpenModal(true);
-  };
+  // --- Filtrar datos ---
+  const filtros = useMemo(
+    () => ({
+      tipo: isMobile
+        ? mobileTipoSelection
+        : { [activeTab === "Ingresos" ? "Ingreso" : "Gasto"]: true },
+      cat: catOptions,
+      met: metOptions,
+      mnd: mndOptions,
+    }),
+    [activeTab, isMobile, mobileTipoSelection, catOptions, metOptions, mndOptions]
+  );
 
-  const cerrarModal = () => {
-    setOpenModal(false);
-    setEditando(null);
-  };
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const form = new FormData(e.target);
-
-    const nuevo: Movimiento = {
-      categoria: (form.get("categoria") as string) || "",
-      monto: Number(form.get("monto")) || 0,
-      metodo: (form.get("paymentMethod") as string) || "",
-      fecha: (form.get("fecha") as string) || "",
-      moneda: (form.get("moneda") as string) || "",
-      tipo,
-    };
-
-    setGuardando(true);
-
-    try {
-      if (editando && editando.id !== undefined) {
-        await db.movimientos.update(editando.id, nuevo);
-        setDatos(await db.movimientos.toArray());
-        cerrarModal();
-        syncUpdateMovimiento(editando.id, nuevo);
-      } else {
-        const idDexie = await db.movimientos.add(nuevo);
-        setDatos(await db.movimientos.toArray());
-        cerrarModal();
-        syncInsertMovimiento(nuevo, idDexie);
-      }
-    } catch (err) {
-      console.error("Error guardando/actualizando:", err);
-    } finally {
-      setGuardando(false);
-    }
-  };
-
-  const handleDelete = async (id?: number) => {
-    if (!id) return;
-    if (!confirm("¿Eliminar este registro?")) return;
-    try {
-      await db.movimientos.delete(id);
-      setDatos(await db.movimientos.toArray());
-      syncDeleteMovimiento(id);
-    } catch (err) {
-      console.error("Error eliminando:", err);
-    }
-  };
-
-  const handleEdit = (item: Movimiento) => abrirModal(item.tipo, item);
-
-  const filtrados = datos
-    .filter((item) => {
-      if (isMobile) {
-        if (!mobileTipoSelection[item.tipo]) return false;
-        if (!catOptions[item.categoria || "Otro"]) return false;
-        if (!metOptions[item.metodo || "Otro"]) return false;
-        if (!mndOptions[item.moneda || "Otro"]) return false;
-        return true;
-      }
-      return item.tipo === (activeTab === "Ingresos" ? "Ingreso" : "Gasto");
-    })
-    .filter((item) => {
-      if (isMobile) return true;
-      if (!busqueda.trim()) return true;
-      const terminos = busqueda
-        .toLowerCase()
-        .split(",")
-        .map((t) => t.trim())
-        .filter((t) => t.length > 0);
-
-      return terminos.every((termino, index) => {
-        if (index === 0) return item.categoria.toLowerCase().includes(termino);
-        if (index === 1) return item.metodo.toLowerCase().includes(termino);
-        if (index === 2) return item.moneda.toLowerCase().includes(termino);
-        return true;
-      });
-    });
-
-  const Lista = React.useMemo(() => ingresosGastos, []);
+  const filtrados = useMemo(
+    () =>
+      datos.filter(
+        item =>
+          filtros.tipo[item.tipo] &&
+          filtros.cat[item.categoria || "Otro"] &&
+          filtros.met[item.metodo || "Otro"] &&
+          filtros.mnd[item.moneda || "Otro"]
+      ),
+    [datos, filtros]
+  );
 
   return (
-    <div className="pagina-ingresos-gastos">
-      <nav className="contenedor">
+    <div className="ingresos-gastos-container">
+      {/* Tabs fijos */}
+      <div className="tabs">
         <button
-          className={`nav-btn ${activeTab === "Ingresos" ? "activo" : ""}`}
+          className={activeTab === "Ingresos" ? "tab active" : "tab"}
           onClick={() => setActiveTab("Ingresos")}
+          style={{
+            marginTop: 45,
+            position: "fixed",
+            top: 70,
+            left: "10%",
+            width: "35%",
+            padding: "14px 0",
+            backgroundColor: activeTab === "Ingresos" ? "#1000eb" : "#ccc",
+            color: activeTab === "Ingresos" ? "#fff" : "#000",
+            border: "none",
+            borderRadius: 6,
+            cursor: "pointer",
+            fontSize: 16,
+            zIndex: 1000,
+          }}
         >
           Ingresos
         </button>
         <button
-          className={`nav-btn ${activeTab === "Gastos" ? "activo" : ""}`}
+          className={activeTab === "Gastos" ? "tab active" : "tab"}
           onClick={() => setActiveTab("Gastos")}
+          style={{
+            marginTop: 45,
+            position: "fixed",
+            top: 70,
+            left: "55%",
+            width: "35%",
+            padding: "14px 0",
+            backgroundColor: activeTab === "Gastos" ? "#1000eb" : "#ccc",
+            color: activeTab === "Gastos" ? "#fff" : "#000",
+            border: "none",
+            borderRadius: 6,
+            cursor: "pointer",
+            fontSize: 16,
+            zIndex: 1000,
+          }}
         >
           Gastos
         </button>
-      </nav>
+      </div>
+
+      {/* Botón flotante */}
+      <IconButton
+        color="primary"
+        onClick={() =>
+          abrirModal(activeTab === "Ingresos" ? "Ingreso" : "Gasto")
+        }
+        style={{
+          position: "fixed",
+          bottom: 100,
+          right: 20,
+          width: 50,
+          height: 50,
+          borderRadius: "50%",
+          backgroundColor: "#1000eb",
+          color: "white",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
+        }}
+      >
+        <AddIcon style={{ fontSize: 30 }} />
+      </IconButton>
 
       {/* Filtro móvil */}
       {isMobile && (
-        <div className="mobile-filter-row">
+        <div className="mobile-filters">
           <button
-            className="filtro-btn"
-            onClick={() => setMobileFilterOpen((v) => !v)}
+            className="color-filter"
+            onClick={() => setMobileFilterOpen(v => !v)}
           >
-            <TuneIcon />
+            <TuneIcon className="style-icon" />
           </button>
-
           {mobileFilterOpen && (
-            <div className="menu-filtro">
-              <div className="menu-section">
-                <div className="section-title">Tipo</div>
+            <div className="filters-panel">
+              <div>
+                <strong>Tipo:</strong>
                 <label>
                   <input
                     type="checkbox"
                     checked={mobileTipoSelection.Ingreso}
                     onChange={() => toggleMobileTipo("Ingreso")}
                   />
-                  Ingresos
+                  Ingreso
                 </label>
                 <label>
                   <input
@@ -270,222 +280,90 @@ function IngresosGastos(): JSX.Element {
                     checked={mobileTipoSelection.Gasto}
                     onChange={() => toggleMobileTipo("Gasto")}
                   />
-                  Gastos
+                  Gasto
                 </label>
               </div>
-
-              <div className="menu-section">
-                <div className="section-title">Categoría</div>
-                <div className="options-scroll">
-                  {Object.keys(catOptions).map((k) => (
-                    <label key={k}>
-                      <input
-                        type="checkbox"
-                        checked={!!catOptions[k]}
-                        onChange={() => toggleCat(k)}
-                      />
-                      {k}
-                    </label>
-                  ))}
-                </div>
+              <div>
+                <strong>Categoría:</strong>
+                {Object.keys(catOptions).map(k => (
+                  <label key={k}>
+                    <input
+                      type="checkbox"
+                      checked={!!catOptions[k]}
+                      onChange={() => toggleCat(k)}
+                    />
+                    {k}
+                  </label>
+                ))}
               </div>
-
-              <div className="menu-section">
-                <div className="section-title">Método</div>
-                <div className="options-scroll">
-                  {Object.keys(metOptions).map((k) => (
-                    <label key={k}>
-                      <input
-                        type="checkbox"
-                        checked={!!metOptions[k]}
-                        onChange={() => toggleMet(k)}
-                      />
-                      {k}
-                    </label>
-                  ))}
-                </div>
+              <div>
+                <strong>Método:</strong>
+                {Object.keys(metOptions).map(k => (
+                  <label key={k}>
+                    <input
+                      type="checkbox"
+                      checked={!!metOptions[k]}
+                      onChange={() => toggleMet(k)}
+                    />
+                    {k}
+                  </label>
+                ))}
               </div>
-
-              <div className="menu-section">
-                <div className="section-title">Moneda</div>
-                <div className="options-scroll">
-                  {Object.keys(mndOptions).map((k) => (
-                    <label key={k}>
-                      <input
-                        type="checkbox"
-                        checked={!!mndOptions[k]}
-                        onChange={() => toggleMnd(k)}
-                      />
-                      {k}
-                    </label>
-                  ))}
-                </div>
+              <div>
+                <strong>Moneda:</strong>
+                {Object.keys(mndOptions).map(k => (
+                  <label key={k}>
+                    <input
+                      type="checkbox"
+                      checked={!!mndOptions[k]}
+                      onChange={() => toggleMnd(k)}
+                    />
+                    {k}
+                  </label>
+                ))}
               </div>
-
-              <div className="menu-actions">
-                <button
-                  type="button"
-                  onClick={() => setMobileFilterOpen(false)}
-                >
-                  Cerrar
-                </button>
-                <button type="button" onClick={resetMobileFilters}>
-                  Reset
-                </button>
+              <div className="filters-actions">
+                <button onClick={() => setMobileFilterOpen(false)}>Cerrar</button>
+                <button onClick={resetMobileFilters}>Reset</button>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Tabla / Lista */}
-      <div className="scroll-area">
-        <div className="tabla-contenedor">
-          {!isMobile ? (
-            <table className="tabla-datos">
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th>Monto</th>
-                  <th>Método</th>
-                  <th>Moneda</th>
-                  <th>
-                    <input
-                      type="text"
-                      placeholder="Buscar... (cat, método, moneda)"
-                      value={busqueda}
-                      onChange={(e) => setBusqueda(e.target.value)}
-                      className="buscador"
-                    />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtrados.length ? (
-                  filtrados.map((item, i) => (
-                    <tr key={item.id ?? i}>
-                      <td>{item.categoria}</td>
-                      <td>{item.monto}</td>
-                      <td>{item.metodo}</td>
-                      <td>{item.moneda}</td>
-                      <td className="acciones-fila">
-                        <EditIcon
-                          className="icono-editar"
-                          onClick={() => handleEdit(item)}
-                        />
-                        <DeleteIcon
-                          className="icono-eliminar"
-                          onClick={() => handleDelete(item.id)}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      style={{ textAlign: "center", padding: 20 }}
-                    >
-                      No hay datos registrados
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {/* Lista scrollable */}
+      <div className="lista-scrollable">
+        <div className="lista-movimientos">
+          {filtrados.length ? (
+            filtrados.map(item => (
+              <MovimientoItem
+                key={item.id}
+                item={item}
+                onEdit={abrirModal}
+                onDelete={handleDelete}
+              />
+            ))
           ) : (
-            <div className="lista-movimientos-mobile">
-              {filtrados.length ? (
-                filtrados.map((item, i) => (
-                  <div className="mov-card" key={item.id ?? i}>
-                    <div className="mov-info">
-                      <div className="mov-top">
-                        <strong>{item.categoria}</strong>
-                        <span>
-                          $ {item.monto} {item.moneda}
-                        </span>
-                      </div>
-                      <div className="mov-bottom">
-                        <small>{item.metodo}</small>
-                        <small>{item.fecha}</small>
-                      </div>
-                    </div>
-                    <div className="mov-acciones">
-                      <button
-                        className="icono-editar"
-                        onClick={() => handleEdit(item)}
-                      >
-                        <EditIcon />
-                      </button>
-                      <button
-                        className="icono-eliminar"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <DeleteIcon />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="sin-datos">No hay datos registrados</div>
-              )}
-            </div>
+            <div className="no-datos">No hay datos registrados</div>
           )}
         </div>
       </div>
 
-      <button
-        className="btn-flotante"
-        onClick={() =>
-          abrirModal(activeTab === "Ingresos" ? "Ingreso" : "Gasto")
-        }
-      >
-        +
-      </button>
-
-      {openModal && (
-        <div className="modal">
-          <div className="modal-contenido">
-            <GenericForm
-              title={editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}
-              controls={ingresosGastos}
-              values={editando ?? {}}
-              submitLabel={editando ? "Actualizar" : "Guardar"}
-              onSubmit={async (values) => {
-                const nuevo: Movimiento = {
-                  categoria: values.categoria || "",
-                  monto: Number(values.monto) || 0,
-                  metodo: values.metodo || "",
-                  fecha: values.fecha || "",
-                  moneda: values.moneda || "",
-                  tipo,
-                };
-
-                setGuardando(true);
-                try {
-                  if (editando && editando.id !== undefined) {
-                    await db.movimientos.update(editando.id, nuevo);
-                    setDatos(await db.movimientos.toArray());
-                    cerrarModal();
-                    syncUpdateMovimiento(editando.id, nuevo);
-                  } else {
-                    const idDexie = await db.movimientos.add(nuevo);
-                    setDatos(await db.movimientos.toArray());
-                    cerrarModal();
-                    syncInsertMovimiento(nuevo, idDexie);
-                  }
-                } catch (err) {
-                  console.error("Error guardando/actualizando:", err);
-                } finally {
-                  setGuardando(false);
-                }
-              }}
-              onCancel={cerrarModal}
-            />
-          </div>
-        </div>
-      )}
+      {/* Modal */}
+      <Dialog open={openModal} onClose={cerrarModal} fullWidth>
+        <DialogTitle>{editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <GenericForm
+            title=""
+            controls={ingresosGastos}
+            values={editando ?? {}}
+            submitLabel={editando ? "Actualizar" : "Guardar"}
+            onSubmit={handleSubmit}
+            onCancel={cerrarModal}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-export default IngresosGastos;

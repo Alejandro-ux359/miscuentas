@@ -1,430 +1,120 @@
-/* ============================
-   🌐 PC
-   ============================ */
-
-.contenedor {
-  display: flex;
-  gap: 10px;
-  margin: 0px;
-}
-
-.nav-btn {
-  flex: 1;
-  padding: 12px 20px;
-  font-size: 1.2rem;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  background: gray;
-  color: black;
-  font-weight: bold;
-}
-
-.nav-btn.activo {
-  background: hsl(244, 100%, 46%);
-  color: white;
-}
-
-.btn-flotante {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  background: hsl(244, 100%, 46%);
-  color: white;
-  font-size: 2.5rem;
-  border: none;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 0;
-  line-height: 1;
-  font-family: Arial, sans-serif;
-  cursor: pointer;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-contenido {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 400px;
+.ingresos-gastos-container {
+  padding: 0px;
+  height: 100vh; /* Ocupa toda la pantalla */
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  position: static;
 }
 
-.modal-contenido input,
-.modal-contenido select,
-.modal-contenido textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  box-sizing: border-box;
+/* Filtros móviles */
+.mobile-filters {
+  margin-bottom: 16px;
 }
 
-.modal-contenido label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  display: block;
-}
-
-.acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.acciones button {
-  padding: 10px 15px;
-  border-radius: 8px;
+.color-filter {
+  position: fixed;
+  top: 190px; /* distancia desde arriba */
+  right: 20px; /* distancia desde la derecha */
+  background-color: #1000eb !important;
+  color: white !important;
+  border-radius: 5px;
   border: none;
-  cursor: pointer;
-  background: hsl(244, 100%, 46%);
-  color: white;
-  font-weight: bold;
-  transition: background 0.3s;
-}
-
-.acciones button:hover {
-  background: hsl(244, 100%, 40%);
-}
-
-@media (min-width: 993px) {
-  .tabla-contenedor {
-    width: 95%;
-    margin: 30px auto;
-    border-radius: 10px;
-    overflow-x: auto;
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-  }
-}
-
-.tabla-header {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 1px;
-}
-
-.tabla-header span {
-  font-weight: bold;
-  font-size: 1rem;
-  color: #333;
-}
-
-.tabla-subtitulo {
-  margin-right: 100px;
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-.buscador {
-  margin-left: auto;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  transition: 0.3s;
-}
-
-.buscador:focus {
-  border-color: hsl(244, 100%, 46%);
-  outline: none;
-}
-
-.tabla-datos {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-  font-size: 0.95rem;
-}
-
-.tabla-datos thead {
-  color: rgb(0, 0, 0);
-}
-
-.tabla-datos th,
-.tabla-datos td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-  vertical-align: middle;
-  min-width: 120px;
-}
-
-.sin-datos {
-  text-align: center;
-  color: gray;
-  font-style: italic;
-  padding: 15px;
-}
-
-.acciones-fila {
-  display: flex;
   justify-content: center;
+  cursor: pointer;
+}
+
+/* Icono interno para que quede centrado */
+.color-filter .style-icon {
+  font-size: 24px;
+}
+
+.filters-panel {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 8px;
+}
+
+.filters-panel label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.filters-actions {
+  margin-top: 8px;
+  display: flex;
   gap: 8px;
+  left: -265px;
 }
 
-.icono-editar {
-  color: blue;
+/* Lista de movimientos */
+.lista-movimientos {
+  flex: -100%; /* Ocupa todo el espacio disponible */
+  overflow-y: scroll; /* Aquí está el scroll */
+  padding-top: 190px;
+  padding-bottom: 100px;
+}
+
+.item-movimiento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* separa info y botones */
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #f9f9f9; /* color suave de fondo */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s; /* animación */
   cursor: pointer;
 }
 
-.icono-eliminar {
-  color: red;
-  cursor: pointer;
+.item-movimiento:hover {
+  transform: translateY(-2px); /* se eleva un poquito al pasar mouse */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-.icono-editar:hover,
-.icono-eliminar:hover {
-  transform: scale(1.1);
-  transition: 0.2s;
+.item-movimiento .info {
+  flex: 1;
+  font-size: 15px;
+  color: #333;
+  word-break: break-word; /* evita que se salga del contenedor */
 }
 
-/* ---------------------------
-   Responsive: filtro móvil y vista móvil tipo tarjetas
-   --------------------------- */
-
-@media (max-width: 992px) {
-  .contenedor {
-    display: flex;
-    gap: 10px;
-    margin: 0px;
-    margin-top: 45px;
-  }
-
-  .btn-flotante {
-    position: fixed;
-    bottom: 100px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background: #1000eb;
-    color: white;
-    font-size: 2.5rem;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 0;
-    padding: 0;
-    line-height: 1;
-    font-family: Arial, sans-serif;
-    cursor: pointer;
-  }
-  .buscador {
-    display: none !important;
-  }
-
-  .mobile-filter-row {
-    width: 95%;
-    margin: 8px auto;
-    display: flex;
-    justify-content: flex-end;
-    position: relative;
-    z-index: 0;
-  }
-
-  .filtro-btn {
-    background: hsl(244, 100%, 46%);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .menu-filtro {
-    position: absolute;
-    top: 46px;
-    right: 0;
-    width: calc(100% - 10px);
-    max-width: 380px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    padding: 12px;
-    border: 1px solid #e6e6e6;
-  }
-
-  .menu-section {
-    margin-bottom: 10px;
-  }
-
-  .section-title {
-    font-weight: 700;
-    margin-bottom: 6px;
-    font-size: 0.95rem;
-  }
-
-  .menu-filtro label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 0;
-    font-size: 0.95rem;
-  }
-
-  .options-scroll {
-    max-height: 110px;
-    overflow-y: auto;
-    padding-right: 6px;
-  }
-
-  .menu-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .menu-actions button {
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  .menu-actions button:first-child {
-    background: #f0f0f0;
-  }
-  .menu-actions button:last-child {
-    background: hsl(244, 100%, 46%);
-    color: white;
-  }
-
-  .tabla-datos {
-    display: none;
-  }
-
-  .lista-movimientos-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 6px 10px 40px;
-  }
-
-  .mov-card {
-    background: #fff;
-    border-radius: 10px;
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.329);
-    gap: 10px;
-  }
-
-  .mov-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .mov-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .mov-categoria {
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .mov-monto {
-    font-weight: 700;
-  }
-
-  .mov-bottom {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    color: #666;
-    font-size: 0.9rem;
-  }
-
-  .mov-acciones {
-    display: flex;
-    gap: 6px;
-    margin-left: 8px;
-  }
-
-  .btn-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 8px;
-  }
-
-  .icono-editar {
-    color: blue;
-    cursor: pointer;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 8px;
-  }
-
-  .icono-eliminar {
-    color: red;
-    cursor: pointer;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 8px;
-  }
-
-  .scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-    padding-bottom: 80px;
-  }
-
-  .pagina-ingresos-gastos {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .tabla-contenedor,
-  .lista-movimientos-mobile {
-    width: 100%;
-    box-sizing: border-box;
-  }
+.item-movimiento button {
+  margin-left: 8px;
 }
+
+/* Mensaje de no datos */
+.no-datos {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+
+/* --- Ajuste general para inputs y selects --- */
+.MuiTextField-root,
+.MuiFormControl-root {
+  width: 100% !important;
+  margin-bottom: 125px;
+}
+
+/* --- Estilo para pantallas pequeñas (móviles) --- */
+@media (max-width: 768px) {
+  .MuiTextField-root input,
+  .MuiSelect-select,
+  .MuiInputBase-input {
+    padding: 14px 12px !important;
+  }
+
+  label.MuiInputLabel-root {
+    font-size: 16px !important;
+  }
+
+
+}
+
+
