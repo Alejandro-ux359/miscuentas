@@ -17,6 +17,16 @@ function Calculadora() {
   );
   const [openModal, setOpenModal] = useState(false);
 
+  // Para subtotales de cada fila
+  const formatSubtotal = (num: number) => {
+    return num >= 10000 ? num.toExponential(0) : num; // sin decimales, cambia 0 a 1 o 2 si quieres más precisión
+  };
+
+  // Para el total general
+  const formatTotal = (num: number) => {
+    return num >= 100000 ? num.toExponential(0) : num; // distinto umbral o formato si quieres
+  };
+
   // Calcular suma total
   const total = monedas.reduce(
     (acc, moneda, index) => acc + moneda * cantidades[index],
@@ -41,7 +51,7 @@ function Calculadora() {
 
       {/* Encabezado con total y botón eliminar */}
       <div className="calculadora-header">
-        <h3>Total: ${total}</h3>
+        <h3>Total: ${formatTotal(total)}</h3>
         <Button
           className="icono-eliminar"
           color="error"
@@ -51,6 +61,8 @@ function Calculadora() {
       </div>
 
       <hr />
+
+      {/* Filas de monedas */}
 
       {/* Filas de monedas */}
       {monedas.map((moneda, index) => (
@@ -64,7 +76,7 @@ function Calculadora() {
               handleCantidadChange(index, Number(e.target.value))
             }
           />
-          <span>= {moneda * cantidades[index]}</span>
+          <span>= {formatSubtotal(moneda * cantidades[index])}</span>
         </div>
       ))}
 
@@ -91,11 +103,9 @@ function Calculadora() {
             cifra y la multiplica por el número que se encuentra a la izquierda
             de la pantalla, el cual representa el valor nominal de un billete o
             denominación específica (por ejemplo: 1, 5, 10, 20, 50, 100, etc.).
-            
             Como resultado de esa multiplicación, el sistema muestra en la
             columna derecha la cantidad total correspondiente a esa
             denominación, es decir, el monto total en billetes de ese valor.
-
             Además, en la parte superior de la pantalla se encuentra un campo
             que suma automáticamente todos los totales de las distintas
             denominaciones, mostrando así el monto total de billetes
