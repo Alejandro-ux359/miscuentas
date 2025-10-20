@@ -69,7 +69,7 @@ export default function IngresosGastos() {
     const met: Record<string, boolean> = {};
     const mnd: Record<string, boolean> = {};
 
-    lista.forEach(d => {
+    lista.forEach((d) => {
       cat[d.categoria || "Otro"] ??= true;
       met[d.metodo || "Otro"] ??= true;
       mnd[d.moneda || "Otro"] ??= true;
@@ -94,11 +94,14 @@ export default function IngresosGastos() {
   }, [activeTab]);
 
   // --- Modal ---
-  const abrirModal = useCallback((t: "Ingreso" | "Gasto", item?: Movimiento) => {
-    setTipo(t);
-    setEditando(item ?? null);
-    setOpenModal(true);
-  }, []);
+  const abrirModal = useCallback(
+    (t: "Ingreso" | "Gasto", item?: Movimiento) => {
+      setTipo(t);
+      setEditando(item ?? null);
+      setOpenModal(true);
+    },
+    []
+  );
   const cerrarModal = useCallback(() => {
     setOpenModal(false);
     setEditando(null);
@@ -119,11 +122,13 @@ export default function IngresosGastos() {
       if (editando && editando.id !== undefined) {
         await db.movimientos.update(editando.id, nuevo);
         syncUpdateMovimiento(editando.id, nuevo);
-        setDatos(prev => prev.map(d => (d.id === editando.id ? { ...d, ...nuevo } : d)));
+        setDatos((prev) =>
+          prev.map((d) => (d.id === editando.id ? { ...d, ...nuevo } : d))
+        );
       } else {
         const idDexie = await db.movimientos.add(nuevo);
         syncInsertMovimiento(nuevo, idDexie);
-        setDatos(prev => [...prev, { ...nuevo, id: idDexie }]);
+        setDatos((prev) => [...prev, { ...nuevo, id: idDexie }]);
       }
       cerrarModal();
     },
@@ -131,32 +136,38 @@ export default function IngresosGastos() {
   );
 
   // --- Eliminar ---
-  const handleDelete = useCallback(
-    async (item: Movimiento) => {
-      if (!item.id || !confirm("¿Eliminar este registro?")) return;
-      await db.movimientos.delete(item.id);
-      syncDeleteMovimiento(item.id);
-      setDatos(prev => prev.filter(d => d.id !== item.id));
-    },
-    []
-  );
+  const handleDelete = useCallback(async (item: Movimiento) => {
+    if (!item.id || !confirm("¿Eliminar este registro?")) return;
+    await db.movimientos.delete(item.id);
+    syncDeleteMovimiento(item.id);
+    setDatos((prev) => prev.filter((d) => d.id !== item.id));
+  }, []);
 
   // --- Filtros móviles ---
   const toggleMobileTipo = useCallback(
     (t: "Ingreso" | "Gasto") =>
-      setMobileTipoSelection(prev => ({ ...prev, [t]: !prev[t] })),
+      setMobileTipoSelection((prev) => ({ ...prev, [t]: !prev[t] })),
     []
   );
-  const toggleCat = useCallback((k: string) => setCatOptions(prev => ({ ...prev, [k]: !prev[k] })), []);
-  const toggleMet = useCallback((k: string) => setMetOptions(prev => ({ ...prev, [k]: !prev[k] })), []);
-  const toggleMnd = useCallback((k: string) => setMndOptions(prev => ({ ...prev, [k]: !prev[k] })), []);
+  const toggleCat = useCallback(
+    (k: string) => setCatOptions((prev) => ({ ...prev, [k]: !prev[k] })),
+    []
+  );
+  const toggleMet = useCallback(
+    (k: string) => setMetOptions((prev) => ({ ...prev, [k]: !prev[k] })),
+    []
+  );
+  const toggleMnd = useCallback(
+    (k: string) => setMndOptions((prev) => ({ ...prev, [k]: !prev[k] })),
+    []
+  );
   const resetMobileFilters = useCallback(() => {
     setMobileTipoSelection({ Ingreso: true, Gasto: true });
     const reset = (prev: Record<string, boolean>) =>
       Object.keys(prev).reduce((acc, k) => ({ ...acc, [k]: true }), {});
-    setCatOptions(prev => reset(prev));
-    setMetOptions(prev => reset(prev));
-    setMndOptions(prev => reset(prev));
+    setCatOptions((prev) => reset(prev));
+    setMetOptions((prev) => reset(prev));
+    setMndOptions((prev) => reset(prev));
   }, []);
 
   // --- Filtrar datos ---
@@ -169,13 +180,20 @@ export default function IngresosGastos() {
       met: metOptions,
       mnd: mndOptions,
     }),
-    [activeTab, isMobile, mobileTipoSelection, catOptions, metOptions, mndOptions]
+    [
+      activeTab,
+      isMobile,
+      mobileTipoSelection,
+      catOptions,
+      metOptions,
+      mndOptions,
+    ]
   );
 
   const filtrados = useMemo(
     () =>
       datos.filter(
-        item =>
+        (item) =>
           filtros.tipo[item.tipo] &&
           filtros.cat[item.categoria || "Otro"] &&
           filtros.met[item.metodo || "Otro"] &&
@@ -258,12 +276,31 @@ export default function IngresosGastos() {
         <div className="mobile-filters">
           <button
             className="color-filter"
-            onClick={() => setMobileFilterOpen(v => !v)}
+            onClick={() => setMobileFilterOpen((v) => !v)}
           >
             <TuneIcon className="style-icon" />
           </button>
-          {mobileFilterOpen && (
-            <div className="filters-panel">
+
+          {/* Modal de filtros */}
+          <Dialog
+            open={mobileFilterOpen}
+            onClose={() => setMobileFilterOpen(false)}
+            fullWidth
+            maxWidth="xs"
+            PaperProps={{
+              style: {
+                borderRadius: 16,
+                padding: 16,
+                backgroundColor: "#f0f0f0",
+              },
+            }}
+          >
+            <DialogTitle>Filtros</DialogTitle>
+            <Divider />
+            <DialogContent
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
+            >
+              {/* Tipo */}
               <div>
                 <strong>Tipo:</strong>
                 <label>
@@ -283,9 +320,10 @@ export default function IngresosGastos() {
                   Gasto
                 </label>
               </div>
+              {/* Categoría */}
               <div>
                 <strong>Categoría:</strong>
-                {Object.keys(catOptions).map(k => (
+                {Object.keys(catOptions).map((k) => (
                   <label key={k}>
                     <input
                       type="checkbox"
@@ -296,9 +334,10 @@ export default function IngresosGastos() {
                   </label>
                 ))}
               </div>
+              {/* Método */}
               <div>
                 <strong>Método:</strong>
-                {Object.keys(metOptions).map(k => (
+                {Object.keys(metOptions).map((k) => (
                   <label key={k}>
                     <input
                       type="checkbox"
@@ -309,9 +348,10 @@ export default function IngresosGastos() {
                   </label>
                 ))}
               </div>
+              {/* Moneda */}
               <div>
                 <strong>Moneda:</strong>
-                {Object.keys(mndOptions).map(k => (
+                {Object.keys(mndOptions).map((k) => (
                   <label key={k}>
                     <input
                       type="checkbox"
@@ -322,12 +362,45 @@ export default function IngresosGastos() {
                   </label>
                 ))}
               </div>
-              <div className="filters-actions">
-                <button onClick={() => setMobileFilterOpen(false)}>Cerrar</button>
-                <button onClick={resetMobileFilters}>Reset</button>
-              </div>
+            </DialogContent>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 8,
+                padding: 8,
+              }}
+            >
+              <button
+                onClick={() => setMobileFilterOpen(false)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  backgroundColor: "#ccc",
+                  color: "#000",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={resetMobileFilters}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  backgroundColor: "#1000eb",
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                }}
+              >
+                Reset
+              </button>
             </div>
-          )}
+          </Dialog>
         </div>
       )}
 
@@ -335,7 +408,7 @@ export default function IngresosGastos() {
       <div className="lista-scrollable">
         <div className="lista-movimientos">
           {filtrados.length ? (
-            filtrados.map(item => (
+            filtrados.map((item) => (
               <MovimientoItem
                 key={item.id}
                 item={item}
@@ -351,7 +424,9 @@ export default function IngresosGastos() {
 
       {/* Modal */}
       <Dialog open={openModal} onClose={cerrarModal} fullWidth>
-        <DialogTitle>{editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}</DialogTitle>
+        <DialogTitle>
+          {editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}
+        </DialogTitle>
         <Divider />
         <DialogContent>
           <GenericForm
