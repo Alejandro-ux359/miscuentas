@@ -77,6 +77,7 @@ export type ISelect = {
   type: "select";
   validations?: ISelectValidation;
   checkValues?: any[];
+  url?: string;
   useRef?: any;
   showDelete?: boolean;
 } & IOptionsProps;
@@ -85,6 +86,7 @@ export type IMultiSelect = {
   type: "multiselect";
   validations?: IMultiSelectValidation;
   checkValues?: any[];
+  url?: string;
   useRef?: any;
 } & IOptionsProps;
 

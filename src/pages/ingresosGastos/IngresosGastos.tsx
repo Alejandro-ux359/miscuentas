@@ -11,6 +11,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TuneIcon from "@mui/icons-material/Tune";
 import GenericForm from "../../components/GenericForms";
+import { useLiveQuery } from "dexie-react-hooks";
+
 import {
   db,
   Movimiento,
@@ -21,7 +23,6 @@ import {
 import { ingresosGastos } from "./FormIngresosGastos";
 import "./IngresosGastos.css";
 
-// Item memoizado para evitar re-renders innecesarios
 const MovimientoItem = React.memo(({ item, onEdit, onDelete }: any) => (
   <div className="item-movimiento">
     <div className="info">
@@ -39,7 +40,6 @@ const MovimientoItem = React.memo(({ item, onEdit, onDelete }: any) => (
 
 export default function IngresosGastos() {
   const [activeTab, setActiveTab] = useState<"Ingresos" | "Gastos">("Ingresos");
-  const [datos, setDatos] = useState<Movimiento[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [editando, setEditando] = useState<Movimiento | null>(null);
   const [tipo, setTipo] = useState<"Ingreso" | "Gasto">("Ingreso");
@@ -62,28 +62,12 @@ export default function IngresosGastos() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // --- Cargar datos ---
-  const cargarDatos = useCallback(async () => {
-    const lista = await db.movimientos.toArray();
-    const cat: Record<string, boolean> = {};
-    const met: Record<string, boolean> = {};
-    const mnd: Record<string, boolean> = {};
-
-    lista.forEach((d) => {
-      cat[d.categoria || "Otro"] ??= true;
-      met[d.metodo || "Otro"] ??= true;
-      mnd[d.moneda || "Otro"] ??= true;
-    });
-
-    setDatos(lista);
-    setCatOptions(cat);
-    setMetOptions(met);
-    setMndOptions(mnd);
-  }, []);
-
-  useEffect(() => {
-    cargarDatos();
-  }, [cargarDatos]);
+  // --- Cargar movimientos en tiempo real desde Dexie ---
+  const data =
+    useLiveQuery(async () => {
+      const movs = await db.movimientos.toArray();
+      return movs.sort((a, b) => (a.fecha > b.fecha ? -1 : 1));
+    }, []) ?? [];
 
   // --- Sincronizar pestaña con filtro móvil ---
   useEffect(() => {
@@ -102,6 +86,7 @@ export default function IngresosGastos() {
     },
     []
   );
+
   const cerrarModal = useCallback(() => {
     setOpenModal(false);
     setEditando(null);
@@ -114,7 +99,7 @@ export default function IngresosGastos() {
         categoria: values.categoria || "",
         monto: Number(values.monto) || 0,
         metodo: values.metodo || "",
-        fecha: values.fecha || "",
+        fecha: values.fecha || new Date().toISOString().split("T")[0],
         moneda: values.moneda || "",
         tipo,
       };
@@ -122,13 +107,9 @@ export default function IngresosGastos() {
       if (editando && editando.id !== undefined) {
         await db.movimientos.update(editando.id, nuevo);
         syncUpdateMovimiento({ ...editando, ...nuevo });
-        setDatos((prev) =>
-          prev.map((d) => (d.id === editando.id ? { ...d, ...nuevo } : d))
-        );
       } else {
         const idDexie = await db.movimientos.add(nuevo);
         syncInsertMovimiento(nuevo, idDexie);
-        setDatos((prev) => [...prev, { ...nuevo, id: idDexie }]);
       }
       cerrarModal();
     },
@@ -140,7 +121,6 @@ export default function IngresosGastos() {
     if (!item.id || !confirm("¿Eliminar este registro?")) return;
     await db.movimientos.delete(item.id);
     syncDeleteMovimiento(item);
-    setDatos((prev) => prev.filter((d) => d.id !== item.id));
   }, []);
 
   // --- Filtros móviles ---
@@ -170,7 +150,7 @@ export default function IngresosGastos() {
     setMndOptions((prev) => reset(prev));
   }, []);
 
-  // --- Filtrar datos ---
+  // --- Filtros ---
   const filtros = useMemo(
     () => ({
       tipo: isMobile
@@ -192,14 +172,14 @@ export default function IngresosGastos() {
 
   const filtrados = useMemo(
     () =>
-      datos.filter(
+      data.filter(
         (item) =>
           filtros.tipo[item.tipo] &&
-          filtros.cat[item.categoria || "Otro"] &&
-          filtros.met[item.metodo || "Otro"] &&
-          filtros.mnd[item.moneda || "Otro"]
+          (filtros.cat[item.categoria || "Otro"] ?? true) &&
+          (filtros.met[item.metodo || "Otro"] ?? true) &&
+          (filtros.mnd[item.moneda || "Otro"] ?? true)
       ),
-    [datos, filtros]
+    [data, filtros]
   );
 
   return (
@@ -271,140 +251,7 @@ export default function IngresosGastos() {
         <AddIcon style={{ fontSize: 30 }} />
       </IconButton>
 
-      {/* Filtro móvil */}
-      {isMobile && (
-        <div className="mobile-filters">
-          <button
-            className="color-filter"
-            onClick={() => setMobileFilterOpen((v) => !v)}
-          >
-            <TuneIcon className="style-icon" />
-          </button>
-
-          {/* Modal de filtros */}
-          <Dialog
-            open={mobileFilterOpen}
-            onClose={() => setMobileFilterOpen(false)}
-            fullWidth
-            maxWidth="xs"
-            PaperProps={{
-              style: {
-                borderRadius: 16,
-                padding: 16,
-                backgroundColor: "#f0f0f0",
-              },
-            }}
-          >
-            <DialogTitle>Filtros</DialogTitle>
-            <Divider />
-            <DialogContent
-              style={{ display: "flex", flexDirection: "column", gap: 12 }}
-            >
-              {/* Tipo */}
-              <div>
-                <strong>Tipo:</strong>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={mobileTipoSelection.Ingreso}
-                    onChange={() => toggleMobileTipo("Ingreso")}
-                  />
-                  Ingreso
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={mobileTipoSelection.Gasto}
-                    onChange={() => toggleMobileTipo("Gasto")}
-                  />
-                  Gasto
-                </label>
-              </div>
-              {/* Categoría */}
-              <div>
-                <strong>Categoría:</strong>
-                {Object.keys(catOptions).map((k) => (
-                  <label key={k}>
-                    <input
-                      type="checkbox"
-                      checked={!!catOptions[k]}
-                      onChange={() => toggleCat(k)}
-                    />
-                    {k}
-                  </label>
-                ))}
-              </div>
-              {/* Método */}
-              <div>
-                <strong>Método:</strong>
-                {Object.keys(metOptions).map((k) => (
-                  <label key={k}>
-                    <input
-                      type="checkbox"
-                      checked={!!metOptions[k]}
-                      onChange={() => toggleMet(k)}
-                    />
-                    {k}
-                  </label>
-                ))}
-              </div>
-              {/* Moneda */}
-              <div>
-                <strong>Moneda:</strong>
-                {Object.keys(mndOptions).map((k) => (
-                  <label key={k}>
-                    <input
-                      type="checkbox"
-                      checked={!!mndOptions[k]}
-                      onChange={() => toggleMnd(k)}
-                    />
-                    {k}
-                  </label>
-                ))}
-              </div>
-            </DialogContent>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 8,
-                padding: 8,
-              }}
-            >
-              <button
-                onClick={() => setMobileFilterOpen(false)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "none",
-                  backgroundColor: "#ccc",
-                  color: "#000",
-                  cursor: "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                Cerrar
-              </button>
-              <button
-                onClick={resetMobileFilters}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "none",
-                  backgroundColor: "#1000eb",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: 500,
-                }}
-              >
-                Reset
-              </button>
-            </div>
-          </Dialog>
-        </div>
-      )}
-
-      {/* Lista scrollable */}
+      {/* Lista */}
       <div className="lista-scrollable">
         <div className="lista-movimientos">
           {filtrados.length ? (

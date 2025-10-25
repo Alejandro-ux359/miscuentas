@@ -23,6 +23,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import DeleteIcon from "@mui/icons-material/Delete";
+import axios from "axios";
 
 // Componente CampoItem memoizado
 export const CampoItem: React.FC<{
@@ -33,7 +34,9 @@ export const CampoItem: React.FC<{
   editable?: boolean;
 }> = memo(({ campo, valor, onChange, onDelete, editable = true }) => {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+    <div
+      style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}
+    >
       {campo.type === "date" ? (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
@@ -43,7 +46,11 @@ export const CampoItem: React.FC<{
               onChange(newValue ? newValue.format("YYYY-MM-DD") : "")
             }
             slotProps={{
-              textField: { fullWidth: true, size: "small", margin: "dense" } as TextFieldProps,
+              textField: {
+                fullWidth: true,
+                size: "small",
+                margin: "dense",
+              } as TextFieldProps,
             }}
           />
         </LocalizationProvider>
@@ -57,7 +64,11 @@ export const CampoItem: React.FC<{
               onChange(newValue ? newValue.format("HH:mm") : "")
             }
             slotProps={{
-              textField: { fullWidth: true, size: "small", margin: "dense" } as TextFieldProps,
+              textField: {
+                fullWidth: true,
+                size: "small",
+                margin: "dense",
+              } as TextFieldProps,
             }}
           />
         </LocalizationProvider>
@@ -105,8 +116,13 @@ const GenericForm: React.FC<GenericFormProps> = ({
   onCancel,
 }) => {
   const initialValues: Record<string, any> = controls.reduce((acc, control) => {
-    acc[control.name] =
-      values?.[control.name] ?? (control.type === "check" || control.type === "switch" ? false : "");
+    if (control.type === "check" || control.type === "switch") {
+      acc[control.name] = values?.[control.name] ?? false;
+    } else if (control.type === "select") {
+      acc[control.name] = values?.[control.name] ?? "";
+    } else {
+      acc[control.name] = values?.[control.name] ?? "";
+    }
     return acc;
   }, {} as Record<string, any>);
 
@@ -129,7 +145,8 @@ const GenericForm: React.FC<GenericFormProps> = ({
         onSubmit={onSubmit}
       >
         {(formikProps: FormikProps<Record<string, any>>) => {
-          const { values, handleChange, handleSubmit, setFieldValue } = formikProps;
+          const { values, handleChange, handleSubmit, setFieldValue } =
+            formikProps;
 
           return (
             <form onSubmit={handleSubmit}>
@@ -175,6 +192,24 @@ const GenericForm: React.FC<GenericFormProps> = ({
 
                     case "select":
                       const selectControl = control as ISelect;
+                      const [options, setOptions] = React.useState<any[]>(
+                        selectControl.checkValues || []
+                      );
+
+                   React.useEffect(() => {
+  if (selectControl.url) {
+    axios.get(selectControl.url).then((res) => {
+      const mapped = res.data.map((item: any) => ({
+        value: item.id_concepto,
+        label: item.denominacion,
+      }));
+      setOptions(mapped);  // Array válido para checkValues
+    });
+  } else if (selectControl.checkValues) {
+    setOptions(selectControl.checkValues);
+  }
+}, [selectControl.url, selectControl.checkValues]);
+
                       return (
                         <div key={control.name} style={{ marginBottom: 12 }}>
                           <TextField
@@ -186,7 +221,8 @@ const GenericForm: React.FC<GenericFormProps> = ({
                             fullWidth
                             SelectProps={{ native: true }}
                           >
-                            {selectControl.checkValues?.map((opt: any) => (
+                            <option value="" disabled></option>
+                            {options.map((opt) => (
                               <option key={opt.value} value={opt.value}>
                                 {opt.label}
                               </option>
