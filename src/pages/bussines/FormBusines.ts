@@ -5,6 +5,7 @@ import {
   ITimePicker,
   ISelect,
 } from "../../components/controls.types";
+import { endpoints } from "../../components/endpoints";
 
 
 //#region BPropietario
@@ -104,12 +105,13 @@ export const Cuenta: INumberField = {
 
 export const MetodosPago: ISelect = {
   type: "select",
-  label: "Registro de Ganancias",
+  label: "Metodo de pago",
   name: "metodo_pago",
+  url: endpoints.metodoPago,
 };
 
-export const TBussines: ISelect = {
-  type: "select",
+export const TBussines: ITextField = {
+  type: "text",
   label: "Registro de Ganancias",
   name: "tbussines",
 };
@@ -180,8 +182,8 @@ export const PrecioProducto: INumberField = {
   format: "finance",
 };
 
-export const Unidad: ISelect = {
-  type: "select",
+export const Unidad: ITextField = {
+  type: "text",
   label: "Unidad",
   name: "unidad_producto",
 };
@@ -220,8 +222,8 @@ export const Nombre: ITextField = {
   name: "nombre_usuario",
 };
 
-export const CargoEmpleado: ISelect = {
-  type: "select",
+export const CargoEmpleado: ITextField = {
+  type: "text",
   label: "Cargo del empleado",
   name: "cargo_usuario",
 };
