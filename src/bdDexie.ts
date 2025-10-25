@@ -1,6 +1,6 @@
 // db-sync.ts
 import Dexie from "dexie";
-import { supabase } from "./supaBase";
+//import { supabase } from "./supaBase";
 
 /* -------------------------
    Interfaces (esquema final)
@@ -166,9 +166,12 @@ class MiDB extends Dexie {
 
 export const db = new MiDB();
 
-/* -------------------------
-   Función genérica para limpiar payload
-   ------------------------- */
+
+
+
+// /* -------------------------
+//    Función genérica para limpiar payload
+//    ------------------------- */
 const cleanPayload = (payload: any, allowedFields: string[]) => {
   const clean: any = {};
   for (const key of allowedFields) {
@@ -177,9 +180,9 @@ const cleanPayload = (payload: any, allowedFields: string[]) => {
   return clean;
 };
 
-/* -------------------------
-   Campos permitidos por tabla
-   ------------------------- */
+// /* -------------------------
+//    Campos permitidos por tabla
+//    ------------------------- */
 const allowedFields = {
   movimientos: ["id","categoria","monto","metodo","fecha","moneda","tipo"],
   bpropietario: [
@@ -204,152 +207,207 @@ const allowedFields = {
   ],
 };
 
+
+
 /* -------------------------
-   Funciones de sincronización
+   Funciones de sincronización al backend
    ------------------------- */
 
-/* MOVIMIENTOS */
+const API_URL = 
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://api-miscuentas.onrender.com";
+
+
+/* -------------------------
+   MOVIMIENTOS
+   ------------------------- */
 export const syncInsertMovimiento = async (mov: Movimiento, idDexie?: number) => {
   const payload = idDexie ? { ...mov, id: idDexie } : { ...mov };
-  const clean = cleanPayload(payload, allowedFields.movimientos);
-  const { error } = await supabase.from("movimientos").upsert(clean, { onConflict: "id" });
-  if (error) console.error("Error insert/upsert movimiento:", error);
+  await fetch(`${API_URL}/sync/movimientos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([payload]),
+  });
 };
 
-export const syncUpdateMovimiento = async (id: number, mov: Partial<Movimiento>) => {
-  const clean = cleanPayload(mov, allowedFields.movimientos);
-  const { error } = await supabase.from("movimientos").update(clean).eq("id", id);
-  if (error) console.error("Error actualizando movimiento:", error);
+export const syncUpdateMovimiento = async (mov: Movimiento) => {
+  await fetch(`${API_URL}/sync/movimientos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([mov]),
+  });
 };
 
-export const syncDeleteMovimiento = async (id: number) => {
-  const { error } = await supabase.from("movimientos").delete().eq("id", id);
-  if (error) console.error("Error eliminando movimiento:", error);
-};
-
-/* BPROPIETARIO */
-export const syncInsertNegocio = async (neg: BPropietario, idDexie?: number) => {
-  const payload = idDexie ? { ...neg, id_negocio: idDexie } : { ...neg };
-  const clean = cleanPayload(payload, allowedFields.bpropietario);
-  const { error } = await supabase.from("bpropietario").upsert(clean, { onConflict: "id_negocio" });
-  if (error) console.error("Error insert/upsert negocio:", error);
-};
-
-export const syncUpdateNegocio = async (id_negocio: number, neg: Partial<BPropietario>) => {
-  const clean = cleanPayload(neg, allowedFields.bpropietario);
-  const { error } = await supabase.from("bpropietario").update(clean).eq("id_negocio", id_negocio);
-  if (error) console.error("Error actualizando negocio:", error);
-};
-
-export const syncDeleteNegocio = async (id_negocio: number) => {
-  const { error } = await supabase.from("bpropietario").delete().eq("id_negocio", id_negocio);
-  if (error) console.error("Error eliminando negocio:", error);
-};
-
-/* CLIENTE */
-export const syncInsertCliente = async (cli: Clientes, idDexie?: number) => {
-  const payload = idDexie ? { ...cli, id_usuario: idDexie } : { ...cli };
-  const clean = cleanPayload(payload, allowedFields.cliente);
-  const { error } = await supabase.from("cliente").upsert(clean, { onConflict: "id_usuario" });
-  if (error) console.error("Error insert/upsert cliente:", error);
-};
-
-export const syncUpdateCliente = async (id_usuario: number, cli: Partial<Clientes>) => {
-  const clean = cleanPayload(cli, allowedFields.cliente);
-  const { error } = await supabase.from("cliente").update(clean).eq("id_usuario", id_usuario);
-  if (error) console.error("Error actualizando cliente:", error);
-};
-
-export const syncDeleteCliente = async (id_usuario: number) => {
-  const { error } = await supabase.from("cliente").delete().eq("id_usuario", id_usuario);
-  if (error) console.error("Error eliminando cliente:", error);
-};
-
-/* PRODUCTOSSERVICIOS */
-export const syncInsertProducto = async (prod: ProductosServicios, idDexie?: number) => {
-  const payload = idDexie ? { ...prod, id_producto: idDexie } : { ...prod };
-  const clean = cleanPayload(payload, allowedFields.productosservicios);
-  const { error } = await supabase.from("productosservicios").upsert(clean, { onConflict: "id_producto" });
-  if (error) console.error("Error insert/upsert producto:", error);
-};
-
-export const syncUpdateProducto = async (id_producto: number, prod: Partial<ProductosServicios>) => {
-  const clean = cleanPayload(prod, allowedFields.productosservicios);
-  const { error } = await supabase.from("productosservicios").update(clean).eq("id_producto", id_producto);
-  if (error) console.error("Error actualizando producto:", error);
-};
-
-export const syncDeleteProducto = async (id_producto: number) => {
-  const { error } = await supabase.from("productosservicios").delete().eq("id_producto", id_producto);
-  if (error) console.error("Error eliminando producto:", error);
-};
-
-/* REPORTESFINANZAS */
-export const syncInsertReporte = async (rep: ReportesFinanzas, idDexie?: number) => {
-  const payload = idDexie ? { ...rep, id_reportes_finanzas: idDexie } : { ...rep };
-  const clean = cleanPayload(payload, allowedFields.reportesfinanzas);
-  const { error } = await supabase.from("reportesfinanzas").upsert(clean, { onConflict: "id_reportes_finanzas" });
-  if (error) console.error("Error insert/upsert reporte:", error);
-};
-
-export const syncUpdateReporte = async (id_reportes_finanzas: number, rep: Partial<ReportesFinanzas>) => {
-  const clean = cleanPayload(rep, allowedFields.reportesfinanzas);
-  const { error } = await supabase.from("reportesfinanzas").update(clean).eq("id_reportes_finanzas", id_reportes_finanzas);
-  if (error) console.error("Error actualizando reporte:", error);
-};
-
-export const syncDeleteReporte = async (id_reportes_finanzas: number) => {
-  const { error } = await supabase.from("reportesfinanzas").delete().eq("id_reportes_finanzas", id_reportes_finanzas);
-  if (error) console.error("Error eliminando reporte:", error);
+export const syncDeleteMovimiento = async (mov: Movimiento) => {
+  await fetch(`${API_URL}/sync/movimientos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([mov]),
+  });
 };
 
 /* -------------------------
-   Bulk sync: subir todo desde Dexie → Supabase
+   BPROPIETARIO
    ------------------------- */
-export const bulkSyncAll = async () => {
-  try {
-    // MOVIMIENTOS
-    const movs = await db.movimientos.toArray();
-    if (movs.length) {
-      const cleanMovs = movs.map((m) => cleanPayload(m, allowedFields.movimientos));
-      const { error } = await supabase.from("movimientos").upsert(cleanMovs, { onConflict: "id" });
-      if (error) console.error("bulkSync movimientos error:", error);
-    }
-
-    // BPROPIETARIO
-    const negocios = await db.bpropietario.toArray();
-    if (negocios.length) {
-      const cleanNegocios = negocios.map((n) => cleanPayload(n, allowedFields.bpropietario));
-      const { error } = await supabase.from("bpropietario").upsert(cleanNegocios, { onConflict: "id_negocio" });
-      if (error) console.error("bulkSync negocios error:", error);
-    }
-
-    // CLIENTES
-    const clientes = await db.cliente.toArray();
-    if (clientes.length) {
-      const cleanClientes = clientes.map((c) => cleanPayload(c, allowedFields.cliente));
-      const { error } = await supabase.from("cliente").upsert(cleanClientes, { onConflict: "id_usuario" });
-      if (error) console.error("bulkSync clientes error:", error);
-    }
-
-    // PRODUCTOS
-    const productos = await db.productosservicios.toArray();
-    if (productos.length) {
-      const cleanProductos = productos.map((p) => cleanPayload(p, allowedFields.productosservicios));
-      const { error } = await supabase.from("productosservicios").upsert(cleanProductos, { onConflict: "id_producto" });
-      if (error) console.error("bulkSync productos error:", error);
-    }
-
-    // REPORTES
-    const reportes = await db.reportesfinanzas.toArray();
-    if (reportes.length) {
-      const cleanReportes = reportes.map((r) => cleanPayload(r, allowedFields.reportesfinanzas));
-      const { error } = await supabase.from("reportesfinanzas").upsert(cleanReportes, { onConflict: "id_reportes_finanzas" });
-      if (error) console.error("bulkSync reportes error:", error);
-    }
-
-    console.log("bulkSyncAll: sincronización completa");
-  } catch (err) {
-    console.error("bulkSyncAll error:", err);
-  }
+export const syncInsertNegocio = async (neg: BPropietario, idDexie?: number) => {
+  const payload = idDexie ? { ...neg, id_negocio: idDexie } : { ...neg };
+  await fetch(`${API_URL}/sync/bpropietario`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([payload]),
+  });
 };
+
+export const syncUpdateNegocio = async (neg: BPropietario) => {
+  await fetch(`${API_URL}/sync/bpropietario`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([neg]),
+  });
+};
+
+export const syncDeleteNegocio = async (neg: BPropietario) => {
+  await fetch(`${API_URL}/sync/bpropietario`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([neg]),
+  });
+};
+
+/* -------------------------
+   CLIENTES
+   ------------------------- */
+export const syncInsertCliente = async (cli: Clientes, idDexie?: number) => {
+  const payload = idDexie ? { ...cli, id_usuario: idDexie } : { ...cli };
+  await fetch(`${API_URL}/sync/clientes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([payload]),
+  });
+};
+
+export const syncUpdateCliente = async (cli: Clientes) => {
+  await fetch(`${API_URL}/sync/clientes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([cli]),
+  });
+};
+
+export const syncDeleteCliente = async (cli: Clientes) => {
+  await fetch(`${API_URL}/sync/clientes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([cli]),
+  });
+};
+
+/* -------------------------
+   PRODUCTOS/SERVICIOS
+   ------------------------- */
+export const syncInsertProducto = async (prod: ProductosServicios, idDexie?: number) => {
+  const payload = idDexie ? { ...prod, id_producto: idDexie } : { ...prod };
+  await fetch(`${API_URL}/sync/productos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([payload]),
+  });
+};
+
+export const syncUpdateProducto = async (prod: ProductosServicios) => {
+  await fetch(`${API_URL}/sync/productos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([prod]),
+  });
+};
+
+export const syncDeleteProducto = async (prod: ProductosServicios) => {
+  await fetch(`${API_URL}/sync/productos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([prod]),
+  });
+};
+
+/* -------------------------
+   REPORTES FINANZAS
+   ------------------------- */
+export const syncInsertReporte = async (rep: ReportesFinanzas, idDexie?: number) => {
+  const payload = idDexie ? { ...rep, id_reportes_finanzas: idDexie } : { ...rep };
+  await fetch(`${API_URL}/sync/reportes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([payload]),
+  });
+};
+
+export const syncUpdateReporte = async (rep: ReportesFinanzas) => {
+  await fetch(`${API_URL}/sync/reportes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([rep]),
+  });
+};
+
+export const syncDeleteReporte = async (rep: ReportesFinanzas) => {
+  await fetch(`${API_URL}/sync/reportes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify([rep]),
+  });
+};
+
+
+
+// /* -------------------------
+//    Bulk sync: subir todo desde Dexie → Supabase
+//    ------------------------- */
+// export const bulkSyncAll = async () => {
+//   try {
+//     // MOVIMIENTOS
+//     const movs = await db.movimientos.toArray();
+//     if (movs.length) {
+//       const cleanMovs = movs.map((m) => cleanPayload(m, allowedFields.movimientos));
+//       const { error } = await supabase.from("movimientos").upsert(cleanMovs, { onConflict: "id" });
+//       if (error) console.error("bulkSync movimientos error:", error);
+//     }
+
+//     // BPROPIETARIO
+//     const negocios = await db.bpropietario.toArray();
+//     if (negocios.length) {
+//       const cleanNegocios = negocios.map((n) => cleanPayload(n, allowedFields.bpropietario));
+//       const { error } = await supabase.from("bpropietario").upsert(cleanNegocios, { onConflict: "id_negocio" });
+//       if (error) console.error("bulkSync negocios error:", error);
+//     }
+
+//     // CLIENTES
+//     const clientes = await db.cliente.toArray();
+//     if (clientes.length) {
+//       const cleanClientes = clientes.map((c) => cleanPayload(c, allowedFields.cliente));
+//       const { error } = await supabase.from("cliente").upsert(cleanClientes, { onConflict: "id_usuario" });
+//       if (error) console.error("bulkSync clientes error:", error);
+//     }
+
+//     // PRODUCTOS
+//     const productos = await db.productosservicios.toArray();
+//     if (productos.length) {
+//       const cleanProductos = productos.map((p) => cleanPayload(p, allowedFields.productosservicios));
+//       const { error } = await supabase.from("productosservicios").upsert(cleanProductos, { onConflict: "id_producto" });
+//       if (error) console.error("bulkSync productos error:", error);
+//     }
+
+//     // REPORTES
+//     const reportes = await db.reportesfinanzas.toArray();
+//     if (reportes.length) {
+//       const cleanReportes = reportes.map((r) => cleanPayload(r, allowedFields.reportesfinanzas));
+//       const { error } = await supabase.from("reportesfinanzas").upsert(cleanReportes, { onConflict: "id_reportes_finanzas" });
+//       if (error) console.error("bulkSync reportes error:", error);
+//     }
+
+//     console.log("bulkSyncAll: sincronización completa");
+//   } catch (err) {
+//     console.error("bulkSyncAll error:", err);
+//   }
+// };

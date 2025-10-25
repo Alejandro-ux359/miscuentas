@@ -8,7 +8,7 @@ const detectarMoneda = (mov: Movimiento): string =>
   mov.moneda ? mov.moneda.toUpperCase() : "CUP";
 
 const Home: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"Hogar" | "Negocios">("Hogar");
+  const [activeTab, setActiveTab] = useState<"Hogar" | "Conversión">("Hogar");
   const [monedas, setMonedas] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [totales, setTotales] = useState<Record<string, number>>({});
@@ -95,10 +95,10 @@ const Home: React.FC = () => {
           Hogar
         </button>
         <button
-          className={`tab-btn ${activeTab === "Negocios" ? "active" : ""}`}
-          onClick={() => setActiveTab("Negocios")}
+          className={`tab-btn ${activeTab === "Conversión" ? "active" : ""}`}
+          onClick={() => setActiveTab("Conversión")}
         >
-          Negocios
+          Conversión
         </button>
       </div>
 
@@ -156,7 +156,7 @@ const Home: React.FC = () => {
       ) : (
         <div className="desarrollo-message">
           <h2>🚧 Disculpa</h2>
-          <p>La sección de Negocios está en desarrollo.</p>
+          <p>La sección de Conversión está en desarrollo.</p>
           <p>Gracias por tu paciencia 🙏</p>
         </div>
       )}
