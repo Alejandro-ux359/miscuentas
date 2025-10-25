@@ -121,7 +121,7 @@ export default function IngresosGastos() {
 
       if (editando && editando.id !== undefined) {
         await db.movimientos.update(editando.id, nuevo);
-        syncUpdateMovimiento(editando.id, nuevo);
+        syncUpdateMovimiento({ ...editando, ...nuevo });
         setDatos((prev) =>
           prev.map((d) => (d.id === editando.id ? { ...d, ...nuevo } : d))
         );
@@ -139,7 +139,7 @@ export default function IngresosGastos() {
   const handleDelete = useCallback(async (item: Movimiento) => {
     if (!item.id || !confirm("¿Eliminar este registro?")) return;
     await db.movimientos.delete(item.id);
-    syncDeleteMovimiento(item.id);
+    syncDeleteMovimiento(item);
     setDatos((prev) => prev.filter((d) => d.id !== item.id));
   }, []);
 
