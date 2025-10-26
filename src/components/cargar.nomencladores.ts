@@ -6,6 +6,8 @@ export interface INomencladores {
   moneda: { value: number; label: string }[];
   categoria: { value: number; label: string }[];
   metodoPago: { value: number; label: string }[];
+  compraventa: { value: number; label: string }[];
+  tcliente: { value: number; label: string }[];
 }
 
 export function useNomencladores() {
@@ -13,15 +15,19 @@ export function useNomencladores() {
     moneda: [],
     categoria: [],
     metodoPago: [],
+    tcliente: [],
+    compraventa: [],
   });
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [resMoneda, resCategoria, resMetodo] = await Promise.all([
+        const [resMoneda, resCategoria, resMetodo, resTcliente, resCompraventa] = await Promise.all([
           axios.get(endpoints.moneda),
           axios.get(endpoints.categoria),
           axios.get(endpoints.metodoPago),
+          axios.get(endpoints.tcliente),
+          axios.get(endpoints.compraventa),
         ]);
 
         setData({
@@ -37,6 +43,14 @@ export function useNomencladores() {
             value: p.id,
             label: p.nombre,
           })),
+           tcliente: resTcliente.data.map((p: any) => ({
+            value: p.id,
+            label: p.nombre,
+          })),
+           compraventa: resCompraventa.data.map((p: any) => ({
+            value: p.id,
+            label: p.nombre,
+          })),
         });
       } catch (error) {
         console.error("Error cargando nomencladores:", error);
@@ -49,4 +63,3 @@ export function useNomencladores() {
   return data;
 }
 export { endpoints };
-

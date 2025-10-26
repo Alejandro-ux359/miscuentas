@@ -120,6 +120,7 @@ export const Tipos: ISelect = {
   type: "select",
   label: "Compra y Venta",
   name: "tipos",
+  url: endpoints.compraventa
 };
 
 //#region Clientes
@@ -141,6 +142,7 @@ export const TipoCliente: ISelect = {
   type: "select",
   name: "tipo_cliente",
   label: "Frecuencia con la que visita el cliente",
+  url: endpoints.tcliente
 };
 
 export const HistorialCompraCliente: ITextField = {

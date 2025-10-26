@@ -8,4 +8,6 @@ export const endpoints = {
   moneda: `${NOMENCLADORES_URL}/nomenclador_moneda`,
   categoria: `${NOMENCLADORES_URL}/nomenclador_categoria`,
   metodoPago: `${NOMENCLADORES_URL}/nomenclador_metodo_de_pago`,
+  compraventa: `${NOMENCLADORES_URL}/nomenclador_compraventa`,
+  tcliente: `${NOMENCLADORES_URL}/nomenclador_tcliente`,
 };
