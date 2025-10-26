@@ -71,6 +71,7 @@ export type INumberField = {
   prefix?: string;
   validations?: INumberValidation;
   negativeValues?: boolean;
+  finanza?: boolean;
 } & IInputProps;
 
 export type ISelect = {

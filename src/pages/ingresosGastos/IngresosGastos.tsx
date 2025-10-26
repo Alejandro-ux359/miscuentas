@@ -9,7 +9,6 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import TuneIcon from "@mui/icons-material/Tune";
 import GenericForm from "../../components/GenericForms";
 import { useLiveQuery } from "dexie-react-hooks";
 
@@ -23,20 +22,29 @@ import {
 import { ingresosGastos } from "./FormIngresosGastos";
 import "./IngresosGastos.css";
 
-const MovimientoItem = React.memo(({ item, onEdit, onDelete }: any) => (
-  <div className="item-movimiento">
-    <div className="info">
-      <strong>{item.categoria}</strong> - {item.monto} {item.moneda} -{" "}
-      {item.metodo} - {item.fecha}
+const MovimientoItem = React.memo(({ item, onEdit, onDelete }: any) => {
+  // Formatear monto con $ y comas
+  const formattedMonto = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(item.monto || 0);
+
+  return (
+    <div className="item-movimiento">
+      <div className="info">
+        <strong>{item.categoria}</strong> - {formattedMonto}{" "}
+        {item.moneda} - {item.metodo} - {item.fecha}
+      </div>
+      <IconButton onClick={() => onEdit(item.tipo, item)}>
+        <EditIcon color="primary" />
+      </IconButton>
+      <IconButton onClick={() => onDelete(item)}>
+        <DeleteIcon color="error" />
+      </IconButton>
     </div>
-    <IconButton onClick={() => onEdit(item.tipo, item)}>
-      <EditIcon color="primary" />
-    </IconButton>
-    <IconButton onClick={() => onDelete(item)}>
-      <DeleteIcon color="error" />
-    </IconButton>
-  </div>
-));
+  );
+});
+
 
 export default function IngresosGastos() {
   const [activeTab, setActiveTab] = useState<"Ingresos" | "Gastos">("Ingresos");

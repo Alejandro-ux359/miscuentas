@@ -14,6 +14,7 @@ export const ingresosGastos: IGenericControls[] = [
     label: "Monto",
     name: "monto",
     format: "finance",
+    finanza: true,
   },
   {
     type: "select",

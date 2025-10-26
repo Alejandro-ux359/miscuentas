@@ -154,12 +154,11 @@ const GenericForm: React.FC<GenericFormProps> = ({
                 {controls.map((control) => {
                   switch (control.type) {
                     case "text":
-                    case "number":
                       return (
                         <div key={control.name} style={{ marginBottom: 12 }}>
                           <TextField
                             label={control.label}
-                            type={control.type}
+                            type="text"
                             name={control.name}
                             value={values[control.name]}
                             onChange={handleChange}
@@ -167,6 +166,30 @@ const GenericForm: React.FC<GenericFormProps> = ({
                           />
                         </div>
                       );
+
+case "number":
+  return (
+    <div key={control.name} style={{ marginBottom: 12 }}>
+      <TextField
+        label={control.label}
+        type="text"
+        name={control.name}
+        value={values[control.name]}
+        onChange={(e) => {
+          // Guardamos solo el número limpio
+          const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+          setFieldValue(control.name, rawValue);
+        }}
+        fullWidth
+        InputProps={{
+          startAdornment: control.finanza ? "$ " : undefined,
+        }}
+      />
+    </div>
+  );
+
+
+
 
                     case "date":
                       return (
@@ -196,19 +219,19 @@ const GenericForm: React.FC<GenericFormProps> = ({
                         selectControl.checkValues || []
                       );
 
-                   React.useEffect(() => {
-  if (selectControl.url) {
-    axios.get(selectControl.url).then((res) => {
-      const mapped = res.data.map((item: any) => ({
-        value: item.id_concepto,
-        label: item.denominacion,
-      }));
-      setOptions(mapped);  // Array válido para checkValues
-    });
-  } else if (selectControl.checkValues) {
-    setOptions(selectControl.checkValues);
-  }
-}, [selectControl.url, selectControl.checkValues]);
+                      React.useEffect(() => {
+                        if (selectControl.url) {
+                          axios.get(selectControl.url).then((res) => {
+                            const mapped = res.data.map((item: any) => ({
+                              value: item.id_concepto,
+                              label: item.denominacion,
+                            }));
+                            setOptions(mapped); // Array válido para checkValues
+                          });
+                        } else if (selectControl.checkValues) {
+                          setOptions(selectControl.checkValues);
+                        }
+                      }, [selectControl.url, selectControl.checkValues]);
 
                       return (
                         <div key={control.name} style={{ marginBottom: 12 }}>
@@ -223,7 +246,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
                           >
                             <option value="" disabled></option>
                             {options.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
+                              <option key={opt.value} value={opt.label}>
                                 {opt.label}
                               </option>
                             ))}
@@ -232,6 +255,22 @@ const GenericForm: React.FC<GenericFormProps> = ({
                       );
 
                     case "check":
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={!!values[control.name]}
+                                onChange={(e) =>
+                                  setFieldValue(control.name, e.target.checked)
+                                }
+                              />
+                            }
+                            label={control.label}
+                          />
+                        </div>
+                      );
+
                     case "switch":
                       return (
                         <div key={control.name} style={{ marginBottom: 12 }}>
