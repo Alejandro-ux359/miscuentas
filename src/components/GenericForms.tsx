@@ -167,29 +167,31 @@ const GenericForm: React.FC<GenericFormProps> = ({
                         </div>
                       );
 
-case "number":
-  return (
-    <div key={control.name} style={{ marginBottom: 12 }}>
-      <TextField
-        label={control.label}
-        type="text"
-        name={control.name}
-        value={values[control.name]}
-        onChange={(e) => {
-          // Guardamos solo el número limpio
-          const rawValue = e.target.value.replace(/[^0-9.]/g, "");
-          setFieldValue(control.name, rawValue);
-        }}
-        fullWidth
-        InputProps={{
-          startAdornment: control.finanza ? "$ " : undefined,
-        }}
-      />
-    </div>
-  );
-
-
-
+                    case "number":
+                      return (
+                        <div key={control.name} style={{ marginBottom: 12 }}>
+                          <TextField
+                            label={control.label}
+                            type="number"
+                            name={control.name}
+                            value={values[control.name]}
+                            onChange={(e) => {
+                              // Guardamos solo el número limpio
+                              const rawValue = e.target.value.replace(
+                                /[^0-9.]/g,
+                                ""
+                              );
+                              setFieldValue(control.name, rawValue);
+                            }}
+                            fullWidth
+                            InputProps={{
+                              startAdornment: control.finanza
+                                ? "$ "
+                                : undefined,
+                            }}
+                          />
+                        </div>
+                      );
 
                     case "date":
                       return (

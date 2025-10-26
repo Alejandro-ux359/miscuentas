@@ -21,7 +21,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import { v4 as uuidv4 } from "uuid";
 import { db, syncInsertNegocio } from "../../bdDexie";
 import GenericForm, { CampoItem } from "../../components/GenericForms";
-import { formulariosDisponibles } from "./ListadeFormulario";
+import { formulariosDisponibles } from "./FormBusines";
+
+
 
 export default function NegocioModal() {
   const [openMain, setOpenMain] = useState(false);
@@ -71,15 +73,15 @@ export default function NegocioModal() {
   const agregarCamposSeleccionados = useCallback(() => {
     const nuevosCampos = formulariosSeleccionados.flatMap((id) => {
       const form = formulariosDisponibles.find((f) => f.id === id);
-      if (!form || !form.campos) return [];
-      const camposArray = Array.isArray(form.campos)
-        ? form.campos
-        : [form.campos];
+      if (!form || !form.id) return [];
+      const camposArray = Array.isArray(form.id)
+        ? form.id
+        : [form.id];
       return camposArray.map((campo: any, index: number) => ({
         id: `${id}_${index}_${uuidv4()}`,
         label: campo.label || campo.nombre || id,
         name: campo.name || `${id}_${index}_${uuidv4()}`,
-        type: campo.type || "text",
+        type: campo.type || "text" ,
         valor: "",
       }));
     });
@@ -272,11 +274,11 @@ export default function NegocioModal() {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={formulariosSeleccionados.includes(form.id)}
-                        onChange={() => toggleFormulario(form.id)}
+                        checked={formulariosSeleccionados.includes(form.id ?? "")}
+                        onChange={() => toggleFormulario(form.id ?? "")}
                       />
                     }
-                    label={form.nombre}
+                    label={form.id }
                   />
                 </div>
               );

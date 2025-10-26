@@ -24,6 +24,7 @@ export type ICommonProps = {
   options?: Record<string, any>;
   disabledOnEdit?: boolean;
   persist?: boolean;
+  url?: string;
 };
 
 export type IOptionsProps = ICommonProps & {
