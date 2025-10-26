@@ -2,7 +2,7 @@
 export const NOMENCLADORES_URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:3000/nomencladores"
-    : "https://mi-backend.com/nomencladores";
+    : "https://api-miscuentas.onrender.com/nomencladores";
 
 export const endpoints = {
   moneda: `${NOMENCLADORES_URL}/nomenclador_moneda`,
