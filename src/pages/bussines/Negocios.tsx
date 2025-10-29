@@ -21,7 +21,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import { CampoItem } from "../../components/GenericForms";
-import { db, syncDeleteNegocio,syncUpdateNegocio, syncInsertNegocio } from "../../bdDexie";
+import {
+  db,
+  syncDeleteNegocio,
+  syncUpdateNegocio,
+  syncInsertNegocio,
+} from "../../bdDexie";
 import { BNegocios } from "../../bdDexie";
 
 export default function Negocios() {
@@ -43,7 +48,8 @@ export default function Negocios() {
   const [confirmarEliminar, setConfirmarEliminar] = useState<{
     open: boolean;
     index: number | null;
-  }>({ open: false, index: null });
+    nombre_negocio?: string;
+  }>({ open: false, index: null, nombre_negocio: "" });
 
   const [valores, setValores] = useState<Partial<BNegocios>>({
     nombre_negocio: "",
@@ -72,6 +78,19 @@ export default function Negocios() {
       }
     }
   };
+  useEffect(() => {
+    if (negocioSeleccionado?.id_negocio) {
+      const actualizarDetalle = async () => {
+        const negocioRefrescado = await db.bnegocios.get(
+          negocioSeleccionado.id_negocio!
+        );
+        if (negocioRefrescado) {
+          setNegocioSeleccionado({ ...negocioRefrescado });
+        }
+      };
+      actualizarDetalle();
+    }
+  }, [negociosGuardados]);
 
   const handleOpenSubModal = () => setOpenSubModal(true);
   const handleCloseSubModal = () => setOpenSubModal(false);
@@ -193,10 +212,18 @@ export default function Negocios() {
     handleEditarNegocio(index); // cierra el detalle y abre el modal de edición
   };
 
-  const handleEliminarClick = (index: number) =>
-    setConfirmarEliminar({ open: true, index });
+  const handleEliminarClick = (index: number) => {
+    const negocio = negociosGuardados[index];
+    setConfirmarEliminar({
+      open: true,
+      index,
+      nombre_negocio: negocio?.nombre_negocio || "",
+    });
+  };
+
   const handleCancelarEliminar = () =>
     setConfirmarEliminar({ open: false, index: null });
+
   const handleConfirmarEliminar = async () => {
     if (confirmarEliminar.index !== null) {
       const negocio = negociosGuardados[confirmarEliminar.index];
@@ -210,48 +237,45 @@ export default function Negocios() {
     setConfirmarEliminar({ open: false, index: null });
   };
 
-
-
   // 🔄 Sincronizar datos locales con Supabase automáticamente
-useEffect(() => {
-  const sincronizarNegocios = async () => {
-    try {
-      // Verifica conexión
-      if (!navigator.onLine) return;
+  useEffect(() => {
+    const sincronizarNegocios = async () => {
+      try {
+        // Verifica conexión
+        if (!navigator.onLine) return;
 
-      console.log("⏳ Sincronizando negocios con Supabase...");
+        console.log("⏳ Sincronizando negocios con Supabase...");
 
-      // Obtener todos los negocios locales
-      const negociosLocales = await db.bnegocios.toArray();
+        // Obtener todos los negocios locales
+        const negociosLocales = await db.bnegocios.toArray();
 
-      for (const neg of negociosLocales) {
-        // Si no tiene un id remoto (id_negocio aún sin sincronizar), lo insertamos
-        if (!neg.id_negocio) {
-          await syncInsertNegocio(neg);
-        } else {
-          // Si ya existe en remoto, hacemos update
-          await syncUpdateNegocio(neg);
+        for (const neg of negociosLocales) {
+          // Si no tiene un id remoto (id_negocio aún sin sincronizar), lo insertamos
+          if (!neg.id_negocio) {
+            await syncInsertNegocio(neg);
+          } else {
+            // Si ya existe en remoto, hacemos update
+            await syncUpdateNegocio(neg);
+          }
         }
+
+        console.log("✅ Sincronización completa con Supabase");
+      } catch (err) {
+        console.error("❌ Error al sincronizar negocios:", err);
       }
+    };
 
-      console.log("✅ Sincronización completa con Supabase");
-    } catch (err) {
-      console.error("❌ Error al sincronizar negocios:", err);
-    }
-  };
+    // Ejecutar sincronización al montar el componente
+    sincronizarNegocios();
 
-  // Ejecutar sincronización al montar el componente
-  sincronizarNegocios();
+    // Reintentar cada vez que vuelva la conexión
+    window.addEventListener("online", sincronizarNegocios);
 
-  // Reintentar cada vez que vuelva la conexión
-  window.addEventListener("online", sincronizarNegocios);
-
-  // Limpieza
-  return () => {
-    window.removeEventListener("online", sincronizarNegocios);
-  };
-}, []);
-
+    // Limpieza
+    return () => {
+      window.removeEventListener("online", sincronizarNegocios);
+    };
+  }, []);
 
   return (
     <>
@@ -383,7 +407,10 @@ useEffect(() => {
       {/* Confirmar eliminación */}
       <Dialog open={confirmarEliminar.open} onClose={handleCancelarEliminar}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
-        <DialogContent>¿Estás seguro de eliminar este negocio?</DialogContent>
+        <DialogContent>
+          ¿Estás seguro de eliminar el negocio{" "}
+          <strong>{confirmarEliminar.nombre_negocio}</strong>?
+        </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelarEliminar}>Cancelar</Button>
           <Button onClick={handleConfirmarEliminar} color="error">
