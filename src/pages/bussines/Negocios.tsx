@@ -31,14 +31,11 @@ import { BNegocios } from "../../bdDexie";
 import { ISelect } from "../../components/controls.types";
 import axios from "axios";
 
-
 interface ISelectFieldProps {
   control: ISelect;
   value: string;
   onChange: (value: string) => void;
 }
-
-
 
 export default function Negocios() {
   const theme = useTheme();
@@ -77,51 +74,54 @@ export default function Negocios() {
   }, []);
 
   const SelectField = ({ control, value, onChange }: ISelectFieldProps) => {
-  const [options, setOptions] = useState<any[]>(control.checkValues || []);
+    const [options, setOptions] = useState<any[]>(control.checkValues || []);
 
-  useEffect(() => {
-    if (control.url) {
-      axios.get(control.url).then((res) => {
-        const mapped = res.data.map((item: any) => ({
-          value: item.id_concepto,
-          label: item.denominacion,
-        }));
-        setOptions(mapped);
-      });
-    } else if (control.checkValues) {
-      setOptions(control.checkValues);
-    }
-  }, [control.url, control.checkValues]);
+    useEffect(() => {
+      if (control.url) {
+        axios.get(control.url).then((res) => {
+          const mapped = res.data.map((item: any) => ({
+            value: item.id_concepto,
+            label: item.denominacion,
+          }));
+          setOptions(mapped);
+        });
+      } else if (control.checkValues) {
+        setOptions(control.checkValues);
+      }
+    }, [control.url, control.checkValues]);
 
-  return (
-    <TextField
-      select
-      label={control.label}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      fullWidth
-      SelectProps={{ native: true }}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 2,
-          backgroundColor: "white",
-          "&:hover fieldset": { borderColor: "#667eea" },
-          "&.Mui-focused fieldset": { borderColor: "#667eea", borderWidth: 2 },
-        },
-        "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
-      }}
-    >
-      <option value="" disabled>
-        Selecciona...
-      </option>
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.label}>
-          {opt.label}
+    return (
+      <TextField
+        select
+        label={control.label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        fullWidth
+        SelectProps={{ native: true }}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            borderRadius: 2,
+            backgroundColor: "white",
+            "&:hover fieldset": { borderColor: "#667eea" },
+            "&.Mui-focused fieldset": {
+              borderColor: "#667eea",
+              borderWidth: 2,
+            },
+          },
+          "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
+        }}
+      >
+        <option value="" disabled>
+          Selecciona...
         </option>
-      ))}
-    </TextField>
-  );
-};
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.label}>
+            {opt.label}
+          </option>
+        ))}
+      </TextField>
+    );
+  };
 
   // Funciones de modales
   const handleOpen = () => setOpen(true);
@@ -582,107 +582,108 @@ export default function Negocios() {
             }}
           />
 
-         {/* Campos dinámicos */}
-{camposSeleccionados.length > 0 && (
-  <>
-    <Divider
-      sx={{
-        my: 3,
-        borderColor: "#e2e8f0",
-        "&::before, &::after": { borderColor: "#e2e8f0" },
-      }}
-    />
-    <Typography
-      variant="subtitle1"
-      sx={{
-        mb: 2,
-        color: "#4a5568",
-        fontWeight: 600,
-        fontSize: "1.1rem",
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-      }}
-    >
-      <span>📋</span> Campos personalizados:
-    </Typography>
+          {/* Campos dinámicos */}
+          {camposSeleccionados.length > 0 && (
+            <>
+              <Divider
+                sx={{
+                  my: 3,
+                  borderColor: "#e2e8f0",
+                  "&::before, &::after": { borderColor: "#e2e8f0" },
+                }}
+              />
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 2,
+                  color: "#4a5568",
+                  fontWeight: 600,
+                  fontSize: "1.1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <span>📋</span> Campos personalizados:
+              </Typography>
 
-    {camposSeleccionados.map((campo) => {
-      const control = formulariosDisponibles.find((f) => f.name === campo);
-      if (!control) return null;
+              {camposSeleccionados.map((campo) => {
+                const control = formulariosDisponibles.find(
+                  (f) => f.name === campo
+                );
+                if (!control) return null;
 
-      // Campo de tipo select
-      if (control.type === "select") {
-        return (
-          <Box
-            key={campo}
-            sx={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 1,
-              mb: 2,
-              width: "100%",
-            }}
-          >
-            <SelectField
-              control={control as ISelect}
-              value={valores[control.name as keyof BNegocios] || ""}
-              onChange={(v) =>
-                setValores((prev) => ({
-                  ...prev,
-                  [control.name as keyof BNegocios]: v,
-                }))
-              }
-            />
-            <IconButton
-              onClick={() => eliminarCamposActivos(campo)}
-              color="error"
-              size="small"
-              sx={{ minWidth: "auto", padding: 2, color: "#c53030" }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        );
-      }
+                // Campo de tipo select
+                if (control.type === "select") {
+                  return (
+                    <Box
+                      key={campo}
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 1,
+                        mb: 2,
+                        width: "100%",
+                      }}
+                    >
+                      <SelectField
+                        control={control as ISelect}
+                        value={valores[control.name as keyof BNegocios] || ""}
+                        onChange={(v) =>
+                          setValores((prev) => ({
+                            ...prev,
+                            [control.name as keyof BNegocios]: v,
+                          }))
+                        }
+                      />
+                      <IconButton
+                        onClick={() => eliminarCamposActivos(campo)}
+                        color="error"
+                        size="small"
+                        sx={{ minWidth: "auto", padding: 2, color: "#c53030" }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  );
+                }
 
-      // Otros tipos de campos
-      return (
-        <Box
-          key={campo}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            mb: 2,
-            width: "100%",
-          }}
-        >
-          <Box
-            sx={{
-              flexGrow: 1,
-              width: "100%",
-              "& > *": { borderRadius: 2 },
-            }}
-          >
-            <CampoItem
-              campo={control}
-              valor={valores[control.name as keyof BNegocios]}
-              onChange={(v) =>
-                setValores((prev) => ({
-                  ...prev,
-                  [control.name as keyof BNegocios]: v,
-                }))
-              }
-              onDelete={() => eliminarCamposActivos(campo)}
-            />
-          </Box>
-        </Box>
-      );
-    })}
-  </>
-)}
-
+                // Otros tipos de campos
+                return (
+                  <Box
+                    key={campo}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mb: 2,
+                      width: "100%",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        width: "100%",
+                        "& > *": { borderRadius: 2 },
+                      }}
+                    >
+                      <CampoItem
+                        campo={control}
+                        valor={valores[control.name as keyof BNegocios]}
+                        onChange={(v) =>
+                          setValores((prev) => ({
+                            ...prev,
+                            [control.name as keyof BNegocios]: v,
+                          }))
+                        }
+                        onDelete={() => eliminarCamposActivos(campo)}
+                      />
+                    </Box>
+                  </Box>
+                );
+              })}
+            </>
+          )}
         </DialogContent>
 
         {/* Footer */}
