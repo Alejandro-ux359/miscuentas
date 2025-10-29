@@ -32,6 +32,7 @@ export const CampoItem: React.FC<{
   onChange: (v: any) => void;
   onDelete?: () => void;
   editable?: boolean;
+   sx?: object;
 }> = memo(({ campo, valor, onChange, onDelete, editable = true }) => {
   return (
     <div
@@ -86,7 +87,7 @@ export const CampoItem: React.FC<{
       )}
 
       {editable && onDelete && (
-        <Button onClick={onDelete} color="error">
+        <Button onClick={onDelete} color="error"  >
           <DeleteIcon />
         </Button>
       )}
@@ -246,7 +247,9 @@ const GenericForm: React.FC<GenericFormProps> = ({
                             fullWidth
                             SelectProps={{ native: true }}
                           >
-                            <option value="" disabled></option>
+                            <option value="" disabled>
+                              Selecciona...
+                            </option>
                             {options.map((opt) => (
                               <option key={opt.value} value={opt.label}>
                                 {opt.label}

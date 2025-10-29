@@ -1,161 +1,264 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect } from "react";
+import { formulariosDisponibles } from "./FormBusines";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Button,
-  Checkbox,
-  FormControlLabel,
-  IconButton,
   Card,
   CardContent,
-  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
+  IconButton,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  Box,
 } from "@mui/material";
-import { FixedSizeList as List } from "react-window";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { v4 as uuidv4 } from "uuid";
-import { db, syncInsertNegocio } from "../../bdDexie";
-import GenericForm, { CampoItem } from "../../components/GenericForms";
-import { formulariosDisponibles } from "./FormBusines";
+import CloseIcon from "@mui/icons-material/Close";
+import { CampoItem } from "../../components/GenericForms";
+import { db, syncDeleteNegocio,syncUpdateNegocio, syncInsertNegocio } from "../../bdDexie";
+import { BNegocios } from "../../bdDexie";
 
+export default function Negocios() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [editarDesdeDetalle, setEditarDesdeDetalle] = useState(false);
 
-
-export default function NegocioModal() {
-  const [openMain, setOpenMain] = useState(false);
-  const [openCampos, setOpenCampos] = useState(false);
-  const [nombre, setNombre] = useState("");
-  const [tipoNegocio, setTipoNegocio] = useState("");
-  const [camposPersonalizados, setCamposPersonalizados] = useState<any[]>([]);
-  const [valoresCampos, setValoresCampos] = useState<{ [key: string]: any }>(
-    {}
+  const [open, setOpen] = useState(false);
+  const [openSubModal, setOpenSubModal] = useState(false);
+  const [camposSeleccionados, setCamposSeleccionados] = useState<string[]>([]);
+  const [negocioEditarIndex, setNegocioEditarIndex] = useState<number | null>(
+    null
   );
-  const [formulariosSeleccionados, setFormulariosSeleccionados] = useState<
-    string[]
-  >([]);
-  const [negocios, setNegocios] = useState<any[]>([]);
-  const [selectedNegocio, setSelectedNegocio] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editableNegocio, setEditableNegocio] = useState<any>(null);
+  const [negociosGuardados, setNegociosGuardados] = useState<BNegocios[]>([]);
+  const [negocioSeleccionado, setNegocioSeleccionado] =
+    useState<BNegocios | null>(null);
+  const [openDetalleModal, setOpenDetalleModal] = useState(false);
 
-  // --- Funciones de apertura/cierre de modales ---
-  const handleAbrirPrincipal = () => setOpenMain(true);
-  const handleCerrarPrincipal = () => setOpenMain(false);
-  const handleAbrirCampos = () => setOpenCampos(true);
-  const handleCerrarCampos = () => setOpenCampos(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState<{
+    open: boolean;
+    index: number | null;
+  }>({ open: false, index: null });
 
-  // --- Cargar negocios desde la DB ---
+  const [valores, setValores] = useState<Partial<BNegocios>>({
+    nombre_negocio: "",
+    tipo_negocio: "",
+  });
+
+  // Cargar negocios desde Dexie al inicio
   useEffect(() => {
     const cargarNegocios = async () => {
-      const lista = await db.bpropietario.toArray();
-      setNegocios(lista);
+      const all = await db.bnegocios.toArray();
+      setNegociosGuardados(all);
     };
     cargarNegocios();
   }, []);
 
-  useEffect(() => {
-    if (selectedNegocio) setEditableNegocio(selectedNegocio);
-    setIsEditing(false);
-  }, [selectedNegocio]);
+  // Funciones de modales
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
 
-  // --- Toggle formularios seleccionados ---
-  const toggleFormulario = useCallback((id: string) => {
-    setFormulariosSeleccionados((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
-  }, []);
+    if (editarDesdeDetalle) {
+      setEditarDesdeDetalle(false);
+      if (negocioTemporal) {
+        handleOpenDetalle(negocioTemporal);
+        setNegocioTemporal(null);
+      }
+    }
+  };
 
-  // --- Agregar campos seleccionados ---
-  const agregarCamposSeleccionados = useCallback(() => {
-    const nuevosCampos = formulariosSeleccionados.flatMap((id) => {
-      const form = formulariosDisponibles.find((f) => f.id === id);
-      if (!form || !form.id) return [];
-      const camposArray = Array.isArray(form.id)
-        ? form.id
-        : [form.id];
-      return camposArray.map((campo: any, index: number) => ({
-        id: `${id}_${index}_${uuidv4()}`,
-        label: campo.label || campo.nombre || id,
-        name: campo.name || `${id}_${index}_${uuidv4()}`,
-        type: campo.type || "text" ,
-        valor: "",
-      }));
+  const handleOpenSubModal = () => setOpenSubModal(true);
+  const handleCloseSubModal = () => setOpenSubModal(false);
+
+  const handleOpenDetalle = (negocio: BNegocios) => {
+    setNegocioSeleccionado(negocio);
+    setOpenDetalleModal(true);
+  };
+  const handleCloseDetalle = () => {
+    setNegocioSeleccionado(null);
+    setOpenDetalleModal(false);
+  };
+
+  // Campos dinámicos
+  const toggleCampo = (name: string) => {
+    setCamposSeleccionados((prev) => {
+      const updated = prev.includes(name)
+        ? prev.filter((n) => n !== name)
+        : [...prev, name];
+      if (!prev.includes(name) && !(name in valores)) {
+        setValores((prevVals) => ({
+          ...prevVals,
+          [name as keyof BNegocios]: "",
+        }));
+      }
+      return updated;
     });
+  };
 
-    if (isEditing && editableNegocio) {
-      setEditableNegocio({
-        ...editableNegocio,
-        campos: [...(editableNegocio.campos || []), ...nuevosCampos],
-      });
-    } else {
-      setCamposPersonalizados((prev) => [...prev, ...nuevosCampos]);
+  const eliminarCamposActivos = (name: string) => {
+    setCamposSeleccionados((prev) => prev.filter((n) => n !== name));
+    setValores((prev) => {
+      const copy = { ...prev };
+      delete copy[name as keyof BNegocios];
+      return copy;
+    });
+  };
+
+  // Guardar negocio en Dexie
+  const guardarNegocio = async () => {
+    if (!valores.nombre_negocio || !valores.tipo_negocio) {
+      alert("Debes completar los campos obligatorios");
+      return;
     }
 
-    setFormulariosSeleccionados([]);
-    handleCerrarCampos();
-  }, [formulariosSeleccionados, editableNegocio, isEditing]);
-
-  // --- Eliminar campo ---
-  const eliminarCampo = useCallback((id: string) => {
-    setCamposPersonalizados((prev) => prev.filter((c) => c.id !== id));
-    setValoresCampos((prev) => {
-      const newValores = { ...prev };
-      delete newValores[id];
-      return newValores;
-    });
-  }, []);
-
-  // --- Actualizar valor de campo ---
-  const handleValorCampo = useCallback((id: string, valor: any) => {
-    setValoresCampos((prev) => ({ ...prev, [id]: valor }));
-  }, []);
-
-  // --- Guardar negocio ---
-  const handleGuardarNegocio = useCallback(async () => {
-    const nuevoNegocio = {
-      nombre_negocio: nombre,
-      tipo_negocio: tipoNegocio,
-      campos: camposPersonalizados.map((c) => ({
-        ...c,
-        valor: valoresCampos[c.id] ?? "",
-      })),
+    const negocioAGuardar: BNegocios = {
+      nombre_negocio: valores.nombre_negocio,
+      tipo_negocio: valores.tipo_negocio,
+      ...valores,
     };
 
-    const id = await db.bpropietario.add(nuevoNegocio as any);
-    await syncInsertNegocio(nuevoNegocio as any, id);
-    const lista = await db.bpropietario.toArray();
-    setNegocios(lista);
+    // Guardar o actualizar
+    if (negocioEditarIndex !== null) {
+      const negocio = negociosGuardados[negocioEditarIndex];
+      if (negocio.id_negocio !== undefined) {
+        const updatePayload: Partial<BNegocios> = { ...negocioAGuardar };
+        delete updatePayload.id_negocio;
+        await db.bnegocios.update(negocio.id_negocio, updatePayload);
+      }
+    } else {
+      await db.bnegocios.add(negocioAGuardar);
+    }
 
-    // Reset
-    setNombre("");
-    setTipoNegocio("");
-    setCamposPersonalizados([]);
-    setValoresCampos({});
-    handleCerrarPrincipal();
-  }, [nombre, tipoNegocio, camposPersonalizados, valoresCampos]);
+    // 🔄 Actualizar lista completa
+    const all = await db.bnegocios.toArray();
+    setNegociosGuardados(all);
 
-  // --- Eliminar negocio ---
-  const handleEliminarNegocio = useCallback(async (id: number) => {
-    await db.bpropietario.delete(id);
-    setNegocios((prev) => prev.filter((neg) => neg.id_negocio !== id));
-  }, []);
+    // 🔁 Si venías desde el detalle, actualiza también el negocio mostrado
+    if (editarDesdeDetalle && negocioTemporal) {
+      const negocioActualizado = all.find(
+        (n) => n.id_negocio === negocioTemporal.id_negocio
+      );
+      if (negocioActualizado) {
+        setNegocioSeleccionado(negocioActualizado);
+        setOpenDetalleModal(true); // reabre el modal con datos actualizados
+      }
+    }
 
-  // --- Formularios disponibles (puedes mover esto a un archivo separado) ---
-  const formulariosMemo = React.useMemo(() => formulariosDisponibles, []);
+    // Reset de estados
+    setValores({ nombre_negocio: "", tipo_negocio: "" });
+    setCamposSeleccionados([]);
+    setNegocioEditarIndex(null);
+    setEditarDesdeDetalle(false);
+    setNegocioTemporal(null);
+    handleClose();
+  };
 
-  // --- CampoItem memoizado ---
-  const MemoCampoItem = memo(CampoItem);
+  const abrirNuevoFormulario = () => {
+    setValores({ nombre_negocio: "", tipo_negocio: "" });
+    setCamposSeleccionados([]);
+    setNegocioEditarIndex(null);
+    setEditarDesdeDetalle(false);
+    handleOpen();
+  };
+
+  const handleEditarNegocio = (index: number) => {
+    const negocio = negociosGuardados[index];
+    if (!negocio) return;
+    setValores({ ...negocio });
+    setCamposSeleccionados(
+      Object.keys(negocio).filter(
+        (k) =>
+          k !== "nombre_negocio" && k !== "tipo_negocio" && k !== "id_negocio"
+      )
+    );
+    setNegocioEditarIndex(index);
+    handleCloseDetalle();
+    handleOpen();
+  };
+
+  const [negocioTemporal, setNegocioTemporal] = useState<BNegocios | null>(
+    null
+  );
+
+  const handleEditarNegocioDesdeDetalle = (index: number) => {
+    const negocio = negociosGuardados[index];
+    setNegocioTemporal(negocio); // lo guardas antes de cerrar el detalle
+    setEditarDesdeDetalle(true);
+    handleEditarNegocio(index); // cierra el detalle y abre el modal de edición
+  };
+
+  const handleEliminarClick = (index: number) =>
+    setConfirmarEliminar({ open: true, index });
+  const handleCancelarEliminar = () =>
+    setConfirmarEliminar({ open: false, index: null });
+  const handleConfirmarEliminar = async () => {
+    if (confirmarEliminar.index !== null) {
+      const negocio = negociosGuardados[confirmarEliminar.index];
+      if (negocio.id_negocio !== undefined) {
+        await db.bnegocios.delete(negocio.id_negocio);
+      }
+      setNegociosGuardados((prev) =>
+        prev.filter((_, i) => i !== confirmarEliminar.index)
+      );
+    }
+    setConfirmarEliminar({ open: false, index: null });
+  };
+
+
+
+  // 🔄 Sincronizar datos locales con Supabase automáticamente
+useEffect(() => {
+  const sincronizarNegocios = async () => {
+    try {
+      // Verifica conexión
+      if (!navigator.onLine) return;
+
+      console.log("⏳ Sincronizando negocios con Supabase...");
+
+      // Obtener todos los negocios locales
+      const negociosLocales = await db.bnegocios.toArray();
+
+      for (const neg of negociosLocales) {
+        // Si no tiene un id remoto (id_negocio aún sin sincronizar), lo insertamos
+        if (!neg.id_negocio) {
+          await syncInsertNegocio(neg);
+        } else {
+          // Si ya existe en remoto, hacemos update
+          await syncUpdateNegocio(neg);
+        }
+      }
+
+      console.log("✅ Sincronización completa con Supabase");
+    } catch (err) {
+      console.error("❌ Error al sincronizar negocios:", err);
+    }
+  };
+
+  // Ejecutar sincronización al montar el componente
+  sincronizarNegocios();
+
+  // Reintentar cada vez que vuelva la conexión
+  window.addEventListener("online", sincronizarNegocios);
+
+  // Limpieza
+  return () => {
+    window.removeEventListener("online", sincronizarNegocios);
+  };
+}, []);
+
 
   return (
-    <div style={{ padding: 20 }}>
-      {/* Botón flotante */}
+    <>
+      {/* Botón abrir formulario */}
       <IconButton
         color="primary"
-        onClick={handleAbrirPrincipal}
+        onClick={abrirNuevoFormulario}
         style={{
           position: "fixed",
           bottom: 100,
@@ -172,277 +275,552 @@ export default function NegocioModal() {
       </IconButton>
 
       {/* Lista de negocios */}
-      <div style={{ display: "grid", gap: 10, marginTop: 20 }}>
-        {negocios.map((neg) => (
-          <Card key={neg.id_negocio} style={{ position: "relative" }}>
-            <CardContent
-              onClick={() => setSelectedNegocio(neg)}
-              style={{ cursor: "pointer" }}
-            >
-              <Typography variant="h6">{neg.nombre_negocio}</Typography>
-              <Typography color="textSecondary">{neg.tipo_negocio}</Typography>
+      <Box
+        sx={{
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          mt: 3,
+        }}
+      >
+        {negociosGuardados.map((negocio, index) => (
+          <Card
+            key={negocio.id_negocio}
+            sx={{ cursor: "pointer", position: "relative" }}
+            onClick={() => handleOpenDetalle(negocio)}
+          >
+            <CardContent>
+              <Typography variant="h6">{negocio.nombre_negocio}</Typography>
+              <Typography variant="subtitle2" color="text.secondary">
+                {negocio.tipo_negocio}
+              </Typography>
             </CardContent>
             <IconButton
-              onClick={() => {
-                if (
-                  window.confirm(`¿Eliminar negocio "${neg.nombre_negocio}"?`)
-                ) {
-                  handleEliminarNegocio(neg.id_negocio);
-                }
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEliminarClick(index);
               }}
-              style={{ position: "absolute", top: 0, right: 0 }}
-              color="error"
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                color: "error.main",
+              }}
             >
               <DeleteIcon />
             </IconButton>
           </Card>
         ))}
-      </div>
+      </Box>
 
-      {/* MODAL PRINCIPAL */}
-      <Dialog open={openMain} onClose={handleCerrarPrincipal} fullWidth>
-        <DialogTitle
-          style={{ display: "flex", justifyContent: "space-between" }}
-        >
-          Nuevo Negocio
-          <Button onClick={handleAbrirCampos}>
-            <AddIcon />
-          </Button>
-          <Divider />
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Nombre del negocio"
-            fullWidth
-            margin="dense"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-          />
-          <TextField
-            label="Tipo de negocio"
-            fullWidth
-            margin="dense"
-            value={tipoNegocio}
-            onChange={(e) => setTipoNegocio(e.target.value)}
-          />
-
-          {camposPersonalizados.length > 0 && (
-            <div style={{ marginTop: 20, maxHeight: 300, overflowY: "auto" }}>
-              <h4>Campos personalizados:</h4>
-              {camposPersonalizados.map((campo) => (
-                <MemoCampoItem
-                  key={campo.id}
-                  campo={campo}
-                  valor={valoresCampos[campo.id]}
-                  onChange={(valor) => handleValorCampo(campo.id, valor)}
-                  onDelete={() => eliminarCampo(campo.id)}
-                  editable={true}
-                />
-              ))}
-            </div>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCerrarPrincipal}>Cancelar</Button>
-          <Button variant="contained" onClick={handleGuardarNegocio}>
-            Guardar negocio
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* MODAL CAMPOS PERSONALIZADOS */}
-      <Dialog open={openCampos} onClose={handleCerrarCampos} fullWidth>
-        <DialogTitle>Seleccionar formularios</DialogTitle>
-        <Divider />
-        <DialogContent style={{ height: 430, padding: 20 }}>
-          <List
-            height={400}
-            itemCount={formulariosDisponibles.length}
-            itemSize={45}
-            width="90%"
-          >
-            {({
-              index,
-              style,
-            }: {
-              index: number;
-              style: React.CSSProperties;
-            }) => {
-              const form = formulariosDisponibles[index];
-              return (
-                <div style={style} key={form.id}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formulariosSeleccionados.includes(form.id ?? "")}
-                        onChange={() => toggleFormulario(form.id ?? "")}
-                      />
-                    }
-                    label={form.id }
-                  />
-                </div>
-              );
-            }}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCerrarCampos}>Cancelar</Button>
-          <Button
-            variant="contained"
-            disabled={formulariosSeleccionados.length === 0}
-            onClick={agregarCamposSeleccionados}
-          >
-            Agregar campos
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* MODAL DETALLE NEGOCIO EDITABLE */}
+      {/* Modal detalle */}
       <Dialog
-        open={!!selectedNegocio}
-        onClose={() => setSelectedNegocio(null)}
+        open={openDetalleModal}
+        onClose={handleCloseDetalle}
         fullWidth
+        maxWidth="sm"
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: 3,
+            padding: 0,
+          },
+        }}
       >
         <DialogTitle
-          style={{ display: "flex", justifyContent: "space-between" }}
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+          }}
         >
-          {selectedNegocio?.nombre_negocio}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {!isEditing && (
-              <IconButton onClick={() => setIsEditing(true)}>
-                <EditIcon color="primary" />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Detalles
+          </Typography>
+
+          <Box>
+            {/* Botón Editar */}
+            {negocioSeleccionado && (
+              <IconButton
+                onClick={() => {
+                  const index = negociosGuardados.findIndex(
+                    (n) => n.id_negocio === negocioSeleccionado?.id_negocio
+                  );
+                  if (index !== -1) handleEditarNegocioDesdeDetalle(index);
+                }}
+                sx={{ color: "white", mr: 1 }}
+              >
+                <EditIcon />
               </IconButton>
             )}
-            {isEditing && (
-              <Button
-                startIcon={<AddIcon />}
-                variant="outlined"
-                size="small"
-                onClick={handleAbrirCampos}
-                style={{ marginLeft: 8 }}
-              >
-                Agregar campos
-              </Button>
-            )}
-          </div>
+
+            {/* Botón Cerrar */}
+            <IconButton onClick={handleCloseDetalle} sx={{ color: "white" }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
 
-        <DialogContent>
-          <div>
-            <strong>Tipo de negocio:</strong>{" "}
-            {isEditing ? (
-              <TextField
-                value={editableNegocio?.tipo_negocio || ""}
-                onChange={(e) =>
-                  setEditableNegocio({
-                    ...editableNegocio,
-                    tipo_negocio: e.target.value,
-                  })
-                }
-                fullWidth
-                margin="dense"
-              />
-            ) : (
-              selectedNegocio?.tipo_negocio
-            )}
-          </div>
-
-          {(editableNegocio?.campos || []).map((c: any) => (
-            <div
-              key={c.id}
-              style={{
-                marginTop: 10,
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <div style={{ flex: 1, }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  {c.label || c.nombre || c.name}:
+        <DialogContent sx={{ py: 3 }}>
+          {negocioSeleccionado &&
+            Object.keys(negocioSeleccionado).map((campo) => (
+              <Box
+                key={campo}
+                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  {campo.replaceAll("_", " ")}
                 </Typography>
-                {isEditing ? (
-                  <TextField
-                    value={c.valor || ""}
-                    onChange={(e) => {
-                      const nuevosCampos = editableNegocio.campos.map(
-                        (campo: any) =>
-                          campo.id === c.id
-                            ? { ...campo, valor: e.target.value }
-                            : campo
-                      );
-                      setEditableNegocio({
-                        ...editableNegocio,
-                        campos: nuevosCampos,
-                      });
-                    }}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                  />
-                ) : (
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    {c.valor || "—"}
-                  </Typography>
-                )}
-              </div>
-
-              {isEditing && (
-                <IconButton
-                  color="error"
-                  onClick={() => {
-                    const nuevosCampos = editableNegocio.campos.filter(
-                      (campo: any) => campo.id !== c.id
-                    );
-                    setEditableNegocio({
-                      ...editableNegocio,
-                      campos: nuevosCampos,
-                    });
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              )}
-            </div>
-          ))}
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {negocioSeleccionado[campo as keyof BNegocios]}
+                </Typography>
+              </Box>
+            ))}
         </DialogContent>
+      </Dialog>
 
+      {/* Confirmar eliminación */}
+      <Dialog open={confirmarEliminar.open} onClose={handleCancelarEliminar}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>¿Estás seguro de eliminar este negocio?</DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              if (isEditing) {
-                setIsEditing(false);
-              } else {
-                setSelectedNegocio(null);
-              }
-            }}
-          >
-            Cerrar
+          <Button onClick={handleCancelarEliminar}>Cancelar</Button>
+          <Button onClick={handleConfirmarEliminar} color="error">
+            Eliminar
           </Button>
-          {isEditing && (
-            <Button
-              variant="contained"
-              onClick={async () => {
-                await db.bpropietario.update(
-                  selectedNegocio.id_negocio,
-                  editableNegocio
-                );
-                setNegocios((prev) =>
-                  prev.map((n) =>
-                    n.id_negocio === selectedNegocio.id_negocio
-                      ? { ...n, ...editableNegocio }
-                      : n
-                  )
-                );
-                setSelectedNegocio(editableNegocio);
-                setIsEditing(false);
-              }}
-            >
-              Guardar
-            </Button>
-          )}
         </DialogActions>
       </Dialog>
-    </div>
+
+      {/* Modal principal */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        fullWidth
+        maxWidth="sm"
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: 3,
+            padding: 0,
+            maxHeight: "85vh",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
+            background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+          },
+        }}
+      >
+        {/* Header con AddIcon para abrir submodal */}
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            fontSize: "1.5rem",
+            fontWeight: 600,
+          }}
+        >
+          {negocioEditarIndex !== null ? "Editar negocio" : "Nuevo Formulario"}
+
+          <IconButton
+            onClick={handleOpenSubModal}
+            sx={{
+              color: "white",
+              backgroundColor: "rgba(255,255,255,0.2)",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.3)",
+                transform: "scale(1.05)",
+              },
+              transition: "all 0.2s ease",
+            }}
+          >
+            <AddIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
+
+        {/* Contenido */}
+        <DialogContent
+          dividers
+          sx={{ overflowY: "auto", padding: 3, backgroundColor: "#f8fafc" }}
+        >
+          <TextField
+            label="Nombre del negocio"
+            name="nombre_negocio"
+            value={valores.nombre_negocio || ""}
+            onChange={(e) =>
+              setValores((prev) => ({
+                ...prev,
+                [e.target.name]: e.target.value,
+              }))
+            }
+            fullWidth
+            sx={{
+              mb: 3,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                backgroundColor: "white",
+                "&:hover fieldset": { borderColor: "#667eea" },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#667eea",
+                  borderWidth: 2,
+                },
+              },
+              "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
+            }}
+          />
+
+          <TextField
+            label="Tipo de negocio"
+            name="tipo_negocio"
+            value={valores.tipo_negocio || ""}
+            onChange={(e) =>
+              setValores((prev) => ({
+                ...prev,
+                [e.target.name]: e.target.value,
+              }))
+            }
+            fullWidth
+            sx={{
+              mb: 3,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                backgroundColor: "white",
+                "&:hover fieldset": { borderColor: "#667eea" },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#667eea",
+                  borderWidth: 2,
+                },
+              },
+              "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
+            }}
+          />
+
+          {camposSeleccionados.length > 0 && (
+            <>
+              <Divider
+                sx={{
+                  my: 3,
+                  borderColor: "#e2e8f0",
+                  "&::before, &::after": { borderColor: "#e2e8f0" },
+                }}
+              />
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 2,
+                  color: "#4a5568",
+                  fontWeight: 600,
+                  fontSize: "1.1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <span>📋</span> Campos personalizados:
+              </Typography>
+
+              {camposSeleccionados.map((campo) => {
+                const control = formulariosDisponibles.find(
+                  (f) => f.name === campo
+                );
+                if (!control) return null;
+
+                // Para campos de tipo select
+                if (control.type === "select") {
+                  const options = control.checkValues || [];
+                  return (
+                    <Box
+                      key={campo}
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start", // Cambiado a flex-start
+                        gap: 1,
+                        mb: 2,
+                        width: "100%",
+                      }}
+                    >
+                      <TextField
+                        select
+                        label={control.label}
+                        value={valores[control.name as keyof BNegocios] || ""}
+                        onChange={(e) =>
+                          setValores((prev) => ({
+                            ...prev,
+                            [control.name as keyof BNegocios]: e.target.value,
+                          }))
+                        }
+                        fullWidth
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                            backgroundColor: "white",
+                            "&:hover fieldset": { borderColor: "#667eea" },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#667eea",
+                              borderWidth: 2,
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#667eea",
+                          },
+                        }}
+                        SelectProps={{
+                          native: true,
+                          style: {
+                            height: "56px", // Altura consistente
+                            display: "flex",
+                            alignItems: "center",
+                          },
+                        }}
+                      >
+                        <option value="" disabled>
+                          Selecciona...
+                        </option>
+                        {options.map((opt) => (
+                          <option key={opt.value} value={opt.label}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </TextField>
+                      <IconButton
+                        onClick={() => eliminarCamposActivos(campo)}
+                        color="error"
+                        size="small"
+                        sx={{
+                          minWidth: "auto",
+                          padding: 2,
+                          color: "#c53030",
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  );
+                }
+
+                // Para otros tipos de campos
+                return (
+                  <Box
+                    key={campo}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mb: 2,
+                      width: "100%",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        width: "100%",
+                        "& > *": {
+                          borderRadius: 2,
+                        },
+                      }}
+                    >
+                      <CampoItem
+                        campo={control}
+                        valor={valores[control.name as keyof BNegocios]}
+                        onChange={(v) =>
+                          setValores((prev) => ({
+                            ...prev,
+                            [control.name as keyof BNegocios]: v,
+                          }))
+                        }
+                        onDelete={() => eliminarCamposActivos(campo)}
+                      />
+                    </Box>
+                  </Box>
+                );
+              })}
+            </>
+          )}
+        </DialogContent>
+
+        {/* Footer */}
+        <DialogActions
+          sx={{
+            padding: 3,
+            backgroundColor: "white",
+            borderTop: "1px solid #e2e8f0",
+          }}
+        >
+          <Button
+            onClick={handleClose}
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              paddingX: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+              },
+              transition: "all 0.3s ease",
+              fontWeight: 600,
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={guardarNegocio}
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              paddingX: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+              },
+              transition: "all 0.3s ease",
+              fontWeight: 600,
+            }}
+          >
+            {negocioEditarIndex !== null ? "Actualizar" : "Guardar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* SubModal */}
+      <Dialog
+        open={openSubModal}
+        onClose={handleCloseSubModal}
+        fullWidth
+        maxWidth="sm"
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: 2,
+            overflow: "hidden",
+          },
+        }}
+      >
+        {/* Header mejorado */}
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+
+            color: "white",
+            py: 2,
+            fontSize: "1.2rem",
+            fontWeight: "bold",
+          }}
+        >
+          Formulario Personalizado
+        </DialogTitle>
+
+        <Divider />
+
+        {/* Contenido mejorado */}
+        <DialogContent sx={{ py: 3, maxHeight: "400px", overflowY: "auto" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {formulariosDisponibles.map((field) => (
+              <Box
+                key={field.name}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: "1px solid #e0e0e0",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: "#f5f5f5",
+                    borderColor: "#2023ecd2",
+                  },
+                  "&:has(input:checked)": {
+                    backgroundColor: "#e8eaf6",
+                    borderColor: "#2023ecd2",
+                  },
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={camposSeleccionados.includes(field.name)}
+                  onChange={() => toggleCampo(field.name)}
+                  id={field.name}
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    accentColor: "#2023ecd2",
+                    cursor: "pointer",
+                  }}
+                />
+                <label
+                  htmlFor={field.name}
+                  style={{
+                    marginLeft: 12,
+                    cursor: "pointer",
+                    fontWeight: 500,
+                    color: "#333",
+                    flex: 1,
+                  }}
+                >
+                  {field.label}
+                </label>
+              </Box>
+            ))}
+          </Box>
+        </DialogContent>
+
+        {/* Footer mejorado */}
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "#f8f9fa",
+            py: 2,
+            px: 3,
+            borderTop: "1px solid #e0e0e0",
+          }}
+        >
+          <Button
+            onClick={handleCloseSubModal}
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              paddingX: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+              },
+              transition: "all 0.3s ease",
+              fontWeight: 600,
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleCloseSubModal}
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              paddingX: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+              },
+              transition: "all 0.3s ease",
+              fontWeight: 600,
+            }}
+          >
+            Agregar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
