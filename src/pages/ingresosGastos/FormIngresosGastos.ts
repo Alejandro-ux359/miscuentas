@@ -1,5 +1,5 @@
 import { IGenericControls } from "../../components/controls.types";
-import { endpoints } from "../../components/cargar.nomencladores";
+import { endpoints } from "../../components/endpoints";
 
 export const ingresosGastos: IGenericControls[] = [
   {
