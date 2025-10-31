@@ -32,8 +32,9 @@ export const CampoItem: React.FC<{
   onChange: (v: any) => void;
   onDelete?: () => void;
   editable?: boolean;
-   sx?: object;
-}> = memo(({ campo, valor, onChange, onDelete, editable = true }) => {
+  sx?: object;
+  maxDate?: Dayjs;
+}> = memo(({ campo, valor, onChange, onDelete, editable = true, maxDate }) => {
   return (
     <div
       style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}
@@ -46,6 +47,7 @@ export const CampoItem: React.FC<{
             onChange={(newValue) =>
               onChange(newValue ? newValue.format("YYYY-MM-DD") : "")
             }
+            maxDate={maxDate} // ✅ aquí se aplica
             slotProps={{
               textField: {
                 fullWidth: true,
@@ -87,7 +89,7 @@ export const CampoItem: React.FC<{
       )}
 
       {editable && onDelete && (
-        <Button onClick={onDelete} color="error"  >
+        <Button onClick={onDelete} color="error">
           <DeleteIcon />
         </Button>
       )}
@@ -104,6 +106,7 @@ type GenericFormProps = {
   values?: Record<string, any>;
   submitLabel?: string;
   onCancel?: () => void;
+  onChange?: (values: Record<string, any>) => void;
 };
 
 const GenericForm: React.FC<GenericFormProps> = ({
@@ -115,6 +118,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
   values,
   submitLabel,
   onCancel,
+  onChange,
 }) => {
   const initialValues: Record<string, any> = controls.reduce((acc, control) => {
     if (control.type === "check" || control.type === "switch") {
@@ -148,6 +152,10 @@ const GenericForm: React.FC<GenericFormProps> = ({
         {(formikProps: FormikProps<Record<string, any>>) => {
           const { values, handleChange, handleSubmit, setFieldValue } =
             formikProps;
+
+          React.useEffect(() => {
+            if (onChange) onChange(values);
+          }, [values, onChange]);
 
           return (
             <form onSubmit={handleSubmit}>
@@ -201,6 +209,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
                             campo={control}
                             valor={values[control.name]}
                             onChange={(v) => setFieldValue(control.name, v)}
+                            maxDate={dayjs()}
                           />
                         </div>
                       );
@@ -311,7 +320,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
 
               <Box sx={{ flexGrow: 1 }} />
 
-              {!hideButtons && (
+              {/* {!hideButtons && (
                 <DialogActions>
                   {onCancel && (
                     <Button
@@ -327,7 +336,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
                     {submitLabel || "Aceptar"}
                   </Button>
                 </DialogActions>
-              )}
+              )} */}
             </form>
           );
         }}

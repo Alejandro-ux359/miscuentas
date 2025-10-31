@@ -100,6 +100,7 @@ export type IAutocomplete = {
 export type IDatePicker = {
   type: "date";
   validations?: IDateValidation;
+  maxDate?: IDateValidation;
 } & ITimeControls;
 
 export type ITimePicker = {

@@ -771,19 +771,20 @@ export default function Negocios() {
             {formulariosDisponibles.map((field) => (
               <Box
                 key={field.name}
+                component="label"
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   p: 1.5,
                   borderRadius: 1,
                   border: "1px solid #e0e0e0",
+                  cursor: "pointer",
                   transition: "all 0.2s ease",
+                  backgroundColor: camposSeleccionados.includes(field.name)
+                    ? "#e8eaf6"
+                    : "white",
                   "&:hover": {
                     backgroundColor: "#f5f5f5",
-                    borderColor: "#2023ecd2",
-                  },
-                  "&:has(input:checked)": {
-                    backgroundColor: "#e8eaf6",
                     borderColor: "#2023ecd2",
                   },
                 }}
@@ -797,21 +798,13 @@ export default function Negocios() {
                     width: "18px",
                     height: "18px",
                     accentColor: "#2023ecd2",
+                    marginRight: 12,
                     cursor: "pointer",
                   }}
                 />
-                <label
-                  htmlFor={field.name}
-                  style={{
-                    marginLeft: 12,
-                    cursor: "pointer",
-                    fontWeight: 500,
-                    color: "#333",
-                    flex: 1,
-                  }}
-                >
+                <span style={{ fontWeight: 500, color: "#333", flex: 1 }}>
                   {field.label}
-                </label>
+                </span>
               </Box>
             ))}
           </Box>

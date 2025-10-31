@@ -69,6 +69,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s, box-shadow 0.2s; /* animación */
   cursor: pointer;
+  width: 65%; /* o 400px si quieres tamaño fijo */
+  margin: 0 auto 12px; /* centra horizontalmente */
 }
 
 .item-movimiento:hover {
@@ -94,7 +96,6 @@
   color: #666;
 }
 
-
 /* --- Ajuste general para inputs y selects --- */
 .MuiTextField-root,
 .MuiFormControl-root {
@@ -113,8 +114,4 @@
   label.MuiInputLabel-root {
     font-size: 16px !important;
   }
-
-
 }
-
-

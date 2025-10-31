@@ -1,10 +1,18 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   Divider,
   IconButton,
+  Button,
+  DialogActions,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -32,8 +40,8 @@ const MovimientoItem = React.memo(({ item, onEdit, onDelete }: any) => {
   return (
     <div className="item-movimiento">
       <div className="info">
-        <strong>{item.categoria}</strong> - {formattedMonto}{" "}
-        {item.moneda} - {item.metodo} - {item.fecha}
+        <strong>{item.categoria}</strong> - {formattedMonto} {item.moneda} -{" "}
+        {item.metodo} - {item.fecha}
       </div>
       <IconButton onClick={() => onEdit(item.tipo, item)}>
         <EditIcon color="primary" />
@@ -44,7 +52,6 @@ const MovimientoItem = React.memo(({ item, onEdit, onDelete }: any) => {
     </div>
   );
 });
-
 
 export default function IngresosGastos() {
   const [activeTab, setActiveTab] = useState<"Ingresos" | "Gastos">("Ingresos");
@@ -61,6 +68,7 @@ export default function IngresosGastos() {
   const [catOptions, setCatOptions] = useState<Record<string, boolean>>({});
   const [metOptions, setMetOptions] = useState<Record<string, boolean>>({});
   const [mndOptions, setMndOptions] = useState<Record<string, boolean>>({});
+  const [formValues, setFormValues] = useState<any>({});
 
   // --- Detectar móvil ---
   useEffect(() => {
@@ -104,11 +112,11 @@ export default function IngresosGastos() {
   const handleSubmit = useCallback(
     async (values: any) => {
       const nuevo: Movimiento = {
-        categoria: values.categoria || "",
+        categoria: values.categoria || [""],
         monto: Number(values.monto) || 0,
-        metodo: values.metodo || "",
+        metodo: values.metodo || [""],
         fecha: values.fecha || new Date().toISOString().split("T")[0],
-        moneda: values.moneda || "",
+        moneda: values.moneda || [""],
         tipo,
       };
 
@@ -279,7 +287,17 @@ export default function IngresosGastos() {
 
       {/* Modal */}
       <Dialog open={openModal} onClose={cerrarModal} fullWidth>
-        <DialogTitle>
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            fontSize: "1.5rem",
+            fontWeight: 600,
+          }}
+        >
           {editando ? `Editar ${tipo}` : `Nuevo ${tipo}`}
         </DialogTitle>
         <Divider />
@@ -289,10 +307,57 @@ export default function IngresosGastos() {
             controls={ingresosGastos}
             values={editando ?? {}}
             submitLabel={editando ? "Actualizar" : "Guardar"}
-            onSubmit={handleSubmit}
+            onChange={setFormValues}
+            onSubmit={() => handleSubmit(formValues)}
             onCancel={cerrarModal}
           />
         </DialogContent>
+        <DialogActions
+          sx={{
+            padding: 3,
+            backgroundColor: "white",
+            borderTop: "1px solid #e2e8f0",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={cerrarModal}
+            sx={{
+              borderRadius: 2,
+              justifyContent: "center",
+              paddingX: 3,
+              
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleSubmit(formValues)}
+            sx={{
+              borderRadius: 2,
+              justifyContent: "center",
+              
+              paddingX: 3,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+              },
+            }}
+          >
+            Aceptar
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );
