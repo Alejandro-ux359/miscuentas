@@ -348,7 +348,7 @@ export default function Negocios() {
           width: 50,
           height: 50,
           borderRadius: "50%",
-          backgroundColor: "#1000eb",
+          background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
           color: "white",
           boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
         }}

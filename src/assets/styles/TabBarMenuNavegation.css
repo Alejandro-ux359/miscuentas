@@ -16,63 +16,9 @@
   z-index: 20;
 }
 
-/* 🌤️🌙 Custom toggle visual tipo imagen */
-.custom-toggle {
-  width: 80px;
-  height: 36px;
-  border-radius: 50px;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: background-color 0.4s ease, justify-content 0.4s ease;
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
 
-/* Fondo de modo claro */
-.custom-toggle.light {
-  background-image: linear-gradient(#b3e5fc, #e1f5fe); /* cielo azul */
-  justify-content: flex-start;
-}
 
-/* Fondo de modo oscuro */
-.custom-toggle.dark {
-  background-image: linear-gradient(#374e64, #030405); /* cielo nocturno */
-  justify-content: flex-end;
-}
 
-/* 🔘 Bola del conmutador */
-.toggle-ball {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.4s ease;
-}
-
-/* 🌞 Sol */
-.sun {
-  width: 24px;
-  height: 24px;
-  background: radial-gradient(circle, #ffeb3b, #fbc02d);
-  border-radius: 50%;
-  box-shadow: 0 0 6px #ffeb3b;
-}
-
-/* 🌜 Luna */
-.moon {
-  width: 24px;
-  height: 24px;
-  background: radial-gradient(circle at 30% 30%, #ffffff, #cfd8dc);
-  border-radius: 50%;
-  box-shadow: 0 0 6px #ffffff88;
-}
 
 /* 🔔 Icono de notificaciones */
 .icon-container {
@@ -113,7 +59,7 @@
   transform: translateX(-50%);
   width: 90%;
   height: 60px;
-  background-color: #00bcd4;
+  background: linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%);
   border-radius: 40px;
   padding: 0 10px;
 }
@@ -142,6 +88,7 @@
   text-align: center;
   padding: 10px 0;
   z-index: 1;
+  color:white;
 }
 
 .tab-item .tab-icon {
@@ -151,7 +98,7 @@
 }
 
 .tab-item.active {
-  color: #4e46e500;
+  color: #cfcfcf00;
 }
 
 .tab-item.active .tab-icon {

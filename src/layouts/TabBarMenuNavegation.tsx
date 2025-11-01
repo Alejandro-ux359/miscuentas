@@ -57,17 +57,7 @@ export default function TabBarMenuNavegation() {
     }
   }, []);
 
-  const toggleTheme = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem("theme", newMode ? "dark" : "light");
-
-    if (newMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-  };
+ 
 
   useEffect(() => {
     const updatePosition = () => {

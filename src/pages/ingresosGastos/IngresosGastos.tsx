@@ -212,13 +212,18 @@ export default function IngresosGastos() {
             left: "10%",
             width: "35%",
             padding: "14px 0",
-            backgroundColor: activeTab === "Ingresos" ? "#1000eb" : "#ccc",
+            background:
+              activeTab === "Ingresos"
+                ? "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)"
+                : "#ccc",
             color: activeTab === "Ingresos" ? "#fff" : "#000",
             border: "none",
             borderRadius: 6,
             cursor: "pointer",
             fontSize: 16,
             zIndex: 1000,
+            fontWeight: "bold",
+            transition: "all 0.3s ease",
           }}
         >
           Ingresos
@@ -233,13 +238,18 @@ export default function IngresosGastos() {
             left: "55%",
             width: "35%",
             padding: "14px 0",
-            backgroundColor: activeTab === "Gastos" ? "#1000eb" : "#ccc",
+            background:
+              activeTab === "Gastos"
+                ? "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)"
+                : "#ccc",
             color: activeTab === "Gastos" ? "#fff" : "#000",
             border: "none",
             borderRadius: 6,
             cursor: "pointer",
             fontSize: 16,
             zIndex: 1000,
+            fontWeight: "bold",
+            transition: "all 0.3s ease",
           }}
         >
           Gastos
@@ -259,7 +269,7 @@ export default function IngresosGastos() {
           width: 50,
           height: 50,
           borderRadius: "50%",
-          backgroundColor: "#1000eb",
+          background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
           color: "white",
           boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
         }}
@@ -327,7 +337,7 @@ export default function IngresosGastos() {
               borderRadius: 2,
               justifyContent: "center",
               paddingX: 3,
-              
+
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
               "&:hover": {
                 background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
@@ -345,7 +355,7 @@ export default function IngresosGastos() {
             sx={{
               borderRadius: 2,
               justifyContent: "center",
-              
+
               paddingX: 3,
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
               "&:hover": {
