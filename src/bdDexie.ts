@@ -1,5 +1,5 @@
 // db-sync.ts
-import Dexie from "dexie";
+import Dexie, {Table} from "dexie";
 //import { supabase } from "./supaBase";
 
 /* -------------------------
@@ -75,6 +75,15 @@ export interface Tasa {
   tasa: number;
 }
 
+export interface Nomencladores {
+  id?: string;
+  moneda: { value: number; label: string }[];
+  categoria: { value: number; label: string }[];
+  metodoPago: { value: number; label: string }[];
+  compraventa: { value: number; label: string }[];
+  tcliente: { value: number; label: string }[];
+}
+
 /* -------------------------
    Clase Dexie con versiones
    ------------------------- */
@@ -82,6 +91,7 @@ class MiDB extends Dexie {
   movimientos!: Dexie.Table<Movimiento, number>;
   bnegocios!: Dexie.Table<BNegocios, number>;
   tasa!: Dexie.Table<Tasa, number>;
+  nomencladores!: Table<Nomencladores, string>;
 
   constructor() {
     super("MiDB");
@@ -91,6 +101,7 @@ class MiDB extends Dexie {
       bnegocios:
         "++id_negocio,  nombre_negocio,  tipo_negocio,  propietario,  direccion,  correo_electronico,  fecha_creacion,  descripcion,  horario_apertura,  horario_cierre,  sitio_web,  trabajadores,  movil,  productos,  money,  cuenta,  metodo_pago,  tbussines,  tipos, id_reportes_finanzas,  total_ingresos,  total_gastos,  balance_general,  ventas_mensuales,  margen_de_ganancia,  historial_caja_diaria, id_usuario,  cedula_ci_cliente,  tipo_cliente,  historial_compras_cliente,  deuda_cliente,  nombre,  apellidos,  cargo_usuario,  salario_usuario,  fecha_ingreso_usuario,  rol_usuario, id_producto,  nombre_producto,  categoria_producto,  precio_venta_producto,  unidad_producto,  stock_actual_producto,  stock_mínimo_producto,  fecha_ingreso_producto,  fecha_actualizacion_producto,  productos_suministrados_proveedor",
       tasa: "++id_tasa, codigo, nombre_tasa, compras_tasa, ventas_tasa, tasa",
+      nomencladores: "++id",
     });
 
     // ===== Versiones históricas (migraciones)
@@ -121,10 +132,22 @@ class MiDB extends Dexie {
             if (b.fecha_creacion === undefined) b.fecha_creacion = Date.now();
           });
       });
+    this.version(4).stores({
+      nomencladores: "&id",
+    });
   }
 }
 
 export const db = new MiDB();
+
+/* -------------------------
+   Función para borrar la DB (para depuración)
+------------------------- */
+export const resetDB = async () => {
+  await db.delete();
+  console.log("🗑️ Base de datos borrada");
+  window.location.reload();
+};
 
 // /* -------------------------
 //    Función genérica para limpiar payload

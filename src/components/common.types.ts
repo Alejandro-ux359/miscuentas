@@ -25,6 +25,7 @@ export type ICommonProps = {
   disabledOnEdit?: boolean;
   persist?: boolean;
   url?: string;
+  getOptions?: () => { value: any; label: string }[];
 };
 
 export type IOptionsProps = ICommonProps & {

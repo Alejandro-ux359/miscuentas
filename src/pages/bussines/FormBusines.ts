@@ -1,5 +1,5 @@
 import { IGenericControls } from "../../components/controls.types";
-import { endpoints } from "../../components/endpoints";
+import { endpoints } from "../../nomencladores/endpoints";
 
 export const formulariosDisponibles: IGenericControls[] = [
   {

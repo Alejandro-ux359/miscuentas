@@ -1,4 +1,3 @@
-// src/_pwa-framework/config/endpoints.ts
 export const NOMENCLADORES_URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:3000/nomencladores"

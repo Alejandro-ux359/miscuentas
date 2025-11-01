@@ -30,6 +30,7 @@ import {
 import { BNegocios } from "../../bdDexie";
 import { ISelect } from "../../components/controls.types";
 import axios from "axios";
+import { useNomencladoresLocal } from "../../nomencladores/useNomencladoresLocal";
 
 interface ISelectFieldProps {
   control: ISelect;
@@ -41,6 +42,8 @@ export default function Negocios() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [editarDesdeDetalle, setEditarDesdeDetalle] = useState(false);
+  const { data: nomencladores, loading: loadingNomencladores } =
+    useNomencladoresLocal();
 
   const [open, setOpen] = useState(false);
   const [openSubModal, setOpenSubModal] = useState(false);
@@ -76,19 +79,52 @@ export default function Negocios() {
   const SelectField = ({ control, value, onChange }: ISelectFieldProps) => {
     const [options, setOptions] = useState<any[]>(control.checkValues || []);
 
-    useEffect(() => {
-      if (control.url) {
-        axios.get(control.url).then((res) => {
-          const mapped = res.data.map((item: any) => ({
-            value: item.id_concepto,
-            label: item.denominacion,
-          }));
-          setOptions(mapped);
-        });
-      } else if (control.checkValues) {
-        setOptions(control.checkValues);
+
+
+useEffect(() => {
+  const cargarOpciones = async () => {
+    let localOptions: any[] = [];
+
+    // Si hay URL y estamos online
+    if (control.url && navigator.onLine) {
+      try {
+        const res = await axios.get(control.url);
+        localOptions = res.data.map((item: any) => ({
+          value: item.id ?? item.id_concepto,
+          label: item.nombre ?? item.denominacion,
+        }));
+      } catch (err) {
+        console.warn("Error cargando desde server, se usará local", err);
       }
-    }, [control.url, control.checkValues]);
+    }
+
+    // Si no hay URL o estamos offline
+    if (!localOptions.length) {
+      const nomencladores = await db.nomencladores.get("default");
+      if (nomencladores) {
+        const nameToNomenclador: Record<string, any[]> = {
+          metodo_pago: nomencladores.metodoPago,
+          tipos: nomencladores.compraventa,
+          tipo_cliente: nomencladores.tcliente,
+          // si quieres agregar más, ejemplo:
+          moneda: nomencladores.moneda,
+          categoria_producto: nomencladores.categoria,
+        };
+
+        localOptions = nameToNomenclador[control.name] || [];
+      }
+    }
+
+    setOptions(localOptions);
+  };
+
+  cargarOpciones();
+}, [control]);
+
+
+
+
+
 
     return (
       <TextField

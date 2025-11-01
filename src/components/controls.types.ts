@@ -80,6 +80,7 @@ export type ISelect = {
   checkValues?: any[];
   url?: string;
   useRef?: any;
+  key?: string;
   showDelete?: boolean;
 } & IOptionsProps;
 

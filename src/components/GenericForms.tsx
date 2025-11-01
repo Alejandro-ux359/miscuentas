@@ -24,6 +24,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
+import { useOptions } from "../nomencladores/useOptions";
+import { Nomencladores } from "../bdDexie";
 
 // Componente CampoItem memoizado
 export const CampoItem: React.FC<{
@@ -225,25 +227,12 @@ const GenericForm: React.FC<GenericFormProps> = ({
                         </div>
                       );
 
-                    case "select":
-                      const selectControl = control as ISelect;
-                      const [options, setOptions] = React.useState<any[]>(
-                        selectControl.checkValues || []
+                    case "select": {
+                      // ✅ Llamamos el hook dentro del componente
+                      const options = useOptions(
+                        control.key as keyof Nomencladores, // clave para el nomenclador
+                        control.url // url opcional para cargar online
                       );
-
-                      React.useEffect(() => {
-                        if (selectControl.url) {
-                          axios.get(selectControl.url).then((res) => {
-                            const mapped = res.data.map((item: any) => ({
-                              value: item.id_concepto,
-                              label: item.denominacion,
-                            }));
-                            setOptions(mapped); // Array válido para checkValues
-                          });
-                        } else if (selectControl.checkValues) {
-                          setOptions(selectControl.checkValues);
-                        }
-                      }, [selectControl.url, selectControl.checkValues]);
 
                       return (
                         <div key={control.name} style={{ marginBottom: 12 }}>
@@ -251,7 +240,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
                             select
                             label={control.label}
                             name={control.name}
-                            value={values[control.name]}
+                            value={values[control.name] || ""}
                             onChange={handleChange}
                             fullWidth
                             SelectProps={{ native: true }}
@@ -267,6 +256,7 @@ const GenericForm: React.FC<GenericFormProps> = ({
                           </TextField>
                         </div>
                       );
+                    }
 
                     case "check":
                       return (
