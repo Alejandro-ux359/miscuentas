@@ -79,52 +79,45 @@ export default function Negocios() {
   const SelectField = ({ control, value, onChange }: ISelectFieldProps) => {
     const [options, setOptions] = useState<any[]>(control.checkValues || []);
 
+    useEffect(() => {
+      const cargarOpciones = async () => {
+        let localOptions: any[] = [];
 
+        // Si hay URL y estamos online
+        if (control.url && navigator.onLine) {
+          try {
+            const res = await axios.get(control.url);
+            localOptions = res.data.map((item: any) => ({
+              value: item.id ?? item.id_concepto,
+              label: item.nombre ?? item.denominacion,
+            }));
+          } catch (err) {
+            console.warn("Error cargando desde server, se usará local", err);
+          }
+        }
 
-useEffect(() => {
-  const cargarOpciones = async () => {
-    let localOptions: any[] = [];
+        // Si no hay URL o estamos offline
+        if (!localOptions.length) {
+          const nomencladores = await db.nomencladores.get("default");
+          if (nomencladores) {
+            const nameToNomenclador: Record<string, any[]> = {
+              metodo_pago: nomencladores.metodoPago,
+              tipos: nomencladores.compraventa,
+              tipo_cliente: nomencladores.tcliente,
+              // si quieres agregar más, ejemplo:
+              moneda: nomencladores.moneda,
+              categoria_producto: nomencladores.categoria,
+            };
 
-    // Si hay URL y estamos online
-    if (control.url && navigator.onLine) {
-      try {
-        const res = await axios.get(control.url);
-        localOptions = res.data.map((item: any) => ({
-          value: item.id ?? item.id_concepto,
-          label: item.nombre ?? item.denominacion,
-        }));
-      } catch (err) {
-        console.warn("Error cargando desde server, se usará local", err);
-      }
-    }
+            localOptions = nameToNomenclador[control.name] || [];
+          }
+        }
 
-    // Si no hay URL o estamos offline
-    if (!localOptions.length) {
-      const nomencladores = await db.nomencladores.get("default");
-      if (nomencladores) {
-        const nameToNomenclador: Record<string, any[]> = {
-          metodo_pago: nomencladores.metodoPago,
-          tipos: nomencladores.compraventa,
-          tipo_cliente: nomencladores.tcliente,
-          // si quieres agregar más, ejemplo:
-          moneda: nomencladores.moneda,
-          categoria_producto: nomencladores.categoria,
-        };
+        setOptions(localOptions);
+      };
 
-        localOptions = nameToNomenclador[control.name] || [];
-      }
-    }
-
-    setOptions(localOptions);
-  };
-
-  cargarOpciones();
-}, [control]);
-
-
-
-
-
+      cargarOpciones();
+    }, [control]);
 
     return (
       <TextField
@@ -224,42 +217,52 @@ useEffect(() => {
   };
 
   // Guardar negocio en Dexie
-  const guardarNegocio = async () => {
-    if (!valores.nombre_negocio || !valores.tipo_negocio) {
-      alert("Debes completar los campos obligatorios");
-      return;
-    }
+ const guardarNegocio = async () => {
+  if (!valores.nombre_negocio || !valores.tipo_negocio) {
+    alert("Debes completar los campos obligatorios");
+    return;
+  }
 
-    const negocioAGuardar: BNegocios = {
-      nombre_negocio: valores.nombre_negocio,
-      tipo_negocio: valores.tipo_negocio,
-      ...valores,
-    };
+  const negocioAGuardar: BNegocios = {
+    nombre_negocio: valores.nombre_negocio,
+    tipo_negocio: valores.tipo_negocio,
+    ...valores,
+  };
 
+  try {
     // Guardar o actualizar
     if (negocioEditarIndex !== null) {
       const negocio = negociosGuardados[negocioEditarIndex];
       if (negocio.id_negocio !== undefined) {
         const updatePayload: Partial<BNegocios> = { ...negocioAGuardar };
         delete updatePayload.id_negocio;
+
+        // Actualizar Dexie
         await db.bnegocios.update(negocio.id_negocio, updatePayload);
+
+        // Sincronizar con backend
+        await syncUpdateNegocio({ ...negocioAGuardar, id_negocio: negocio.id_negocio });
       }
     } else {
-      await db.bnegocios.add(negocioAGuardar);
+      // Insertar en Dexie
+      const id = await db.bnegocios.add(negocioAGuardar);
+
+      // Insertar en backend con idDexie
+      await syncInsertNegocio({ ...negocioAGuardar, id_negocio: id }, id);
     }
 
-    // 🔄 Actualizar lista completa
+    // Actualizar lista local
     const all = await db.bnegocios.toArray();
     setNegociosGuardados(all);
 
-    // 🔁 Si venías desde el detalle, actualiza también el negocio mostrado
+    // Actualizar detalle si venías de allí
     if (editarDesdeDetalle && negocioTemporal) {
       const negocioActualizado = all.find(
         (n) => n.id_negocio === negocioTemporal.id_negocio
       );
       if (negocioActualizado) {
         setNegocioSeleccionado(negocioActualizado);
-        setOpenDetalleModal(true); // reabre el modal con datos actualizados
+        setOpenDetalleModal(true);
       }
     }
 
@@ -270,7 +273,12 @@ useEffect(() => {
     setEditarDesdeDetalle(false);
     setNegocioTemporal(null);
     handleClose();
-  };
+  } catch (err) {
+    console.error("Error guardando negocio:", err);
+    alert("Ocurrió un error al guardar el negocio");
+  }
+};
+
 
   const abrirNuevoFormulario = () => {
     setValores({ nombre_negocio: "", tipo_negocio: "" });
@@ -318,58 +326,33 @@ useEffect(() => {
   const handleCancelarEliminar = () =>
     setConfirmarEliminar({ open: false, index: null });
 
-  const handleConfirmarEliminar = async () => {
-    if (confirmarEliminar.index !== null) {
-      const negocio = negociosGuardados[confirmarEliminar.index];
-      if (negocio.id_negocio !== undefined) {
-        await db.bnegocios.delete(negocio.id_negocio);
-      }
-      setNegociosGuardados((prev) =>
-        prev.filter((_, i) => i !== confirmarEliminar.index)
-      );
-    }
-    setConfirmarEliminar({ open: false, index: null });
-  };
-
-  // 🔄 Sincronizar datos locales con Supabase automáticamente
-  useEffect(() => {
-    const sincronizarNegocios = async () => {
+const handleConfirmarEliminar = async () => {
+  if (confirmarEliminar.index !== null) {
+    const negocio = negociosGuardados[confirmarEliminar.index];
+    if (negocio.id_negocio !== undefined) {
       try {
-        // Verifica conexión
-        if (!navigator.onLine) return;
+        // Eliminar de Dexie
+        await db.bnegocios.delete(negocio.id_negocio);
 
-        console.log("⏳ Sincronizando negocios con Supabase...");
+        // Sincronizar con Supabase
+        await syncDeleteNegocio(negocio);
 
-        // Obtener todos los negocios locales
-        const negociosLocales = await db.bnegocios.toArray();
-
-        for (const neg of negociosLocales) {
-          // Si no tiene un id remoto (id_negocio aún sin sincronizar), lo insertamos
-          if (!neg.id_negocio) {
-            await syncInsertNegocio(neg);
-          } else {
-            // Si ya existe en remoto, hacemos update
-            await syncUpdateNegocio(neg);
-          }
-        }
-
-        console.log("✅ Sincronización completa con Supabase");
+        // Actualizar lista local
+        setNegociosGuardados((prev) =>
+          prev.filter((_, i) => i !== confirmarEliminar.index)
+        );
       } catch (err) {
-        console.error("❌ Error al sincronizar negocios:", err);
+        console.error("Error eliminando negocio:", err);
+        alert("Ocurrió un error al eliminar el negocio");
       }
-    };
+    }
+  }
+  setConfirmarEliminar({ open: false, index: null });
+};
 
-    // Ejecutar sincronización al montar el componente
-    sincronizarNegocios();
 
-    // Reintentar cada vez que vuelva la conexión
-    window.addEventListener("online", sincronizarNegocios);
 
-    // Limpieza
-    return () => {
-      window.removeEventListener("online", sincronizarNegocios);
-    };
-  }, []);
+ 
 
   return (
     <>

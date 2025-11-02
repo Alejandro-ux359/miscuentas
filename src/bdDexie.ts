@@ -269,12 +269,25 @@ export const syncDeleteMovimiento = async (mov: Movimiento) => {
    ------------------------- */
 export const syncInsertNegocio = async (neg: BNegocios, idDexie?: number) => {
   const payload = idDexie ? { ...neg, id_negocio: idDexie } : { ...neg };
-  await fetch(`${API_URL}/sync/bnegocios`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify([payload]),
-  });
+  try {
+    const res = await fetch(`${API_URL}/sync/bnegocios`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([payload]),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Error syncInsertNegocio:", res.status, text);
+      throw new Error(`Sync failed: ${res.status}`);
+    } else {
+      console.log("Negocio sincronizado:", payload);
+    }
+  } catch (err) {
+    console.error("Fallo al sincronizar negocio:", err);
+  }
 };
+
 
 export const syncUpdateNegocio = async (neg: BNegocios) => {
   await fetch(`${API_URL}/sync/bnegocios`, {
@@ -285,9 +298,28 @@ export const syncUpdateNegocio = async (neg: BNegocios) => {
 };
 
 export const syncDeleteNegocio = async (neg: BNegocios) => {
-  await fetch(`${API_URL}/sync/bnegocios`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify([neg]),
-  });
+  if (!neg.id_negocio) throw new Error("El negocio no tiene id_negocio");
+
+  try {
+    const res = await fetch(`${API_URL}/sync/bnegocios/${neg.id_negocio}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Delete failed: ${res.status} ${text}`);
+    }
+
+    const data = await res.json();
+    console.log("Negocio eliminado en Supabase:", data);
+    return data;
+  } catch (err) {
+    console.error("Error eliminando negocio en backend:", err);
+    throw err;
+  }
 };
+
+
+
+
