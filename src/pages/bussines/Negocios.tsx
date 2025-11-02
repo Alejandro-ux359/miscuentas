@@ -241,14 +241,14 @@ export default function Negocios() {
         await db.bnegocios.update(negocio.id_negocio, updatePayload);
 
         // Sincronizar con backend
-        await syncUpdateNegocio({ ...negocioAGuardar, id_negocio: negocio.id_negocio });
+        syncUpdateNegocio({ ...negocioAGuardar, id_negocio: negocio.id_negocio });
       }
     } else {
       // Insertar en Dexie
       const id = await db.bnegocios.add(negocioAGuardar);
 
       // Insertar en backend con idDexie
-      await syncInsertNegocio({ ...negocioAGuardar, id_negocio: id }, id);
+      syncInsertNegocio({ ...negocioAGuardar, id_negocio: id }, id);
     }
 
     // Actualizar lista local
@@ -335,7 +335,7 @@ const handleConfirmarEliminar = async () => {
         await db.bnegocios.delete(negocio.id_negocio);
 
         // Sincronizar con Supabase
-        await syncDeleteNegocio(negocio);
+        syncDeleteNegocio(negocio);
 
         // Actualizar lista local
         setNegociosGuardados((prev) =>
