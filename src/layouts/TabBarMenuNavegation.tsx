@@ -17,7 +17,7 @@ export default function TabBarMenuNavegation() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState();
+  const [user, setUser] = useState<any>(null);
 
   const tabs = [
     {
@@ -85,6 +85,13 @@ export default function TabBarMenuNavegation() {
           background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
         }}
       >
+        <div className="user-avatar">
+          <img
+            src={user?.avatarUrl || "https://i.pravatar.cc/100"} // puedes poner una imagen por defecto
+            alt="Usuario"
+          />
+        </div>
+
         <div className="icon-container">
           <NotificationsNoneIcon
             className="notification-icon"
