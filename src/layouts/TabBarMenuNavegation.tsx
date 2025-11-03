@@ -17,6 +17,7 @@ export default function TabBarMenuNavegation() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [user, setUser] = useState();
 
   const tabs = [
     {
@@ -57,8 +58,6 @@ export default function TabBarMenuNavegation() {
     }
   }, []);
 
- 
-
   useEffect(() => {
     const updatePosition = () => {
       const activeIndex = tabs.findIndex((tab) => tab.id === activeTab);
@@ -80,17 +79,12 @@ export default function TabBarMenuNavegation() {
 
   return (
     <>
-      <div className="top-bar">
-
-        {/* <div
-          className={`custom-toggle ${isDarkMode ? "dark" : "light"}`}
-          onClick={toggleTheme}>
-          <div className="toggle-ball">
-            {isDarkMode ? <div className="moon" /> : <div className="sun" />}
-          </div>
-        </div> */}
-
-
+      <div
+        className="top-bar"
+        style={{
+          background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
+        }}
+      >
         <div className="icon-container">
           <NotificationsNoneIcon
             className="notification-icon"

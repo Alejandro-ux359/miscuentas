@@ -17,12 +17,6 @@
   }
 }
 
-/* 🌙 Dark mode general */
-body.dark-mode .notification-page {
-  background-color: #121212;
-  color: #f0f0f0;
-}
-
 /* ============================
    🔝 Encabezado
    ============================ */
@@ -31,8 +25,9 @@ body.dark-mode .notification-page {
   align-items: center;
   padding: 16px;
   gap: 12px;
+  color: #f0f0f0;
   border-bottom: 1px solid #ccc;
-  background-color: #fff;
+  background: linear-gradient(135deg, #1d4ed8 0%, #7e22ce 100%);
 }
 
 body.dark-mode .notification-header {
@@ -46,6 +41,7 @@ body.dark-mode .notification-header {
 /* Oculto por defecto (desktop) */
 .notification-header .back-icon {
   display: none !important;
+  color: #f0f0f0 !important;
 }
 
 /* Solo visible en móviles y tablets */
