@@ -6,9 +6,10 @@ const WelcomePage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [showIntro, setShowIntro] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showFinal, setShowFinal] = useState(false); // pantalla 3
   const navigate = useNavigate();
 
-  const slides = [
+ const slides = [
     {
       image: "/src/assets/imagenes/inicio.svg",
       title: "Resumen Financiero",
@@ -34,31 +35,45 @@ const WelcomePage: React.FC = () => {
       title: "Análisis de Movimientos",
       text: "En esta sección podrás registrar tus billetes de manera rápida y precisa. Simplemente ingresa la cantidad de cada denominación y multiplícala por el valor indicado a su lado. La aplicación calculará automáticamente la suma total y la mostrará en la parte superior. Así tendrás un control claro y confiable de tus fondos en todo momento.",
     },
-  ];
+   ];
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const hasSeen = localStorage.getItem("hasSeenWelcome");
+
+    if (hasSeen === "true") {
+      // Usuario ya vio la intro: mostrar solo pantalla 3
       setShowSplash(false);
-      setShowIntro(true);
-    }, 3000);
-    return () => clearTimeout(timer);
+      setShowIntro(false);
+      setShowFinal(true);
+    } else {
+      // Primera vez: mostrar splash y luego intro
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        setShowIntro(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide((prev) => prev + 1);
     } else {
+      // Final del slider
+      localStorage.setItem("hasSeenWelcome", "true");
       setShowIntro(false);
+      setShowFinal(true);
     }
+  };
+
+  const handleSkip = () => {
+    localStorage.setItem("hasSeenWelcome", "true");
+    setShowIntro(false);
+    setShowFinal(true);
   };
 
   const handleBack = () => {
     if (currentSlide > 0) setCurrentSlide((prev) => prev - 1);
-  };
-
-  // 🔹 Botón Skip: salta directo a la pantalla 3
-  const handleSkip = () => {
-    setShowIntro(false);
   };
 
   return (
@@ -90,24 +105,29 @@ const WelcomePage: React.FC = () => {
         >
           <Box sx={{ mb: 2 }}>
             <img
-              src="/logo/logo2.2.svg" // ruta correcta desde public
+              src="/logo/logo2.2.svg"
               alt="Logo"
-              width={200} // tamaño más grande que 80
-              height={200} // ajusta según lo necesites
-              style={{ objectFit: "contain" }} // mantiene proporciones
+              width={200}
+              height={200}
+              style={{ objectFit: "contain" }}
             />
           </Box>
 
           <Typography
             variant="h5"
-            sx={{ color: "#fff", fontFamily: "'Montserrat', sans-serif", letterSpacing: 3, textTransform: "uppercase" }}
+            sx={{
+              color: "#fff",
+              fontFamily: "'Montserrat', sans-serif",
+              letterSpacing: 3,
+              textTransform: "uppercase",
+            }}
           >
             Mis Cuentas
           </Typography>
         </Box>
       </Fade>
 
-      {/* 💡 Pantalla 2: Explicación */}
+      {/* 💡 Pantalla 2: Slider */}
       <Fade in={showIntro} timeout={1000}>
         <Box
           sx={{
@@ -123,14 +143,8 @@ const WelcomePage: React.FC = () => {
             position: "relative",
           }}
         >
-          {/* 🔝 Texto Skip arriba a la derecha */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: "5%",
-              right: "6%",
-            }}
-          >
+          {/* Skip */}
+          <Box sx={{ position: "absolute", top: "5%", right: "6%" }}>
             <Typography
               variant="body1"
               sx={{
@@ -165,7 +179,7 @@ const WelcomePage: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* 🔘 Botones centrados */}
+          {/* Botones */}
           <Box
             sx={{
               position: "absolute",
@@ -209,11 +223,11 @@ const WelcomePage: React.FC = () => {
         </Box>
       </Fade>
 
-      {/* 🚀 Pantalla 3: Bienvenida final */}
-      <Fade in={!showSplash && !showIntro} timeout={1000}>
+      {/* 🚀 Pantalla 3: Final */}
+      <Fade in={showFinal} timeout={1000}>
         <Box
           sx={{
-            display: !showSplash && !showIntro ? "flex" : "none",
+            display: showFinal ? "flex" : "none",
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
@@ -223,20 +237,8 @@ const WelcomePage: React.FC = () => {
             position: "relative",
           }}
         >
-          <Box
-            sx={{
-              mt: "70%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Box
-              sx={{
-                md: 0.1,
-                mt: "-80%", // ajusta aquí para mover el logo hacia arriba o abajo
-              }}
-            >
+          <Box sx={{ mt: "70%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <Box sx={{ mt: "-80%" }}>
               <img
                 src="/logo/logo2.2.svg"
                 alt="Logo"
@@ -246,19 +248,13 @@ const WelcomePage: React.FC = () => {
               />
             </Box>
 
-            <Typography
-              variant="h4"
-              sx={{ color: "#fff", fontWeight: 700, mb: 1 }}
-            >
+            <Typography variant="h4" sx={{ color: "#fff", fontWeight: 700, mb: 1 }}>
               Bienvenidos
             </Typography>
             <Typography variant="subtitle1" sx={{ color: "#fcefee", mb: 3 }}>
               Mis cuentas
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "#fff", mb: 4, mt: "10%" }}
-            >
+            <Typography variant="body2" sx={{ color: "#fff", mb: 4, mt: "10%" }}>
               Toma el control de tus finanzas. <br />
               Crea una cuenta y estarás listo para empezar.
             </Typography>
@@ -281,12 +277,7 @@ const WelcomePage: React.FC = () => {
             </Button>
           </Box>
 
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: "10%",
-            }}
-          >
+          <Box sx={{ position: "absolute", bottom: "10%" }}>
             <Typography
               variant="body2"
               sx={{
