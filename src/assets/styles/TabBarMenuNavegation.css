@@ -6,14 +6,15 @@
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
-  height: 70px;
+  height: 80px;
  /* background-color: #00bcd4;*/
-  border-radius:0px 0px 0px 60px;
+  border-radius:0px 0px 0px 60px ;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
   z-index: 20;
+  margin-left: 10px;
 }
 
 
@@ -35,19 +36,29 @@
 /* 🔔 Icono de notificaciones */
 .icon-container {
   display: flex;
-  gap: 15px;
+  gap: 30px;
   align-items: center;
   justify-content: flex-end;
 }
 
-.notification-icon,
+.notification-icon {
+  font-size: 28px;
+  color: #ffffff;
+  cursor: pointer;
+  position: relative; /* 🔹 permite moverlo sin afectar otros */
+  top: 2px;           /* 🔹 ajusta verticalmente */
+  right: 15px;
+}
+
 .setting-icon {
   font-size: 28px;
   color: #ffffff;
   cursor: pointer;
-  justify-content: flex-end;
-  align-items: center;
+  right: 20px;
+  position: relative; /* 🔹 permite moverlo sin afectar otros */
+  top: 2px;          /* 🔹 ajusta verticalmente */
 }
+
 
 /* BOTTOM MENU (Barra inferior) */
 .bottom-menu-container {

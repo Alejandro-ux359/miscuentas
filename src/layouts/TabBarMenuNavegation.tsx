@@ -82,6 +82,7 @@ export default function TabBarMenuNavegation() {
       <div
         className="top-bar"
         style={{
+          
           background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
         }}
       >

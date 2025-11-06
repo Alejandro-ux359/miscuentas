@@ -7,13 +7,16 @@ import Negocios from "../../pages/bussines/Negocios";
 import IngresosGastos from "../../pages/ingresosGastos/IngresosGastos";
 import Configuracion from "../../pages/configuracion/Configuracion";
 import Estadisticas from "../../pages/estadisticas/Estadisticas";
-
-
+import WelcomePage from "../../welcome/Welcome";
+import LoginPage from "../../welcome/Login";
+import RegisterPage from "../../welcome/Register";
 
 function AppRouter() {
   return (
     <Routes>
-       <Route path="/" element={<Navigate to="/inicio" />} />
+      <Route path="/" element={<WelcomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/inicio" element={<Home />} />
       <Route path="/notificacion" element={<NotificationPage />} />
       <Route path="/calculadora" element={<Calculadora />} />
@@ -21,8 +24,7 @@ function AppRouter() {
       <Route path="/ingresosgastos" element={<IngresosGastos />} />
       <Route path="/estadisticas" element={<Estadisticas />} />
       <Route path="/configuracion" element={<Configuracion />} />
-
-   </Routes>
+    </Routes>
   );
 }
 
