@@ -1,0 +1,138 @@
+/* Fondo general */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fb 0%, #e5ecf3 100%);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Contenedor principal */
+.login-container {
+   background-color: white;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 30px;
+  border-radius: 24px;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+/* Ilustración superior */
+.login-illustration {
+  width: 100%;
+  max-width: 230px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Título y subtítulo */
+.login-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2d3d;
+  margin-bottom: 0.25rem;
+}
+
+.login-subtitle {
+  color: #8c98a4;
+  margin-bottom: 1.5rem;
+}
+
+/* Campos de entrada */
+.MuiTextField-root {
+  background: #f8f9fb;
+  border-radius: 10px;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border: none !important;
+}
+
+.MuiInputBase-input {
+  padding: 14px !important;
+}
+
+/* Checkbox y labels */
+.MuiFormControlLabel-root {
+  margin: 0;
+}
+
+.MuiInputBase-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* Botón principal */
+.login-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  padding: 12px 0 !important;
+  margin-top: 10px !important;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3); /* Sombra suave */
+}
+
+/* Efecto hover con animación */
+.login-button:hover {
+  background: linear-gradient(135deg, #5a6ee0 0%, #6a3d94 100%) !important;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+
+/* Link de registro */
+.login-link {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #8c98a4;
+}
+
+.login-link a {
+  color: #1f2d3d;
+  text-decoration: none;
+  font-weight: 600;
+}
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+.MuiTextField-root {
+  margin-bottom: 15px !important;
+}
+
+.MuiOutlinedInput-root {
+  background: #f8f9fb;
+  border-radius: 12px;
+}
+
+
+.Mui-focused .MuiSvgIcon-root {
+  color: #1f2d3d !important;
+}
+
+/* Enlace de "¿Se te olvidó tu contraseña?" */
+.forgot-password-link {
+  font-size: 0.9rem;
+  color: #667eea;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
