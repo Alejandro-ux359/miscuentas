@@ -11,27 +11,27 @@ const WelcomePage: React.FC = () => {
 
  const slides = [
     {
-      image: "/src/assets/imagenes/inicio.svg",
+      image: "/src/assets/imagenes/inicio.png",
       title: "Resumen Financiero",
       text: "En la pantalla de inicio encontrarás un resumen claro y actualizado de tus ingresos y gastos totales. La aplicación calcula automáticamente tus operaciones, agrupándolas por moneda para ofrecerte mayor precisión. Además, incorpora el valor real del mercado informal cubano, obtenido de El Toque, para mantenerte siempre informado. De esta forma, podrás tomar decisiones financieras con mayor confianza y control sobre tu economía personal.",
     },
     {
-      image: "/src/assets/imagenes/ingresosGastos.svg",
+      image: "/src/assets/imagenes/ingresosGastos.png",
       title: "Registrar Movimientos",
       text: "En esta sección podrás registrar fácilmente tus movimientos financieros. Selecciona entre ingresos o gastos y utiliza el formulario para agregar cada operación de manera detallada. Esto te permitirá mantener un control claro y ordenado de tus finanzas personales. Cada registro se integrará automáticamente a tu balance general para ofrecerte una visión completa de tu economía..",
     },
     {
-      image: "/src/assets/imagenes/negocios.svg",
+      image: "/src/assets/imagenes/negocios.png",
       title: "Formularios Personalizados",
       text: "En esta sección podrás crear tu propio formulario personalizado según las necesidades de tu negocio. A través de un subformulario, podrás añadir y organizar los campos que desees incluir en tu formulario principal. Esto te brinda la flexibilidad de adaptar la herramienta a distintos tipos de gestión o seguimiento. Diseña tu flujo de trabajo de manera sencilla y eficiente, optimizando la información que realmente necesitas.",
     },
     {
-      image: "/src/assets/imagenes/calculadora.svg",
+      image: "/src/assets/imagenes/calculadora.png",
       title: "Calculadora de Billetes",
       text: "En esta sección podrás registrar tus billetes de manera rápida y precisa. Simplemente ingresa la cantidad de cada denominación y multiplícala por el valor indicado a su lado. La aplicación calculará automáticamente la suma total y la mostrará en la parte superior. Así tendrás un control claro y confiable de tus fondos en todo momento.",
     },
     {
-      image: "/src/assets/imagenes/estadisticas.svg",
+      image: "/src/assets/imagenes/estadisticas.png",
       title: "Análisis de Movimientos",
       text: "En esta sección podrás registrar tus billetes de manera rápida y precisa. Simplemente ingresa la cantidad de cada denominación y multiplícala por el valor indicado a su lado. La aplicación calculará automáticamente la suma total y la mostrará en la parte superior. Así tendrás un control claro y confiable de tus fondos en todo momento.",
     },

@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
 
   const handleSignIn = () => {
     console.log("Username:", username, "Password:", password);
-    navigate("/home");
+    navigate("/inicio");
   };
 
   const handleForgotPassword = () => {

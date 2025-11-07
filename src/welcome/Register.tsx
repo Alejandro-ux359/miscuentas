@@ -22,7 +22,7 @@ const RegisterPage: React.FC = () => {
 
   const handleSignUp = () => {
     console.log("Username:", username, "Mobile:", mobile, "Password:", password);
-    navigate("/home");
+    navigate("/login");
   };
 
   return (
