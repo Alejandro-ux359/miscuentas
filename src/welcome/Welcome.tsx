@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Button, Fade } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import inicio from "../../public/imagenes/inicio.png"
+import calculadora from "../../public/imagenes/calculadora.png"
+import negocios from "../../public/imagenes/negocios.png"
+import estadisticas from "../../public/imagenes/estadisticas.png"
+import ingresosGastos from "../../public/imagenes/ingresosGastos.png"
+
+
 
 const WelcomePage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -11,27 +18,27 @@ const WelcomePage: React.FC = () => {
 
   const slides = [
     {
-      image: "/public/imagenes/inicio.png",
+      image: inicio,
       title: "Resumen Financiero",
       text: "En la pantalla de inicio encontrarás un resumen claro y actualizado de tus ingresos y gastos totales. La aplicación calcula automáticamente tus operaciones, agrupándolas por moneda para ofrecerte mayor precisión. Además, incorpora el valor real del mercado informal cubano, obtenido de El Toque, para mantenerte siempre informado. De esta forma, podrás tomar decisiones financieras con mayor confianza y control sobre tu economía personal.",
     },
     {
-      image: "/public/imagenes/ingresosGastos.png",
+      image: ingresosGastos,
       title: "Registrar Movimientos",
       text: "En esta sección podrás registrar fácilmente tus movimientos financieros. Selecciona entre ingresos o gastos y utiliza el formulario para agregar cada operación de manera detallada. Esto te permitirá mantener un control claro y ordenado de tus finanzas personales. Cada registro se integrará automáticamente a tu balance general para ofrecerte una visión completa de tu economía..",
     },
     {
-      image: "/public/imagenes/negocios.png",
+      image: negocios,
       title: "Formularios Personalizados",
       text: "En esta sección podrás crear tu propio formulario personalizado según las necesidades de tu negocio. A través de un subformulario, podrás añadir y organizar los campos que desees incluir en tu formulario principal. Esto te brinda la flexibilidad de adaptar la herramienta a distintos tipos de gestión o seguimiento. Diseña tu flujo de trabajo de manera sencilla y eficiente, optimizando la información que realmente necesitas.",
     },
     {
-      image: "/public/imagenes/calculadora.png",
+      image: calculadora,
       title: "Calculadora de Billetes",
       text: "En esta sección podrás registrar tus billetes de manera rápida y precisa. Simplemente ingresa la cantidad de cada denominación y multiplícala por el valor indicado a su lado. La aplicación calculará automáticamente la suma total y la mostrará en la parte superior. Así tendrás un control claro y confiable de tus fondos en todo momento.",
     },
     {
-      image: "/publicimagenes/estadisticas.png",
+      image: estadisticas,
       title: "Análisis de Movimientos",
       text: "En esta sección podrás registrar tus billetes de manera rápida y precisa. Simplemente ingresa la cantidad de cada denominación y multiplícala por el valor indicado a su lado. La aplicación calculará automáticamente la suma total y la mostrará en la parte superior. Así tendrás un control claro y confiable de tus fondos en todo momento.",
     },
