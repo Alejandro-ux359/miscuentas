@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Button, Fade } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import inicio from "../../public/imagenes/inicio.png"
-import calculadora from "../../public/imagenes/calculadora.png"
-import negocios from "../../public/imagenes/negocios.png"
-import estadisticas from "../../public/imagenes/estadisticas.png"
-import ingresosGastos from "../../public/imagenes/ingresosGastos.png"
-
-
+import inicio from "../../public/imagenes/inicio.png";
+import calculadora from "../../public/imagenes/calculadora.png";
+import negocios from "../../public/imagenes/negocios.png";
+import estadisticas from "../../public/imagenes/estadisticas.png";
+import ingresosGastos from "../../public/imagenes/ingresosGastos.png";
 
 const WelcomePage: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [showIntro, setShowIntro] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showFinal, setShowFinal] = useState(false); // pantalla 3
+  const [showFinal, setShowFinal] = useState(false);
   const navigate = useNavigate();
 
   const slides = [
@@ -25,7 +23,7 @@ const WelcomePage: React.FC = () => {
     {
       image: ingresosGastos,
       title: "Registrar Movimientos",
-      text: "En esta sección podrás registrar fácilmente tus movimientos financieros. Selecciona entre ingresos o gastos y utiliza el formulario para agregar cada operación de manera detallada. Esto te permitirá mantener un control claro y ordenado de tus finanzas personales. Cada registro se integrará automáticamente a tu balance general para ofrecerte una visión completa de tu economía..",
+      text: "En esta sección podrás registrar fácilmente tus movimientos financieros. Selecciona entre ingresos o gastos y utiliza el formulario para agregar cada operación de manera detallada. Esto te permitirá mantener un control claro y ordenado de tus finanzas personales. Cada registro se integrará automáticamente a tu balance general para ofrecerte una visión completa de tu economía.",
     },
     {
       image: negocios,
@@ -40,7 +38,7 @@ const WelcomePage: React.FC = () => {
     {
       image: estadisticas,
       title: "Análisis de Movimientos",
-      text: "En esta sección podrás registrar tus billetes de manera rápida y precisa. Simplemente ingresa la cantidad de cada denominación y multiplícala por el valor indicado a su lado. La aplicación calculará automáticamente la suma total y la mostrará en la parte superior. Así tendrás un control claro y confiable de tus fondos en todo momento.",
+      text: "En esta sección podrás analizar tus movimientos financieros y obtener estadísticas claras para tomar decisiones acertadas sobre tu dinero. La aplicación muestra gráficos y resúmenes de manera precisa y confiable.",
     },
   ];
 
@@ -48,12 +46,10 @@ const WelcomePage: React.FC = () => {
     const hasSeen = localStorage.getItem("hasSeenWelcome");
 
     if (hasSeen === "true") {
-      // Usuario ya vio la intro: mostrar solo pantalla 3
       setShowSplash(false);
       setShowIntro(false);
       setShowFinal(true);
     } else {
-      // Primera vez: mostrar splash y luego intro
       const timer = setTimeout(() => {
         setShowSplash(false);
         setShowIntro(true);
@@ -66,7 +62,6 @@ const WelcomePage: React.FC = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide((prev) => prev + 1);
     } else {
-      // Final del slider
       localStorage.setItem("hasSeenWelcome", "true");
       setShowIntro(false);
       setShowFinal(true);
@@ -96,7 +91,6 @@ const WelcomePage: React.FC = () => {
         justifyContent: "center",
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         overflow: "hidden",
-        transition: "background 1s ease-in-out",
         zIndex: 9999,
       }}
     >
@@ -119,7 +113,6 @@ const WelcomePage: React.FC = () => {
               style={{ objectFit: "contain" }}
             />
           </Box>
-
           <Typography
             variant="h5"
             sx={{
@@ -135,10 +128,10 @@ const WelcomePage: React.FC = () => {
       </Fade>
 
       {/* 💡 Pantalla 2: Slider */}
-      <Fade in={showIntro} timeout={1000}>
+      {showIntro && (
         <Box
           sx={{
-            display: showIntro ? "flex" : "none",
+            display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "space-between",
@@ -166,24 +159,32 @@ const WelcomePage: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* Imagen y texto */}
+          {/* Imagen y texto con Fade separados */}
           <Box sx={{ mt: "18%" }}>
-            <Box
-              component="img"
-              src={slides[currentSlide].image}
-              alt={slides[currentSlide].title}
-              sx={{
-                width: "80%",
-                maxWidth: 280,
-                mb: 3,
-              }}
-            />
-            <Typography variant="h5" sx={{ color: "#fff", fontWeight: 700 }}>
-              {slides[currentSlide].title}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#fcefee", mt: 1, px: 2 }}>
-              {slides[currentSlide].text}
-            </Typography>
+            <Fade key={currentSlide + "-img"} in timeout={500}>
+              <Box
+                component="img"
+                src={slides[currentSlide].image}
+                alt={slides[currentSlide].title}
+                sx={{
+                  width: "80%",
+                  maxWidth: 280,
+                  mb: 3,
+                }}
+              />
+            </Fade>
+
+            <Fade key={currentSlide + "-title"} in timeout={500}>
+              <Typography variant="h5" sx={{ color: "#fff", fontWeight: 700 }}>
+                {slides[currentSlide].title}
+              </Typography>
+            </Fade>
+
+            <Fade key={currentSlide + "-text"} in timeout={500}>
+              <Typography variant="body2" sx={{ color: "#fcefee", mt: 1, px: 2 }}>
+                {slides[currentSlide].text}
+              </Typography>
+            </Fade>
           </Box>
 
           {/* Botones */}
@@ -228,7 +229,7 @@ const WelcomePage: React.FC = () => {
             </Button>
           </Box>
         </Box>
-      </Fade>
+      )}
 
       {/* 🚀 Pantalla 3: Final */}
       <Fade in={showFinal} timeout={1000}>
@@ -262,19 +263,13 @@ const WelcomePage: React.FC = () => {
               />
             </Box>
 
-            <Typography
-              variant="h4"
-              sx={{ color: "#fff", fontWeight: 700, mb: 1 }}
-            >
+            <Typography variant="h4" sx={{ color: "#fff", fontWeight: 700, mb: 1 }}>
               Bienvenidos
             </Typography>
             <Typography variant="subtitle1" sx={{ color: "#fcefee", mb: 3 }}>
               Mis cuentas
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "#fff", mb: 4, mt: "10%" }}
-            >
+            <Typography variant="body2" sx={{ color: "#fff", mb: 4, mt: "10%" }}>
               Toma el control de tus finanzas. <br />
               Crea una cuenta y estarás listo para empezar.
             </Typography>
