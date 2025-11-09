@@ -20,7 +20,7 @@
 }
 
 /* Título principal */
-.register-title {
+.register-container .register-title {
   font-size: 1.8rem;
   font-weight: 600;
   color: #1f2d3d;
@@ -28,39 +28,44 @@
 }
 
 /* Subtítulo */
-.register-subtitle {
+.register-container .register-subtitle {
   color: #8c98a4;
   font-size: 0.95rem;
   margin-bottom: 20px;
 }
 
-/* Campos de texto */
-.MuiTextField-root {
-  margin-bottom: 15px !important;
+/* Campos de texto - Eliminar bordes */
+.register-container .MuiTextField-root {
+  margin-bottom: 15px;
 }
 
-.MuiOutlinedInput-root {
-  border-radius: 12px !important;
-  background-color: #f8f9fc !important;
+/* Eliminar bordes de los campos de entrada */
+.register-container .MuiOutlinedInput-root {
+  border: none;  /* Eliminar el borde */
+  background-color: #f8f9fc;
+  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
-.MuiOutlinedInput-root:hover fieldset {
-  border-color: #667eea !important;
+/* Eliminar borde del campo cuando se hace hover */
+.register-container .MuiOutlinedInput-root:hover fieldset {
+  border: none;
 }
 
-.MuiOutlinedInput-root.Mui-focused fieldset {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+/* Eliminar el borde al hacer focus */
+.register-container .MuiOutlinedInput-root.Mui-focused fieldset {
+  border: none;
+  box-shadow: none; /* Eliminar el efecto de sombra en focus */
 }
 
-.MuiInputBase-input {
-  padding: 14px 0 !important;
-  font-size: 0.95rem !important;
+/* Ajustar el padding y tamaño de la fuente */
+.register-container .MuiInputBase-input {
+  padding: 14px 0;
+  font-size: 0.95rem;
 }
 
 /* Checkbox y texto */
-.remember-row {
+.register-container .remember-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -69,42 +74,36 @@
 }
 
 /* Botón de registro con gradiente */
-.register-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: #fff !important;
-  border-radius: 12px !important;
-  text-transform: none !important;
-  font-weight: 600 !important;
-  padding: 12px 0 !important;
-  margin-top: 10px !important;
+.register-container .register-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 12px;
+  text-transform: none;
+  font-weight: 600;
+  padding: 12px 0;
+  margin-top: 10px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.register-button:hover {
+.register-container .register-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
 }
 
 /* Enlace para login */
-.register-link {
+.register-container .register-link {
   margin-top: 20px;
   font-size: 0.9rem;
   color: #8c98a4;
 }
 
-.register-link a {
+.register-container .register-link a {
   color: #667eea;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.register-link a:hover {
+.register-container .register-link a:hover {
   color: #764ba2;
-}
-
-
-.MuiFormHelperText-root {
-  color: red !important;
-  font-size: 0.85rem;
 }

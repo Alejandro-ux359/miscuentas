@@ -10,7 +10,7 @@
 
 /* Contenedor principal */
 .login-container {
-   background-color: white;
+  background-color: white;
   width: 100%;
   max-width: 400px;
   padding: 40px 30px;
@@ -20,103 +20,103 @@
 }
 
 /* Ilustración superior */
-.login-illustration {
+.login-container .login-illustration {
   width: 100%;
   max-width: 230px;
   margin: 0 auto 1.5rem;
 }
 
 /* Título y subtítulo */
-.login-title {
+.login-container .login-title {
   font-size: 1.8rem;
   font-weight: 700;
   color: #1f2d3d;
   margin-bottom: 0.25rem;
 }
 
-.login-subtitle {
+.login-container .login-subtitle {
   color: #8c98a4;
   margin-bottom: 1.5rem;
 }
 
 /* Campos de entrada */
-.MuiTextField-root {
+.login-container .MuiTextField-root {
   background: #f8f9fb;
   border-radius: 10px;
 }
 
-.MuiOutlinedInput-notchedOutline {
-  border: none !important;
+.login-container .MuiOutlinedInput-notchedOutline {
+  border: none;
 }
 
-.MuiInputBase-input {
-  padding: 14px !important;
+.login-container .MuiInputBase-input {
+  padding: 14px;
+  font-size: 0.95rem;
 }
 
-/* Checkbox y labels */
-.MuiFormControlLabel-root {
-  margin: 0;
-}
-
-.MuiInputBase-input::placeholder {
+.login-container .MuiInputBase-input::placeholder {
   color: #9ca3af;
   opacity: 1;
   font-weight: 500;
 }
 
+/* Checkbox y labels */
+.login-container .MuiFormControlLabel-root {
+  margin: 0;
+}
+
 /* Botón principal */
-.login-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  border-radius: 12px !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  text-transform: none !important;
-  padding: 12px 0 !important;
-  margin-top: 10px !important;
+.login-container .login-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  text-transform: none;
+  padding: 12px 0;
+  margin-top: 10px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3); /* Sombra suave */
+  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
 }
 
 /* Efecto hover con animación */
-.login-button:hover {
-  background: linear-gradient(135deg, #5a6ee0 0%, #6a3d94 100%) !important;
+.login-container .login-button:hover {
+  background: linear-gradient(135deg, #5a6ee0 0%, #6a3d94 100%);
   box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
   transform: translateY(-1px);
 }
 
-
 /* Link de registro */
-.login-link {
+.login-container .login-link {
   margin-top: 15px;
   font-size: 0.9rem;
   color: #8c98a4;
 }
 
-.login-link a {
+.login-container .login-link a {
   color: #1f2d3d;
   text-decoration: none;
   font-weight: 600;
 }
-.login-link a:hover {
+
+.login-container .login-link a:hover {
   text-decoration: underline;
 }
 
-.MuiTextField-root {
-  margin-bottom: 15px !important;
+.login-container .MuiTextField-root {
+  margin-bottom: 15px;
 }
 
-.MuiOutlinedInput-root {
+.login-container .MuiOutlinedInput-root {
   background: #f8f9fb;
   border-radius: 12px;
 }
 
-
-.Mui-focused .MuiSvgIcon-root {
-  color: #1f2d3d !important;
+.login-container .Mui-focused .MuiSvgIcon-root {
+  color: #1f2d3d;
 }
 
 /* Enlace de "¿Se te olvidó tu contraseña?" */
-.forgot-password-link {
+.login-container .forgot-password-link {
   font-size: 0.9rem;
   color: #667eea;
   cursor: pointer;
@@ -124,12 +124,12 @@
   transition: color 0.3s ease;
 }
 
-.forgot-password-link:hover {
+.login-container .forgot-password-link:hover {
   color: #764ba2;
   text-decoration: underline;
 }
 
-.options-row {
+.login-container .options-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
