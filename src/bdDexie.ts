@@ -6,7 +6,8 @@ import Dexie, {Table} from "dexie";
    Interfaces (esquema final)
    ------------------------- */
 export interface Movimiento {
-  id?: number;
+  id_usuario: number;
+  id?:number;
   categoria: string;
   monto: number;
   metodo: string;
@@ -16,7 +17,8 @@ export interface Movimiento {
 }
 
 export interface BNegocios {
-  id_negocio?: number;
+  id_usuario: number;
+  id_negocio: number;
   nombre_negocio: string;
   tipo_negocio: string;
   propietario?: string;
@@ -36,7 +38,6 @@ export interface BNegocios {
   tbussines?: "Perdidas" | "Ganancias";
   tipos?: "Compra" | "Venta";
   campos?: any;
-  id_usuario?: number;
   cedula_ci_cliente?: number;
   tipo_cliente?: string;
   historial_compras_cliente?: string;
@@ -64,6 +65,7 @@ export interface BNegocios {
   ventas_mensuales?: number;
   margen_de_ganancia?: number;
   historial_caja_diaria?: string;
+  logo_imagen?:string;
 }
 
 export interface Tasa {
@@ -73,6 +75,16 @@ export interface Tasa {
   compras_tasa: number;
   ventas_tasa: number;
   tasa: number;
+}
+
+export interface LoginRegistre {
+  id_usuario?: number; 
+  id_codigounico: number;
+  avatar: string;
+  nombre: string;
+  cel_usuario: number;
+  correo_usuario: string;
+  password: string;
 }
 
 export interface Nomencladores {
@@ -92,16 +104,18 @@ class MiDB extends Dexie {
   bnegocios!: Dexie.Table<BNegocios, number>;
   tasa!: Dexie.Table<Tasa, number>;
   nomencladores!: Table<Nomencladores, string>;
+  loginregistre!: Table<LoginRegistre, number>;
 
   constructor() {
     super("MiDB");
 
     this.version(1).stores({
-      movimientos: "++id, categoria, monto, metodo, fecha, moneda, tipo",
+      movimientos: "++id, id_usuario, categoria, monto, metodo, fecha, moneda, tipo",
       bnegocios:
-        "++id_negocio,  nombre_negocio,  tipo_negocio,  propietario,  direccion,  correo_electronico,  fecha_creacion,  descripcion,  horario_apertura,  horario_cierre,  sitio_web,  trabajadores,  movil,  productos,  money,  cuenta,  metodo_pago,  tbussines,  tipos, id_reportes_finanzas,  total_ingresos,  total_gastos,  balance_general,  ventas_mensuales,  margen_de_ganancia,  historial_caja_diaria, id_usuario,  cedula_ci_cliente,  tipo_cliente,  historial_compras_cliente,  deuda_cliente,  nombre,  apellidos,  cargo_usuario,  salario_usuario,  fecha_ingreso_usuario,  rol_usuario, id_producto,  nombre_producto,  categoria_producto,  precio_venta_producto,  unidad_producto,  stock_actual_producto,  stock_mínimo_producto,  fecha_ingreso_producto,  fecha_actualizacion_producto,  productos_suministrados_proveedor",
+        "++id_negocio,  nombre_negocio, logo_imagen,  tipo_negocio,  propietario,  direccion,  correo_electronico,  fecha_creacion,  descripcion,  horario_apertura,  horario_cierre,  sitio_web,  trabajadores,  movil,  productos,  money,  cuenta,  metodo_pago,  tbussines,  tipos, id_reportes_finanzas,  total_ingresos,  total_gastos,  balance_general,  ventas_mensuales,  margen_de_ganancia,  historial_caja_diaria, id_usuario,  cedula_ci_cliente,  tipo_cliente,  historial_compras_cliente,  deuda_cliente,  nombre,  apellidos,  cargo_usuario,  salario_usuario,  fecha_ingreso_usuario,  rol_usuario, id_producto,  nombre_producto,  categoria_producto,  precio_venta_producto,  unidad_producto,  stock_actual_producto,  stock_mínimo_producto,  fecha_ingreso_producto,  fecha_actualizacion_producto,  productos_suministrados_proveedor",
       tasa: "++id_tasa, codigo, nombre_tasa, compras_tasa, ventas_tasa, tasa",
       nomencladores: "++id",
+       loginregistre: "++id_usuario, &correo_usuario, id_codigounico, avatar, password, cel_usuario, nombre",
     });
 
     // ===== Versiones históricas (migraciones)
@@ -222,6 +236,15 @@ export const allowedFields = {
     "margen_de_ganancia",
     "historial_caja_diaria",
   ],
+    loginregistre: [
+    "id_usuario",
+    "id_codigounico",
+    "avatar",
+    "nombre",
+    "cel_usuario",
+    "correo_usuario",
+    "password",
+  ],
 };
 
 /* -------------------------
@@ -321,5 +344,26 @@ export const syncDeleteNegocio = async (neg: BNegocios) => {
 };
 
 
+/* -------------------------
+   LOGIN Y REGISTRO LOCAL
+------------------------- */
+export const registrarUsuario = async (usuario: Omit<LoginRegistre, "id_usuario">) => {
+  const existente = await db.loginregistre
+    .where("correo_usuario")
+    .equals(usuario.correo_usuario)
+    .first();
 
+  if (existente) throw new Error("Ya existe una cuenta con este correo.");
+
+  const id = await db.loginregistre.add(usuario);
+  return { ...usuario, id_usuario: id };
+};
+
+
+export const iniciarSesion = async (correo: string, password: string) => {
+  const usuario = await db.loginregistre.where("correo_usuario").equals(correo).first();
+  if (!usuario) throw new Error("Usuario no encontrado.");
+  if (usuario.password !== password) throw new Error("Contraseña incorrecta.");
+  return usuario;
+};
 
