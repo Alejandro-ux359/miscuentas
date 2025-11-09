@@ -102,3 +102,9 @@
 .register-link a:hover {
   color: #764ba2;
 }
+
+
+.MuiFormHelperText-root {
+  color: red !important;
+  font-size: 0.85rem;
+}

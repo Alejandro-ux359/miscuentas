@@ -18,6 +18,7 @@ import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import "./Register.css";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const API_URL =
   window.location.hostname === "localhost"
@@ -48,7 +49,11 @@ const RegisterPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const showModal = (title: string, message: string, showCloseButton = false) => {
+  const showModal = (
+    title: string,
+    message: string,
+    showCloseButton = false
+  ) => {
     setModalTitle(title);
     setModalMessage(message);
     setModalShowClose(showCloseButton);
@@ -64,7 +69,10 @@ const RegisterPage: React.FC = () => {
     if (!value.trim()) {
       setErrors((prev) => ({ ...prev, username: "Nombre es obligatorio" }));
     } else if (!/^[a-zA-Z0-9_-]+$/.test(value.trim())) {
-      setErrors((prev) => ({ ...prev, username: "Solo letras, números, _ y -" }));
+      setErrors((prev) => ({
+        ...prev,
+        username: "Solo letras, números, _ y -",
+      }));
     } else {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -80,7 +88,9 @@ const RegisterPage: React.FC = () => {
 
     if (!value.trim()) {
       setErrors((prev) => ({ ...prev, email: "Email es obligatorio" }));
-    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+    } else if (
+      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
+    ) {
       setErrors((prev) => ({ ...prev, email: "Email no válido" }));
     } else {
       setErrors((prev) => {
@@ -95,10 +105,15 @@ const RegisterPage: React.FC = () => {
     const value = e.target.value;
     setMobile(value);
 
+    // Validar el número de teléfono con la librería, en este caso para Cuba ('CU')
+    const validPhone = isValidPhoneNumber(value, "CU"); // 'CU' es el código de país para Cuba
     if (!value.trim()) {
       setErrors((prev) => ({ ...prev, mobile: "Número es obligatorio" }));
-    } else if (!/^\d+$/.test(value.trim())) {
-      setErrors((prev) => ({ ...prev, mobile: "Solo puede contener dígitos" }));
+    } else if (!validPhone) {
+      setErrors((prev) => ({
+        ...prev,
+        mobile: "Número no válido o prefijo incorrecto",
+      }));
     } else {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -134,17 +149,18 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleSignUp = async () => {
-    if (!validateFields()) return;
+    if (!validateFields()) return; // Verifica los campos antes de enviar la solicitud.
     setLoading(true);
+    setErrors({}); // Limpia errores anteriores.
 
     try {
       const nuevoUsuario = {
         id_codigounico: Date.now(),
         avatar: "default.png",
         nombre: username.trim(),
-        cel_usuario: Number(mobile),
+        cel_usuario: mobile.trim(),
         correo_usuario: email.trim().toLowerCase(),
-        password: password,
+        password,
       };
 
       const res = await fetch(`${API_URL}/sync/loginregistre`, {
@@ -155,22 +171,53 @@ const RegisterPage: React.FC = () => {
 
       const result = await res.json();
 
+      // 🔹 Detectar el error 409 cuando hay duplicados
+      if (res.status === 409 && result.error === "duplicate" && result.field) {
+        const fieldMap: Record<string, keyof Errors> = {
+          nombre: "username",
+          correo_usuario: "email",
+          cel_usuario: "mobile",
+        };
+
+        const fieldKey = fieldMap[result.field];
+
+        if (fieldKey) {
+          // Actualizar el estado de los errores con el mensaje del backend
+          setErrors((prev) => ({
+            ...prev,
+            [fieldKey]: result.message, // Muestra el mensaje debajo del campo correspondiente
+          }));
+        }
+        setLoading(false); // Detener el loading
+        return; // Evitar que se continúe con el proceso y que se muestre el modal de éxito.
+      }
+
+      // 🔹 Si hubo otro error (No fue duplicado)
       if (!res.ok) {
         showModal(
           "Error",
-          result.message || "No se pudo registrar el usuario. Intenta nuevamente.",
+          result.message ||
+            "No se pudo registrar el usuario. Intenta nuevamente.",
           true
         );
         setLoading(false);
         return;
       }
 
-      // Registro exitoso
-      showModal("Registro exitoso", "¡Tu cuenta se ha creado correctamente!", false);
+      // 🔹 Si fue exitoso, mostramos el modal de éxito
+      showModal(
+        "Registro exitoso",
+        "¡Tu cuenta se ha creado correctamente!",
+        false
+      );
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       console.error("❌ Error registrando usuario:", err);
-      showModal("Error", "Ocurrió un error al registrar el usuario. Intenta nuevamente.", true);
+      showModal(
+        "Error",
+        "Ocurrió un error al registrar el usuario. Intenta nuevamente.",
+        true
+      );
     } finally {
       setLoading(false);
     }
