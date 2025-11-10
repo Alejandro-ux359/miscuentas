@@ -6,7 +6,7 @@ import Dexie, {Table} from "dexie";
    Interfaces (esquema final)
    ------------------------- */
 export interface Movimiento {
-  id_usuario: number;
+  id_usuario?: number;
   id?:number;
   categoria: string;
   monto: number;
@@ -17,8 +17,8 @@ export interface Movimiento {
 }
 
 export interface BNegocios {
-  id_usuario: number;
-  id_negocio: number;
+  id_usuario?: number;
+  id_negocio?: number;
   nombre_negocio: string;
   tipo_negocio: string;
   propietario?: string;
