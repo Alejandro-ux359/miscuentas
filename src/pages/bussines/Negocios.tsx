@@ -217,68 +217,70 @@ export default function Negocios() {
   };
 
   // Guardar negocio en Dexie
- const guardarNegocio = async () => {
-  if (!valores.nombre_negocio || !valores.tipo_negocio) {
-    alert("Debes completar los campos obligatorios");
-    return;
-  }
+  const guardarNegocio = async () => {
+    if (!valores.nombre_negocio || !valores.tipo_negocio) {
+      alert("Debes completar los campos obligatorios");
+      return;
+    }
 
-  const negocioAGuardar: BNegocios = {
-    nombre_negocio: valores.nombre_negocio,
-    tipo_negocio: valores.tipo_negocio,
-    ...valores,
+    const negocioAGuardar: BNegocios = {
+      nombre_negocio: valores.nombre_negocio,
+      tipo_negocio: valores.tipo_negocio,
+      ...valores,
+    };
+
+    try {
+      // Guardar o actualizar
+      if (negocioEditarIndex !== null) {
+        const negocio = negociosGuardados[negocioEditarIndex];
+        if (negocio.id_negocio !== undefined) {
+          const updatePayload: Partial<BNegocios> = { ...negocioAGuardar };
+          delete updatePayload.id_negocio;
+
+          // Actualizar Dexie
+          await db.bnegocios.update(negocio.id_negocio, updatePayload);
+
+          // Sincronizar con backend
+          syncUpdateNegocio({
+            ...negocioAGuardar,
+            id_negocio: negocio.id_negocio,
+          });
+        }
+      } else {
+        // Insertar en Dexie
+        const id = await db.bnegocios.add(negocioAGuardar);
+
+        // Insertar en backend con idDexie
+        syncInsertNegocio({ ...negocioAGuardar, id_negocio: id }, id);
+      }
+
+      // Actualizar lista local
+      const all = await db.bnegocios.toArray();
+      setNegociosGuardados(all);
+
+      // Actualizar detalle si venías de allí
+      if (editarDesdeDetalle && negocioTemporal) {
+        const negocioActualizado = all.find(
+          (n) => n.id_negocio === negocioTemporal.id_negocio
+        );
+        if (negocioActualizado) {
+          setNegocioSeleccionado(negocioActualizado);
+          setOpenDetalleModal(true);
+        }
+      }
+
+      // Reset de estados
+      setValores({ nombre_negocio: "", tipo_negocio: "" });
+      setCamposSeleccionados([]);
+      setNegocioEditarIndex(null);
+      setEditarDesdeDetalle(false);
+      setNegocioTemporal(null);
+      handleClose();
+    } catch (err) {
+      console.error("Error guardando negocio:", err);
+      alert("Ocurrió un error al guardar el negocio");
+    }
   };
-
-  try {
-    // Guardar o actualizar
-    if (negocioEditarIndex !== null) {
-      const negocio = negociosGuardados[negocioEditarIndex];
-      if (negocio.id_negocio !== undefined) {
-        const updatePayload: Partial<BNegocios> = { ...negocioAGuardar };
-        delete updatePayload.id_negocio;
-
-        // Actualizar Dexie
-        await db.bnegocios.update(negocio.id_negocio, updatePayload);
-
-        // Sincronizar con backend
-        syncUpdateNegocio({ ...negocioAGuardar, id_negocio: negocio.id_negocio });
-      }
-    } else {
-      // Insertar en Dexie
-      const id = await db.bnegocios.add(negocioAGuardar);
-
-      // Insertar en backend con idDexie
-      syncInsertNegocio({ ...negocioAGuardar, id_negocio: id }, id);
-    }
-
-    // Actualizar lista local
-    const all = await db.bnegocios.toArray();
-    setNegociosGuardados(all);
-
-    // Actualizar detalle si venías de allí
-    if (editarDesdeDetalle && negocioTemporal) {
-      const negocioActualizado = all.find(
-        (n) => n.id_negocio === negocioTemporal.id_negocio
-      );
-      if (negocioActualizado) {
-        setNegocioSeleccionado(negocioActualizado);
-        setOpenDetalleModal(true);
-      }
-    }
-
-    // Reset de estados
-    setValores({ nombre_negocio: "", tipo_negocio: "" });
-    setCamposSeleccionados([]);
-    setNegocioEditarIndex(null);
-    setEditarDesdeDetalle(false);
-    setNegocioTemporal(null);
-    handleClose();
-  } catch (err) {
-    console.error("Error guardando negocio:", err);
-    alert("Ocurrió un error al guardar el negocio");
-  }
-};
-
 
   const abrirNuevoFormulario = () => {
     setValores({ nombre_negocio: "", tipo_negocio: "" });
@@ -326,33 +328,29 @@ export default function Negocios() {
   const handleCancelarEliminar = () =>
     setConfirmarEliminar({ open: false, index: null });
 
-const handleConfirmarEliminar = async () => {
-  if (confirmarEliminar.index !== null) {
-    const negocio = negociosGuardados[confirmarEliminar.index];
-    if (negocio.id_negocio !== undefined) {
-      try {
-        // Eliminar de Dexie
-        await db.bnegocios.delete(negocio.id_negocio);
+  const handleConfirmarEliminar = async () => {
+    if (confirmarEliminar.index !== null) {
+      const negocio = negociosGuardados[confirmarEliminar.index];
+      if (negocio.id_negocio !== undefined) {
+        try {
+          // Eliminar de Dexie
+          await db.bnegocios.delete(negocio.id_negocio);
 
-        // Sincronizar con Supabase
-        syncDeleteNegocio(negocio);
+          // Sincronizar con Supabase
+          syncDeleteNegocio(negocio);
 
-        // Actualizar lista local
-        setNegociosGuardados((prev) =>
-          prev.filter((_, i) => i !== confirmarEliminar.index)
-        );
-      } catch (err) {
-        console.error("Error eliminando negocio:", err);
-        alert("Ocurrió un error al eliminar el negocio");
+          // Actualizar lista local
+          setNegociosGuardados((prev) =>
+            prev.filter((_, i) => i !== confirmarEliminar.index)
+          );
+        } catch (err) {
+          console.error("Error eliminando negocio:", err);
+          alert("Ocurrió un error al eliminar el negocio");
+        }
       }
     }
-  }
-  setConfirmarEliminar({ open: false, index: null });
-};
-
-
-
- 
+    setConfirmarEliminar({ open: false, index: null });
+  };
 
   return (
     <>
@@ -370,6 +368,7 @@ const handleConfirmarEliminar = async () => {
           background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
           color: "white",
           boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
+          zIndex: 1000,
         }}
       >
         <AddIcon style={{ fontSize: 30 }} />
@@ -382,12 +381,18 @@ const handleConfirmarEliminar = async () => {
           gap: 2,
           gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
           mt: 3,
+          maxHeight: "calc(100vh - 120px)", 
+          overflowY: "auto", 
         }}
       >
         {negociosGuardados.map((negocio, index) => (
           <Card
             key={negocio.id_negocio}
-            sx={{ cursor: "pointer", position: "relative" }}
+            sx={{
+              cursor: "pointer",
+              position: "relative",
+              top: 80,
+            }}
             onClick={() => handleOpenDetalle(negocio)}
           >
             <CardContent>
