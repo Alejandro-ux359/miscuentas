@@ -93,7 +93,7 @@ export default function TabBarMenuNavegation() {
           />
         </div>
 
-        <div className="icon-container">
+        {/* <div className="icon-container">
           <NotificationsNoneIcon
             className="notification-icon"
             onClick={() => navigate("/notificacion")}
@@ -102,7 +102,7 @@ export default function TabBarMenuNavegation() {
             className="setting-icon"
             onClick={() => navigate("/configuracion")}
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="bottom-menu-container">
