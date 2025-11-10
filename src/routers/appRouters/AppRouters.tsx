@@ -7,9 +7,9 @@ import Negocios from "../../pages/bussines/Negocios";
 import IngresosGastos from "../../pages/ingresosGastos/IngresosGastos";
 import Configuracion from "../../pages/configuracion/Configuracion";
 import Estadisticas from "../../pages/estadisticas/Estadisticas";
-import WelcomePage from "../../welcome/Welcome";
-import LoginPage from "../../welcome/Login";
-import RegisterPage from "../../welcome/Register";
+import WelcomePage from "../../auth/Welcome";
+import LoginPage from "../../auth/Login";
+import RegisterPage from "../../auth/Register";
 
 function AppRouter() {
   return (
