@@ -22,20 +22,25 @@ import PermIdentityIcon from "@mui/icons-material/PermIdentity";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState("");  // Celular del usuario
-  const [password, setPassword] = useState("");  // Contraseña
+  const [username, setUsername] = useState(""); // Celular del usuario
+  const [password, setPassword] = useState(""); // Contraseña
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [openErrorModal, setOpenErrorModal] = useState(false);
 
   const navigate = useNavigate();
 
+  const API_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://api-miscuentas.onrender.com";
+
   const handleSignIn = async () => {
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),  // Enviamos solo el número de celular y la contraseña
+        body: JSON.stringify({ username, password }), // Enviamos solo el número de celular y la contraseña
       });
 
       const data = await response.json();
@@ -47,7 +52,7 @@ const LoginPage: React.FC = () => {
       }
 
       console.log("Login exitoso:", data.user);
-      navigate("/inicio");  // Redirigir al inicio si el login es exitoso
+      navigate("/inicio"); // Redirigir al inicio si el login es exitoso
     } catch (err) {
       console.error(err);
       setErrorMessage("Error del servidor. Intenta nuevamente.");
@@ -83,7 +88,7 @@ const LoginPage: React.FC = () => {
           fullWidth
           margin="normal"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}  // Celular del usuario
+          onChange={(e) => setUsername(e.target.value)} // Celular del usuario
           placeholder="Número de celular *"
           InputLabelProps={{ shrink: false }}
           InputProps={{
