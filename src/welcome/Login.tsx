@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   TextField,
   Button,
@@ -6,29 +6,29 @@ import {
   Checkbox,
   FormControlLabel,
   InputAdornment,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import "./Login.css";
-import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Stack,
+  CircularProgress,
 } from "@mui/material";
-import { Stack } from "@mui/material";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext"; // ✅ importar contexto
 import PermIdentityIcon from "@mui/icons-material/PermIdentity";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import "./Login.css";
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState(""); // Celular del usuario
-  const [password, setPassword] = useState(""); // Contraseña
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [openErrorModal, setOpenErrorModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { setUsuario } = useContext(AuthContext); // ✅ usar contexto
 
   const API_URL =
     window.location.hostname === "localhost"
@@ -36,11 +36,12 @@ const LoginPage: React.FC = () => {
       : "https://api-miscuentas.onrender.com";
 
   const handleSignIn = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }), // Enviamos solo el número de celular y la contraseña
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
@@ -48,15 +49,23 @@ const LoginPage: React.FC = () => {
       if (!response.ok) {
         setErrorMessage("Móvil o contraseña incorrectos");
         setOpenErrorModal(true);
+        setLoading(false);
         return;
       }
 
       console.log("Login exitoso:", data.user);
-      navigate("/inicio"); // Redirigir al inicio si el login es exitoso
+
+      // ✅ Actualizar contexto y guardar en localStorage
+      setUsuario(data.user);
+      localStorage.setItem("usuario", JSON.stringify(data.user));
+
+      navigate("/inicio");
     } catch (err) {
       console.error(err);
       setErrorMessage("Error del servidor. Intenta nuevamente.");
       setOpenErrorModal(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,13 +91,12 @@ const LoginPage: React.FC = () => {
           Por favor, inicie sesión para continuar
         </Typography>
 
-        {/* Campo de celular */}
         <TextField
           variant="outlined"
           fullWidth
           margin="normal"
           value={username}
-          onChange={(e) => setUsername(e.target.value)} // Celular del usuario
+          onChange={(e) => setUsername(e.target.value)}
           placeholder="Número de celular *"
           InputLabelProps={{ shrink: false }}
           InputProps={{
@@ -97,17 +105,9 @@ const LoginPage: React.FC = () => {
                 <PermIdentityIcon sx={{ color: "#8c98a4", mr: 1 }} />
               </InputAdornment>
             ),
-            sx: {
-              paddingLeft: "5px",
-              "& input": {
-                paddingLeft: "0px",
-              },
-              height: "50px",
-            },
           }}
         />
 
-        {/* Campo de contraseña */}
         <TextField
           type="password"
           variant="outlined"
@@ -123,17 +123,9 @@ const LoginPage: React.FC = () => {
                 <LockOpenIcon sx={{ color: "#8c98a4", mr: 1 }} />
               </InputAdornment>
             ),
-            sx: {
-              paddingLeft: "5px",
-              "& input": {
-                paddingLeft: "0px",
-              },
-              height: "50px",
-            },
           }}
         />
 
-        {/* Contenedor para recordar y olvidar contraseña */}
         <div className="options-row">
           <FormControlLabel
             control={
@@ -152,9 +144,15 @@ const LoginPage: React.FC = () => {
             ¿Se te olvidó tu contraseña?
           </Typography>
         </div>
+
         <Stack spacing={3} width="100%" mt={2}>
-          <Button fullWidth onClick={handleSignIn} className="login-button">
-            Iniciar sesión
+          <Button
+            fullWidth
+            onClick={handleSignIn}
+            className="login-button"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Iniciar sesión"}
           </Button>
 
           <Typography className="login-link">
