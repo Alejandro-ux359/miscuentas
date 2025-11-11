@@ -380,9 +380,10 @@ export default function Negocios() {
           display: "grid",
           gap: 2,
           gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          mt: 3,
+          mt: 9,
           maxHeight: "calc(100vh - 120px)", 
           overflowY: "auto", 
+          paddingBottom:18,
         }}
       >
         {negociosGuardados.map((negocio, index) => (
@@ -391,7 +392,6 @@ export default function Negocios() {
             sx={{
               cursor: "pointer",
               position: "relative",
-              top: 80,
             }}
             onClick={() => handleOpenDetalle(negocio)}
           >
