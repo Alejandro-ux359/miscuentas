@@ -97,6 +97,7 @@
   padding: 0;
   border: none;
   cursor: pointer;
+  left: 25px;
 }
 
 /* 🔹 Asegura que el ícono esté exactamente en el centro */
