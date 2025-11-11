@@ -118,9 +118,17 @@ const Estadisticas: React.FC = () => {
   };
 
   return (
-    <div className="estadisticas-container">
+    <>
       <div className="header-estadisticas">
-        <h2>📊 Estadísticas</h2>
+        <h2
+        style={{
+          textAlign: "center",
+          alignContent:"center",
+          justifyContent: "center",
+          marginTop:100,
+        }}
+        > Estadísticas</h2>
+        <hr/>
 
         {monedasDisponibles.length > 0 && (
           <div className="selector-moneda">
@@ -168,7 +176,7 @@ const Estadisticas: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
