@@ -91,6 +91,8 @@ const Home: React.FC = () => {
   // 🔹 Función para convertir totalActual a otra moneda usando tasa de venta
 
   const convertirTotal = (monedaDestino: string): string => {
+    if (totalActual < 0) return "0.00"; // ⛔ NO convertir valores negativos
+
     const monedaA = normalizarCodigo(monedaActual);
     const monedaB = normalizarCodigo(monedaDestino);
 
@@ -115,8 +117,9 @@ const Home: React.FC = () => {
 
   // Función para calcular total en CUP
   const totalEnCUP = () => {
-    const monedaA = normalizarCodigo(monedaActual);
+    if (totalActual < 0) return "0.00"; // ⛔ NO convertir valores negativos
 
+    const monedaA = normalizarCodigo(monedaActual);
     const tasa = tasas.find((t) => normalizarCodigo(t.codigo) === monedaA);
 
     if (!tasa) return "0.00";
@@ -180,8 +183,10 @@ const Home: React.FC = () => {
                       <td>{t.compras_tasa}</td>
                       <td>{t.ventas_tasa}</td>
                       <td>
-                        {monedaActual === "CUP"
-                          ? (totalActual / t.ventas_tasa).toFixed(2) // ✅ corregido
+                        {totalActual < 0
+                          ? "0.00" // ⛔ NO convertir valores negativos
+                          : monedaActual === "CUP"
+                          ? (totalActual / t.ventas_tasa).toFixed(2)
                           : convertirTotal(t.codigo.toUpperCase())}
                       </td>
                     </tr>
