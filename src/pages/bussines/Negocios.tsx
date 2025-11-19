@@ -41,7 +41,9 @@ interface ISelectFieldProps {
 }
 
 export default function Negocios() {
-  const hoy = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const [camposSeleccionadosTemp, setCamposSeleccionadosTemp] = useState<
+    string[]
+  >([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [editarDesdeDetalle, setEditarDesdeDetalle] = useState(false);
@@ -181,7 +183,11 @@ export default function Negocios() {
     }
   }, [negociosGuardados]);
 
-  const handleOpenSubModal = () => setOpenSubModal(true);
+  const handleOpenSubModal = () => {
+    setCamposSeleccionadosTemp(camposSeleccionados);
+    setOpenSubModal(true);
+  };
+
   const handleCloseSubModal = () => setOpenSubModal(false);
 
   const handleOpenDetalle = (negocio: BNegocios) => {
@@ -194,19 +200,10 @@ export default function Negocios() {
   };
 
   // Campos dinámicos
-  const toggleCampo = (name: string) => {
-    setCamposSeleccionados((prev) => {
-      const updated = prev.includes(name)
-        ? prev.filter((n) => n !== name)
-        : [...prev, name];
-      if (!prev.includes(name) && !(name in valores)) {
-        setValores((prevVals) => ({
-          ...prevVals,
-          [name as keyof BNegocios]: "",
-        }));
-      }
-      return updated;
-    });
+  const toggleCampoTemp = (name: string) => {
+    setCamposSeleccionadosTemp((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
   };
 
   const eliminarCamposActivos = (name: string) => {
@@ -818,8 +815,8 @@ export default function Negocios() {
               >
                 <input
                   type="checkbox"
-                  checked={camposSeleccionados.includes(field.name)}
-                  onChange={() => toggleCampo(field.name)}
+                  checked={camposSeleccionadosTemp.includes(field.name)}
+                  onChange={() => toggleCampoTemp(field.name)}
                   id={field.name}
                   style={{
                     width: "18px",
@@ -850,7 +847,7 @@ export default function Negocios() {
           }}
         >
           <Button
-            onClick={handleCloseSubModal}
+            onClick={() => setOpenSubModal(false)}
             variant="contained"
             sx={{
               borderRadius: 2,
@@ -868,7 +865,20 @@ export default function Negocios() {
             Cancelar
           </Button>
           <Button
-            onClick={handleCloseSubModal}
+            onClick={() => {
+              setCamposSeleccionados(camposSeleccionadosTemp);
+
+              // Inicializar valores vacíos para los nuevos campos
+              setValores((prev) => {
+                const nuevos = { ...prev };
+                camposSeleccionadosTemp.forEach((campo) => {
+                  if (!(campo in nuevos)) nuevos[campo as keyof BNegocios] = "";
+                });
+                return nuevos;
+              });
+
+              setOpenSubModal(false);
+            }}
             variant="contained"
             sx={{
               borderRadius: 2,
