@@ -62,7 +62,7 @@ const LoginPage: React.FC = () => {
       navigate("/inicio");
     } catch (err) {
       console.error(err);
-      setErrorMessage("Error del servidor. Intenta nuevamente.");
+      setErrorMessage("Error de conexión. Intenta nuevamente.");
       setOpenErrorModal(true);
     } finally {
       setLoading(false);

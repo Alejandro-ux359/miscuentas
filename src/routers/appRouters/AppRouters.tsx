@@ -10,20 +10,74 @@ import Estadisticas from "../../pages/estadisticas/Estadisticas";
 import WelcomePage from "../../auth/Welcome";
 import LoginPage from "../../auth/Login";
 import RegisterPage from "../../auth/Register";
+import PrivateRoute from "./PrivateRoute";
+
 
 function AppRouter() {
   return (
     <Routes>
+      {/* Rutas públicas */}
       <Route path="/" element={<WelcomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/inicio" element={<Home />} />
-      <Route path="/notificacion" element={<NotificationPage />} />
-      <Route path="/calculadora" element={<Calculadora />} />
-      <Route path="/negocios" element={<Negocios />} />
-      <Route path="/ingresosgastos" element={<IngresosGastos />} />
-      <Route path="/estadisticas" element={<Estadisticas />} />
-      <Route path="/configuracion" element={<Configuracion />} />
+
+      {/* Rutas privadas */}
+      <Route
+        path="/inicio"
+        element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/notificacion"
+        element={
+          <PrivateRoute>
+            <NotificationPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/calculadora"
+        element={
+          <PrivateRoute>
+            <Calculadora />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/negocios"
+        element={
+          <PrivateRoute>
+            <Negocios />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/ingresosgastos"
+        element={
+          <PrivateRoute>
+            <IngresosGastos />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/estadisticas"
+        element={
+          <PrivateRoute>
+            <Estadisticas />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/configuracion"
+        element={
+          <PrivateRoute>
+            <Configuracion />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 }
