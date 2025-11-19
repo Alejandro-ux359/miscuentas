@@ -17,9 +17,12 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext"; // ✅ importar contexto
 import PermIdentityIcon from "@mui/icons-material/PermIdentity";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import "./Login.css";
 
 const LoginPage: React.FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -109,7 +112,7 @@ const LoginPage: React.FC = () => {
         />
 
         <TextField
-          type="password"
+          type={showPassword ? "text" : "password"} 
           variant="outlined"
           fullWidth
           margin="normal"
@@ -121,6 +124,21 @@ const LoginPage: React.FC = () => {
             startAdornment: (
               <InputAdornment position="start">
                 <LockOpenIcon sx={{ color: "#8c98a4", mr: 1 }} />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                {showPassword ? (
+                  <VisibilityOff
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => setShowPassword(false)}
+                  />
+                ) : (
+                  <Visibility
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => setShowPassword(true)}
+                  />
+                )}
               </InputAdornment>
             ),
           }}
@@ -152,7 +170,11 @@ const LoginPage: React.FC = () => {
             className="login-button"
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} color="inherit" /> : "Iniciar sesión"}
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Iniciar sesión"
+            )}
           </Button>
 
           <Typography className="login-link">
