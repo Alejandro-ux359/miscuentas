@@ -238,49 +238,50 @@ const GenericForm: React.FC<GenericFormProps> = ({
                       return (
                         <div key={control.name} style={{ marginBottom: 12 }}>
                           <TextField
-  select
-  label={control.label}
-  name={control.name}
-  value={values[control.name] || ""}
-  onChange={handleChange}
-  fullWidth
-  SelectProps={{
-    MenuProps: {
-      PaperProps: {
-        sx: {
-          mt: 1.5,           // separación del menú
-          borderRadius: 2,   // bordes suaves
-        },
-      },
-    },
-  }}
-  sx={{
-    mt: 1,
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "3px",       // estilo suave
-      fontSize: "15px",
-      height: "46px",             // altura estándar como el input normal
-      paddingRight: "8px",
-    },
-    "& .MuiInputLabel-root": {
-      top: "-5px",                // subir el label
-      fontSize: "14px",
-    },
-    "& .MuiInputLabel-shrink": {
-      top: "2px",
-      fontSize: "13px",
-    },
-  }}
->
-  <MenuItem value="" disabled>Selecciona...</MenuItem>
+                            select
+                            label={control.label}
+                            name={control.name}
+                            value={values[control.name] || ""}
+                            onChange={handleChange}
+                            fullWidth
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    mt: 1.5, // separación del menú
+                                    borderRadius: 2, // bordes suaves
+                                  },
+                                },
+                              },
+                            }}
+                            sx={{
+                              mt: 1,
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "3px", // estilo suave
+                                fontSize: "15px",
+                                height: "46px", // altura estándar como el input normal
+                                paddingRight: "8px",
+                              },
+                              "& .MuiInputLabel-root": {
+                                top: "-5px", // subir el label
+                                fontSize: "14px",
+                              },
+                              "& .MuiInputLabel-shrink": {
+                                top: "2px",
+                                fontSize: "13px",
+                              },
+                            }}
+                          >
+                            <MenuItem value="" disabled>
+                              Selecciona...
+                            </MenuItem>
 
-  {options.map((opt) => (
-    <MenuItem key={opt.value} value={opt.label}>
-      {opt.label}
-    </MenuItem>
-  ))}
-</TextField>
-
+                            {options.map((opt) => (
+                              <MenuItem key={opt.value} value={opt.label}>
+                                {opt.label}
+                              </MenuItem>
+                            ))}
+                          </TextField>
                         </div>
                       );
                     }

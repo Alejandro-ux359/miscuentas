@@ -15,6 +15,7 @@ import {
   useMediaQuery,
   useTheme,
   Box,
+  MenuItem,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -31,6 +32,7 @@ import { BNegocios } from "../../bdDexie";
 import { ISelect } from "../../components/controls.types";
 import axios from "axios";
 import { useNomencladoresLocal } from "../../nomencladores/useNomencladoresLocal";
+import dayjs from "dayjs";
 
 interface ISelectFieldProps {
   control: ISelect;
@@ -39,6 +41,7 @@ interface ISelectFieldProps {
 }
 
 export default function Negocios() {
+  const hoy = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [editarDesdeDetalle, setEditarDesdeDetalle] = useState(false);
@@ -126,7 +129,6 @@ export default function Negocios() {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         fullWidth
-        SelectProps={{ native: true }}
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
@@ -140,13 +142,13 @@ export default function Negocios() {
           "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
         }}
       >
-        <option value="" disabled>
+        <MenuItem value="" disabled>
           Selecciona...
-        </option>
+        </MenuItem>
         {options.map((opt) => (
-          <option key={opt.value} value={opt.label}>
+          <MenuItem key={opt.value} value={opt.label}>
             {opt.label}
-          </option>
+          </MenuItem>
         ))}
       </TextField>
     );
@@ -381,9 +383,9 @@ export default function Negocios() {
           gap: 2,
           gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
           mt: 9,
-          maxHeight: "calc(100vh - 120px)", 
-          overflowY: "auto", 
-          paddingBottom:18,
+          maxHeight: "calc(100vh - 120px)",
+          overflowY: "auto",
+          paddingBottom: 18,
         }}
       >
         {negociosGuardados.map((negocio, index) => (
@@ -701,6 +703,7 @@ export default function Negocios() {
                           }))
                         }
                         onDelete={() => eliminarCamposActivos(campo)}
+                        maxDate={dayjs()}
                       />
                     </Box>
                   </Box>
