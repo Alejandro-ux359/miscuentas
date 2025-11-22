@@ -1,4 +1,3 @@
-// src/routers/PrivateRoute.tsx
 import React, { JSX, useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
@@ -8,14 +7,18 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { usuario } = useContext(AuthContext);
+  const { usuario, loading } = useContext(AuthContext);
 
+  // Mientras carga el usuario desde localStorage, NO redirigir
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
+  // Si no hay usuario una vez cargado → redirigir
   if (!usuario) {
-    // No está logueado → redirige a login
     return <Navigate to="/login" replace />;
   }
 
-  // Está logueado → muestra el componente
   return children;
 };
 
