@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Button, Fade } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+
 import inicio from "../../public/imagenes/inicio.png";
 import calculadora from "../../public/imagenes/calculadora.png";
 import negocios from "../../public/imagenes/negocios.png";
@@ -94,7 +95,7 @@ const WelcomePage: React.FC = () => {
         zIndex: 9999,
       }}
     >
-      {/* 🌟 Pantalla 1: Splash */}
+      {/* Splash */}
       <Fade in={showSplash} timeout={1500}>
         <Box
           sx={{
@@ -127,40 +128,33 @@ const WelcomePage: React.FC = () => {
         </Box>
       </Fade>
 
-      {/* 💡 Pantalla 2: Slider */}
+      {/* INTRO SLIDES */}
       {showIntro && (
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "space-between",
             height: "100%",
             width: "100%",
             textAlign: "center",
             px: 3,
-            py: 4,
-            position: "relative",
+            py: 3,
+            overflowY: "auto",
           }}
         >
           {/* Skip */}
           <Box sx={{ position: "absolute", top: "5%", right: "6%" }}>
             <Typography
               variant="body1"
-              sx={{
-                color: "#fff",
-                fontWeight: 600,
-                cursor: "pointer",
-                textDecoration: "underline",
-              }}
+              sx={{ color: "#fff", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
               onClick={handleSkip}
             >
               omitir
             </Typography>
           </Box>
 
-          {/* Imagen y texto con Fade separados */}
-          <Box sx={{ mt: "18%" }}>
+          {/* CONTENIDO */}
+          <Box sx={{ mt: "20%" }}>
             <Fade key={currentSlide + "-img"} in timeout={500}>
               <Box
                 component="img"
@@ -181,21 +175,20 @@ const WelcomePage: React.FC = () => {
             </Fade>
 
             <Fade key={currentSlide + "-text"} in timeout={500}>
-              <Typography variant="body2" sx={{ color: "#fcefee", mt: 1, px: 2 }}>
+              <Typography variant="body2" sx={{ color: "#fcefee", mt: 1 }}>
                 {slides[currentSlide].text}
               </Typography>
             </Fade>
           </Box>
 
-          {/* Botones */}
+          {/* BOTONES — SIEMPRE ABAJO */}
           <Box
             sx={{
-              position: "absolute",
-              bottom: "8%",
-              left: "50%",
-              transform: "translateX(-50%)",
               display: "flex",
+              justifyContent: "center",
               gap: 2,
+              mt: "auto",
+              mb: 3,
             }}
           >
             <Button
@@ -231,7 +224,7 @@ const WelcomePage: React.FC = () => {
         </Box>
       )}
 
-      {/* 🚀 Pantalla 3: Final */}
+      {/* FINAL */}
       <Fade in={showFinal} timeout={1000}>
         <Box
           sx={{
@@ -245,14 +238,7 @@ const WelcomePage: React.FC = () => {
             position: "relative",
           }}
         >
-          <Box
-            sx={{
-              mt: "70%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
+          <Box sx={{ mt: "70%", display: "flex", flexDirection: "column", alignItems: "center" }}>
             <Box sx={{ mt: "-80%" }}>
               <img
                 src="/logo/logo2.2.svg"
@@ -269,6 +255,7 @@ const WelcomePage: React.FC = () => {
             <Typography variant="subtitle1" sx={{ color: "#fcefee", mb: 3 }}>
               Mis cuentas
             </Typography>
+
             <Typography variant="body2" sx={{ color: "#fff", mb: 4, mt: "10%" }}>
               Toma el control de tus finanzas. <br />
               Crea una cuenta y estarás listo para empezar.
