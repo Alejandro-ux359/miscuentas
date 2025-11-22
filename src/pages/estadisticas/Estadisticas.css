@@ -17,10 +17,10 @@
 /* ======== CONTENEDOR GENERAL ======== */
 .estadisticas-container {
   width: 100%;
-  margin-top: 80px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 80px auto 0 auto;
   padding: 15px;
+  padding-bottom: 120px; /* espacio extra al final para menú inferior */
   background-color: var(--color-fondo);
   color: var(--color-texto);
   text-align: center;
@@ -29,9 +29,8 @@
 
 .estadisticas-container h2 {
   font-size: 1.8rem;
-  margin-bottom: 20px;
+  margin: 50px 0 20px 0;
   color: var(--color-primario);
-  margin-top: 50px;
   font-weight: 700; 
 }
 
@@ -41,6 +40,7 @@
   flex-direction: column;
   gap: 20px;
   align-items: stretch;
+  flex-wrap: wrap; /* permite que las tarjetas bajen si no caben */
 }
 
 /* ======== TARJETAS DE GRÁFICAS ======== */
@@ -49,6 +49,13 @@
   border-radius: var(--radio);
   box-shadow: var(--sombra-card);
   padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  min-height: 320px; /* altura mínima para no cortar gráficos */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -70,72 +77,17 @@
   margin-top: 10px;
 }
 
+/* Última tarjeta: dejar espacio para menú inferior */
+.grafica-card:last-child {
+  margin-bottom: 100px;
+}
+
 /* ======== GRÁFICAS ======== */
 .grafica-card canvas {
-  width: 100% !important;
-  height: auto !important;
-  max-height: 280px;
-}
-
-/* ============================
-   📱 MÓVIL (por defecto)
-   ============================ */
-@media (max-width: 600px) {
-  .estadisticas-container {
-    padding: 10px;
-  }
-
-  .estadisticas-container h2 {
-    font-size: 1.5rem;
-  }
-
-  .grafica-card {
-    padding: 15px;
-  }
-
-  .grafica-card h3 {
-    font-size: 1rem;
-  }
-
-  .grafica-card canvas {
-    max-height: 240px;
-  }
-}
-
-/* ============================
-   💻 TABLET
-   ============================ */
-@media (min-width: 601px) and (max-width: 1024px) {
-  .secciones-graficas {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .grafica-card {
-    width: 45%;
-    margin: 10px;
-  }
-
-  .grafica-card canvas {
-    max-height: 260px;
-  }
-}
-
-/* ============================
-   🖥️ ESCRITORIO GRANDE
-   ============================ */
-@media (min-width: 1025px) {
-  .secciones-graficas {
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 25px;
-  }
-
-  .grafica-card {
-    flex: 1;
-    max-width: 32%;
-  }
+  width: 100%;
+  height: auto;
+  min-height: 250px;     /* altura mínima para móviles */
+  aspect-ratio: 1 / 1;   /* mantiene proporción cuadrada */
 }
 
 /* ===== SELECTOR DE MONEDA ===== */
@@ -170,8 +122,33 @@
   box-shadow: 0 0 6px rgba(54, 162, 235, 0.3);
 }
 
-/* Móvil */
+/* ============================
+   📱 MÓVIL (por defecto)
+   ============================ */
 @media (max-width: 600px) {
+  .estadisticas-container {
+    padding: 10px;
+    padding-bottom: 120px; /* espacio extra también en móvil */
+  }
+
+  .estadisticas-container h2 {
+    font-size: 1.5rem;
+    margin-top: 40px;
+  }
+
+  .grafica-card {
+    padding: 15px;
+    min-height: 280px;
+  }
+
+  .grafica-card h3 {
+    font-size: 1rem;
+  }
+
+  .grafica-card canvas {
+    min-height: 240px;
+  }
+
   .selector-moneda {
     flex-direction: column;
     align-items: stretch;
@@ -182,3 +159,48 @@
   }
 }
 
+/* ============================
+   💻 TABLET
+   ============================ */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .secciones-graficas {
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .grafica-card {
+    width: 45%;
+    margin: 10px 0;
+  }
+
+  .grafica-card canvas {
+    min-height: 260px;
+  }
+}
+
+/* ============================
+   🖥️ ESCRITORIO GRANDE
+   ============================ */
+@media (min-width: 1025px) {
+  .secciones-graficas {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 25px;
+  }
+
+  .grafica-card {
+    flex: 1;
+    max-width: 32%;
+  }
+}
+
+/* ============================
+   GENERAL BODY
+   ============================ */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto; /* permite scroll completo si hay menú inferior fijo */
+}
