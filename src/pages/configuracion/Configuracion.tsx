@@ -1,6 +1,7 @@
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { useNavigate } from "react-router-dom";
-import "../../assets/styles/Configuracion.css"; 
+import "../../assets/styles/Configuracion.css";
+import People from "./people";
 
 export default function ConfiguracionPage() {
   const navigate = useNavigate();
@@ -10,12 +11,12 @@ export default function ConfiguracionPage() {
       <div className="configuracion-header">
         <ArrowBackIosNewIcon
           className="back-icon"
-          onClick={() => navigate(-1)} 
+          onClick={() => navigate(-1)}
         />
         <h2>Configuración</h2>
       </div>
 
-      
+      <People />
     </div>
   );
 }

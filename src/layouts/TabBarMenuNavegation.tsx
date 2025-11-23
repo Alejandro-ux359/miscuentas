@@ -93,16 +93,16 @@ export default function TabBarMenuNavegation() {
           />
         </div>
 
-        {/* <div className="icon-container">
-          <NotificationsNoneIcon
+        <div className="icon-container">
+          {/* <NotificationsNoneIcon
             className="notification-icon"
             onClick={() => navigate("/notificacion")}
-          />
+          /> */}
           <SettingsIcon
             className="setting-icon"
             onClick={() => navigate("/configuracion")}
           />
-        </div> */}
+        </div>
       </div>
 
       <div className="bottom-menu-container">

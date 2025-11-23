@@ -1,9 +1,10 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 
 interface Usuario {
-  id: string;
+  id_usuario: number; 
   nombre: string;
-  celular: string;
+  correo?: string;
+  celular?: string;
   foto_perfil?: string;
 }
 
@@ -33,8 +34,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUsuario(JSON.parse(storedUser));
     }
 
-    setLoading(false); // ← IMPORTANTE
+    setLoading(false);
   }, []);
+
+  // Guardar usuario cuando cambie
+  useEffect(() => {
+    if (usuario) {
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+    }
+  }, [usuario]);
 
   const cerrarSesion = () => {
     setUsuario(null);

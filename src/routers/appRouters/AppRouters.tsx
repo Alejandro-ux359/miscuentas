@@ -11,6 +11,7 @@ import WelcomePage from "../../auth/Welcome";
 import LoginPage from "../../auth/Login";
 import RegisterPage from "../../auth/Register";
 import PrivateRoute from "./PrivateRoute";
+import PerfilPage from "../../pages/configuracion/PerfilPage";
 
 
 function AppRouter() {
@@ -78,6 +79,15 @@ function AppRouter() {
           </PrivateRoute>
         }
       />
+<Route
+  path="/perfil"
+  element={
+    <PrivateRoute>
+      <PerfilPage />
+    </PrivateRoute>
+  }
+/>
+
     </Routes>
   );
 }
