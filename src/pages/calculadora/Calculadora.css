@@ -6,6 +6,9 @@
   font-family: "Segoe UI", Roboto, sans-serif;
   color: #111;
   background: transparent; /* 🔹 Mantener sin cuadro */
+   height: calc(100vh - 80px); /* 👈 IMPORTANTE */
+  overflow-y: auto;          /* 👈 PERMITE EL SCROLL */
+  padding-bottom: 90px; 
 }
 
 /* 🔹 Nuevo: estilo de título en línea */
@@ -97,7 +100,8 @@
   padding: 0;
   border: none;
   cursor: pointer;
-  left: 25px;
+  left: 20px;
+
 }
 
 /* 🔹 Asegura que el ícono esté exactamente en el centro */
