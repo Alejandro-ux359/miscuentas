@@ -31,23 +31,26 @@ export default function PerfilPage() {
   // 🔹 Cargar datos del usuario desde Dexie
 useEffect(() => {
   const cargarUsuario = async () => {
-    if (usuario) {
-      setName(usuario.nombre);
-      setPhone(usuario.celular || "");
-      setEmail(usuario.correo || ""); 
-      setAvatar(usuario.foto_perfil || "");
+    if (!usuario) return;
 
-      
-        // Traer password desde Dexie usando id_usuario
-        const userDb = await db.loginregistre.get(usuario.id_usuario);
-        if (userDb) {
-          setPassword(userDb.password);
-        } 
+    // Datos desde el contexto
+    setName(usuario.nombre);
+    setEmail(usuario.correo || "");
+    setPhone(usuario.celular || ""); // <- directamente desde contexto
+    setAvatar(usuario.foto_perfil || "");
+
+    // Traer datos extra desde Dexie si existe
+    const userDb = await db.loginregistre.get(usuario.id_usuario);
+    if (userDb) {
+      setPhone(userDb.cel_usuario?.toString() || usuario.celular || "");
+      setPassword(userDb.password || "");
     }
   };
 
   cargarUsuario();
 }, [usuario]);
+
+
 
 
 
@@ -58,32 +61,35 @@ useEffect(() => {
   };
 
   // 🔹 Guardar cambios
-  const handleGuardarCambios = async () => {
-    if (!usuario) return;
+ const handleGuardarCambios = async () => {
+  if (!usuario) return;
 
-    try {
-      await db.loginregistre.update(Number(usuario.id_usuario), {
-        nombre: name,
-        cel_usuario: Number(phone),
-        correo_usuario: email,
-        password,
-        avatar: avatar || "default.png",
-      });
+  try {
+    // Actualizar Dexie
+    await db.loginregistre.update(Number(usuario.id_usuario), {
+      nombre: name,
+      cel_usuario: Number(phone), // <- número
+      correo_usuario: email,
+      password,
+      avatar: avatar || "default.png",
+    });
 
-      // Actualizar contexto
-      setUsuario({
-        ...usuario,
-        nombre: name,
-        celular: phone,
-        foto_perfil: avatar || undefined,
-      });
+    // Actualizar contexto para que el resto de la app vea los cambios
+    setUsuario({
+      ...usuario,
+      nombre: name,
+      correo: email,
+      celular: phone, // <- esto asegura que se guarde el móvil
+      foto_perfil: avatar || undefined,
+    });
 
-      alert("Datos actualizados correctamente");
-    } catch (err) {
-      console.error("Error actualizando usuario:", err);
-      alert("Error actualizando usuario: " + err);
-    }
-  };
+    alert("Datos actualizados correctamente");
+  } catch (err) {
+    console.error("Error actualizando usuario:", err);
+    alert("Error actualizando usuario: " + err);
+  }
+};
+
 
   return (
     <div style={{ maxWidth: 500, margin: "20px auto" }}>
@@ -126,6 +132,7 @@ useEffect(() => {
             onChange={(e) => setName(e.target.value)}
             fullWidth
             margin="normal"
+            disabled={true}
           />
           <TextField
             label="Correo electrónico"
@@ -133,6 +140,7 @@ useEffect(() => {
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
             margin="normal"
+            disabled={true}
           />
           <TextField
             label="Teléfono"
@@ -140,22 +148,9 @@ useEffect(() => {
             onChange={(e) => setPhone(e.target.value)}
             fullWidth
             margin="normal"
+            disabled={true}
           />
-          <TextField
-            label="Contraseña"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            fullWidth
-            margin="normal"
-            InputProps={{
-              endAdornment: (
-                <IconButton onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              ),
-            }}
-          />
+    
 
           <Button
             variant="contained"
@@ -166,7 +161,7 @@ useEffect(() => {
             }}
             onClick={handleGuardarCambios}
           >
-            Guardar cambios
+            Guardar foto
           </Button>
         </CardContent>
       </Card>

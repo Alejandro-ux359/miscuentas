@@ -59,8 +59,17 @@ const LoginPage: React.FC = () => {
       console.log("Login exitoso:", data.user);
 
       // ✅ Actualizar contexto y guardar en localStorage
-      setUsuario(data.user);
-      localStorage.setItem("usuario", JSON.stringify(data.user));
+      const usuarioLimpio = {
+        id_usuario: data.user.id_usuario,
+        nombre: data.user.nombre,
+        correo: data.user.correo,
+        celular: data.user.celular,
+        foto_perfil: data.user.avatar || "",
+      };
+
+      // Guardar en contexto y localStorage
+      setUsuario(usuarioLimpio);
+      localStorage.setItem("usuario", JSON.stringify(usuarioLimpio));
 
       navigate("/inicio");
     } catch (err) {
@@ -112,7 +121,7 @@ const LoginPage: React.FC = () => {
         />
 
         <TextField
-          type={showPassword ? "text" : "password"} 
+          type={showPassword ? "text" : "password"}
           variant="outlined"
           fullWidth
           margin="normal"

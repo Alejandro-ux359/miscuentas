@@ -1,6 +1,6 @@
 // db-sync.ts
 import Dexie, {Table} from "dexie";
-//import { supabase } from "./supaBase";
+
 
 /* -------------------------
    Interfaces (esquema final)
