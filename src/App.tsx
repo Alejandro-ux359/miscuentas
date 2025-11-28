@@ -7,7 +7,6 @@ import { useNomencladores } from "./nomencladores/useNomencladores";
 import { syncNomencladores } from "./nomencladores/syncNomencladores";
 import { useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext"; // ✅ importar contexto
-import PerfilPage from "./pages/configuracion/PerfilPage";
 import "./assets/typografias/montserrat/static/Montserrat-Bold.ttf";
 
 

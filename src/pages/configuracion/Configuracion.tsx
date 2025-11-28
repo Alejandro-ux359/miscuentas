@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../../assets/styles/Configuracion.css";
 import People from "./people";
 
+
 export default function ConfiguracionPage() {
   const navigate = useNavigate();
 

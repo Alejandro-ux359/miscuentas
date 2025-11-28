@@ -12,7 +12,8 @@ import LoginPage from "../../auth/Login";
 import RegisterPage from "../../auth/Register";
 import PrivateRoute from "./PrivateRoute";
 import PerfilPage from "../../pages/configuracion/PerfilPage";
-
+import Contrasenya from "../../pages/configuracion/Contrasenya";
+import DescargarApp from "../../pages/configuracion/DescargarApp";
 
 function AppRouter() {
   return (
@@ -79,15 +80,30 @@ function AppRouter() {
           </PrivateRoute>
         }
       />
-<Route
-  path="/perfil"
-  element={
-    <PrivateRoute>
-      <PerfilPage />
-    </PrivateRoute>
-  }
-/>
-
+      <Route
+        path="/perfil"
+        element={
+          <PrivateRoute>
+            <PerfilPage />
+          </PrivateRoute>
+        }
+      />
+ <Route
+        path="/contrasenya"
+        element={
+          <PrivateRoute>
+            <Contrasenya />
+          </PrivateRoute>
+        }
+      />
+ <Route
+        path="/descargarapp"
+        element={
+          <PrivateRoute>
+            <DescargarApp />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 }
