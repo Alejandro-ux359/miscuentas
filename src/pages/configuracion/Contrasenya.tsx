@@ -42,8 +42,8 @@ export default function Contrasenya() {
         right: 0,
         bottom: 0,
         background: "#F1F2F6",
+        overflowX: "hidden", // evita scroll horizontal 
         overflowY: "auto",
-        // overflowX: "hidden",
         zIndex: 9999, // 🔥 PARA QUE ESTÉ ENCIMA DE TODO
       }}
     >
@@ -70,7 +70,7 @@ export default function Contrasenya() {
             fontWeight: "bold",
           }}
         >
-          Mi Perfil
+          Contraseña
         </Typography>
       </div>
 

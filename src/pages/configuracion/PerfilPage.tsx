@@ -85,7 +85,9 @@ export default function PerfilPage() {
         bottom: 0,
         background: "#F1F2F6",
         overflowY: "auto",
-        zIndex: 9999, // 🔥 PARA QUE ESTÉ ENCIMA DE TODO
+        overflowX: "hidden", // evita scroll horizontal
+        zIndex: 9999,
+        boxSizing: "border-box", // importante
       }}
     >
       {/* 🔵 Barra superior con degradado + botón atrás */}
@@ -116,12 +118,13 @@ export default function PerfilPage() {
       </div>
 
       {/* 🔽 Contenedor blanco centrado */}
-      <div style={{ padding: 20 }}>
+      <div style={{ padding: 20, boxSizing: "border-box" }}>
         <Card
           style={{
             borderRadius: 12,
             width: "100%",
             maxWidth: 500,
+            boxSizing: "border-box", // importante
             margin: "0 auto",
           }}
         >
