@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -17,48 +17,69 @@ import { AuthContext } from "../../context/AuthContext";
 
 export default function Contrasenya() {
   const navigate = useNavigate();
-  const { usuario } = useContext(AuthContext); // Para obtener ID del usuario
+  const { usuario } = useContext(AuthContext);
 
   const [nueva, setNueva] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [showNueva, setShowNueva] = useState(false);
   const [showConfirmar, setShowConfirmar] = useState(false);
 
+  const [notifVisible, setNotifVisible] = useState(false);
+  const [notifMessage, setNotifMessage] = useState("");
+  const [notifType, setNotifType] = useState<"success" | "error">("success");
+
   const handleGuardar = async () => {
     if (nueva !== confirmar) {
-      alert("La nueva contraseña no coincide");
+      setNotifMessage("La nueva contraseña no coincide");
+      setNotifType("error");
+      setNotifVisible(true);
       return;
     }
 
     if (!usuario?.id_usuario) {
-      alert("No se encontró usuario activo");
+      setNotifMessage("No se encontró usuario activo");
+      setNotifType("error");
+      setNotifVisible(true);
       return;
     }
 
     try {
-      // ✅ Usamos ruta relativa para que el proxy de Vite lo redirija al backend
-   const response = await axios.post(
-  "http://localhost:3000/sync/loginregistre/actualizar-password",
-  {
-    id_usuario: usuario.id_usuario,
-    password: nueva,
-  }
-);
-
+      const response = await axios.post(
+        "http://localhost:3000/sync/loginregistre/actualizar-password",
+        {
+          id_usuario: usuario.id_usuario,
+          password: nueva,
+        }
+      );
 
       if (response.data?.message) {
-        alert("Contraseña actualizada correctamente");
+        setNotifMessage("Contraseña actualizada correctamente");
+        setNotifType("success");
+        setNotifVisible(true);
         setNueva("");
         setConfirmar("");
       }
     } catch (err: any) {
       console.error(err);
-      alert(
+      setNotifMessage(
         err.response?.data?.message ||
           "Ocurrió un error al actualizar la contraseña"
       );
+      setNotifType("error");
+      setNotifVisible(true);
     }
   };
+
+  // Cuando la notificación se muestra, se oculta después de 3 segundos y se hace navigate(-1)
+  useEffect(() => {
+    if (notifVisible) {
+      const timer = setTimeout(() => {
+        setNotifVisible(false);
+        navigate(-1);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notifVisible, navigate]);
 
   return (
     <div
@@ -89,7 +110,6 @@ export default function Contrasenya() {
         <IconButton onClick={() => navigate(-1)} style={{ color: "white" }}>
           <ArrowBackIosNewIcon />
         </IconButton>
-
         <Typography variant="h5" style={{ marginLeft: 10, fontWeight: "bold" }}>
           Cambiar Contraseña
         </Typography>
@@ -157,6 +177,45 @@ export default function Contrasenya() {
           </Button>
         </CardContent>
       </Card>
+
+    {/* Overlay semitransparente */}
+{notifVisible && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0,0,0,0.3)", // negro con 30% de opacidad
+      zIndex: 9999,
+    }}
+  ></div>
+)}
+
+{/* Tarjeta de notificación */}
+{notifVisible && (
+  <Card
+    sx={{
+      position: "fixed",
+      top: "30%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      minWidth: 300,
+      maxWidth: 400,
+      borderRadius: 2,
+      p: 2,
+      textAlign: "center",
+      background: notifType === "success" ? "#3f7cd7ff" : "#F44336",
+      color: "white",
+      boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+      zIndex: 10000, // encima del overlay
+    }}
+  >
+    <Typography variant="subtitle1">{notifMessage}</Typography>
+  </Card>
+)}
+
     </div>
   );
 }
