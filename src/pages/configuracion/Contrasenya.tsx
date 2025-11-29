@@ -28,9 +28,26 @@ export default function Contrasenya() {
   const [notifMessage, setNotifMessage] = useState("");
   const [notifType, setNotifType] = useState<"success" | "error">("success");
 
+  // URL del backend (local por defecto o variable de entorno en producción)
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+  // Función para validar contraseña: mínimo 8 caracteres, al menos un símbolo
+  const isPasswordStrong = (pwd: string) => {
+    return /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(pwd);
+  };
+
   const handleGuardar = async () => {
     if (nueva !== confirmar) {
       setNotifMessage("La nueva contraseña no coincide");
+      setNotifType("error");
+      setNotifVisible(true);
+      return;
+    }
+
+    if (!isPasswordStrong(nueva)) {
+      setNotifMessage(
+        "La contraseña debe tener al menos 8 caracteres y un símbolo"
+      );
       setNotifType("error");
       setNotifVisible(true);
       return;
@@ -45,7 +62,7 @@ export default function Contrasenya() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/sync/loginregistre/actualizar-password",
+        `${API_URL}/sync/loginregistre/actualizar-password`,
         {
           id_usuario: usuario.id_usuario,
           password: nueva,
@@ -70,22 +87,21 @@ export default function Contrasenya() {
     }
   };
 
-  // Cuando la notificación se muestra, se oculta después de 3 segundos y se hace navigate(-1)
+  // Maneja el cierre automático de la notificación solo si fue éxito
   useEffect(() => {
-    if (notifVisible) {
+    if (notifVisible && notifType === "success") {
       const timer = setTimeout(() => {
         setNotifVisible(false);
         navigate(-1);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [notifVisible, navigate]);
+  }, [notifVisible, notifType, navigate]);
 
   return (
     <div
       style={{
         position: "fixed",
-        alignItems: "center",
         top: 0,
         left: 0,
         right: 0,
@@ -96,6 +112,7 @@ export default function Contrasenya() {
         zIndex: 9999,
       }}
     >
+      {/* Header */}
       <div
         style={{
           width: "100%",
@@ -115,6 +132,7 @@ export default function Contrasenya() {
         </Typography>
       </div>
 
+      {/* Formulario */}
       <Card
         sx={{
           width: "80%",
@@ -178,44 +196,43 @@ export default function Contrasenya() {
         </CardContent>
       </Card>
 
-    {/* Overlay semitransparente */}
-{notifVisible && (
-  <div
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(0,0,0,0.3)", // negro con 30% de opacidad
-      zIndex: 9999,
-    }}
-  ></div>
-)}
+      {/* Overlay semitransparente */}
+      {notifVisible && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.3)",
+            zIndex: 9999,
+          }}
+        ></div>
+      )}
 
-{/* Tarjeta de notificación */}
-{notifVisible && (
-  <Card
-    sx={{
-      position: "fixed",
-      top: "30%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      minWidth: 300,
-      maxWidth: 400,
-      borderRadius: 2,
-      p: 2,
-      textAlign: "center",
-      background: notifType === "success" ? "#3f7cd7ff" : "#F44336",
-      color: "white",
-      boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
-      zIndex: 10000, // encima del overlay
-    }}
-  >
-    <Typography variant="subtitle1">{notifMessage}</Typography>
-  </Card>
-)}
-
+      {/* Tarjeta de notificación */}
+      {notifVisible && (
+        <Card
+          sx={{
+            position: "fixed",
+            top: "30%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            minWidth: 300,
+            maxWidth: 400,
+            borderRadius: 2,
+            p: 2,
+            textAlign: "center",
+            background: notifType === "success" ? "#3f7cd7ff" : "#F44336",
+            color: "white",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+            zIndex: 10000,
+          }}
+        >
+          <Typography variant="subtitle1">{notifMessage}</Typography>
+        </Card>
+      )}
     </div>
   );
 }
