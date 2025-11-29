@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -12,24 +12,52 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function Contrasenya() {
   const navigate = useNavigate();
-  const [actual, setActual] = useState("");
+  const { usuario } = useContext(AuthContext); // Para obtener ID del usuario
+
   const [nueva, setNueva] = useState("");
   const [confirmar, setConfirmar] = useState("");
-
-  // Estados para mostrar/ocultar cada contraseña
-  const [showActual, setShowActual] = useState(false);
   const [showNueva, setShowNueva] = useState(false);
   const [showConfirmar, setShowConfirmar] = useState(false);
 
-  const handleGuardar = () => {
+  const handleGuardar = async () => {
     if (nueva !== confirmar) {
       alert("La nueva contraseña no coincide");
       return;
     }
-    alert("Contraseña actualizada correctamente");
+
+    if (!usuario?.id_usuario) {
+      alert("No se encontró usuario activo");
+      return;
+    }
+
+    try {
+      // ✅ Usamos ruta relativa para que el proxy de Vite lo redirija al backend
+   const response = await axios.post(
+  "http://localhost:3000/sync/loginregistre/actualizar-password",
+  {
+    id_usuario: usuario.id_usuario,
+    password: nueva,
+  }
+);
+
+
+      if (response.data?.message) {
+        alert("Contraseña actualizada correctamente");
+        setNueva("");
+        setConfirmar("");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(
+        err.response?.data?.message ||
+          "Ocurrió un error al actualizar la contraseña"
+      );
+    }
   };
 
   return (
@@ -42,12 +70,11 @@ export default function Contrasenya() {
         right: 0,
         bottom: 0,
         background: "#F1F2F6",
-        overflowX: "hidden", // evita scroll horizontal 
+        overflowX: "hidden",
         overflowY: "auto",
-        zIndex: 9999, // 🔥 PARA QUE ESTÉ ENCIMA DE TODO
+        zIndex: 9999,
       }}
     >
-      {/* 🔵 Barra superior con degradado + botón atrás */}
       <div
         style={{
           width: "100%",
@@ -63,14 +90,8 @@ export default function Contrasenya() {
           <ArrowBackIosNewIcon />
         </IconButton>
 
-        <Typography
-          variant="h5"
-          style={{
-            marginLeft: 10,
-            fontWeight: "bold",
-          }}
-        >
-          Contraseña
+        <Typography variant="h5" style={{ marginLeft: 10, fontWeight: "bold" }}>
+          Cambiar Contraseña
         </Typography>
       </div>
 
@@ -86,7 +107,6 @@ export default function Contrasenya() {
         }}
       >
         <CardContent>
-          {/* Nueva contraseña */}
           <TextField
             label="Nueva contraseña"
             type={showNueva ? "text" : "password"}
@@ -105,7 +125,6 @@ export default function Contrasenya() {
             }}
           />
 
-          {/* Confirmar contraseña */}
           <TextField
             label="Confirmar contraseña"
             type={showConfirmar ? "text" : "password"}
@@ -129,7 +148,7 @@ export default function Contrasenya() {
             variant="contained"
             sx={{
               mt: 2,
-              background: "linear-gradient(135deg, #1D4ED8, #7E22CE)",
+              background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
               padding: "10px",
             }}
             onClick={handleGuardar}
