@@ -89,14 +89,15 @@ export default function Contrasenya() {
 
   // Maneja el cierre automático de la notificación solo si fue éxito
   useEffect(() => {
-    if (notifVisible && notifType === "success") {
-      const timer = setTimeout(() => {
-        setNotifVisible(false);
-        navigate(-1);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notifVisible, notifType, navigate]);
+  if (notifVisible) {
+    const timer = setTimeout(() => {
+      setNotifVisible(false);
+      if (notifType === "success") navigate(-1); // solo navegar atrás si fue éxito
+    }, 3000); // 3 segundos
+    return () => clearTimeout(timer);
+  }
+}, [notifVisible, notifType, navigate]);
+
 
   return (
     <div
