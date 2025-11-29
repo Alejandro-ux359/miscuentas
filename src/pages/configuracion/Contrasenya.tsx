@@ -28,64 +28,72 @@ export default function Contrasenya() {
   const [notifMessage, setNotifMessage] = useState("");
   const [notifType, setNotifType] = useState<"success" | "error">("success");
 
-  // URL del backend (local por defecto o variable de entorno en producción)
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
   // Función para validar contraseña: mínimo 8 caracteres, al menos un símbolo
   const isPasswordStrong = (pwd: string) => {
     return /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(pwd);
   };
 
-  const handleGuardar = async () => {
-    if (nueva !== confirmar) {
-      setNotifMessage("La nueva contraseña no coincide");
-      setNotifType("error");
-      setNotifVisible(true);
-      return;
-    }
 
-    if (!isPasswordStrong(nueva)) {
-      setNotifMessage(
-        "La contraseña debe tener al menos 8 caracteres y un símbolo"
-      );
-      setNotifType("error");
-      setNotifVisible(true);
-      return;
-    }
+// Para desarrollo (localhost) o producción (remplaza con tu dominio)
+const API_URL = "http://localhost:3000"; // o "https://mi-backend.com" en producción
 
-    if (!usuario?.id_usuario) {
-      setNotifMessage("No se encontró usuario activo");
-      setNotifType("error");
-      setNotifVisible(true);
-      return;
-    }
+const handleGuardar = async () => {
+  if (nueva !== confirmar) {
+    setNotifMessage("La nueva contraseña no coincide");
+    setNotifType("error");
+    setNotifVisible(true);
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        `${API_URL}/sync/loginregistre/actualizar-password`,
-        {
-          id_usuario: usuario.id_usuario,
-          password: nueva,
-        }
-      );
+  if (!isPasswordStrong(nueva)) {
+    setNotifMessage(
+      "La contraseña debe tener al menos 8 caracteres y un símbolo"
+    );
+    setNotifType("error");
+    setNotifVisible(true);
+    return;
+  }
 
-      if (response.data?.message) {
-        setNotifMessage("Contraseña actualizada correctamente");
-        setNotifType("success");
-        setNotifVisible(true);
-        setNueva("");
-        setConfirmar("");
+  if (!usuario?.id_usuario) {
+    setNotifMessage("No se encontró usuario activo");
+    setNotifType("error");
+    setNotifVisible(true);
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/sync/loginregistre/actualizar-password`,
+      {
+        id_usuario: usuario.id_usuario,
+        password: nueva,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        timeout: 5000, // opcional: 5 segundos de timeout
       }
-    } catch (err: any) {
-      console.error(err);
-      setNotifMessage(
-        err.response?.data?.message ||
-          "Ocurrió un error al actualizar la contraseña"
-      );
-      setNotifType("error");
+    );
+
+    if (response.data?.message) {
+      setNotifMessage("Contraseña actualizada correctamente");
+      setNotifType("success");
       setNotifVisible(true);
+      setNueva("");
+      setConfirmar("");
     }
-  };
+  } catch (err: any) {
+    console.error("Axios error:", err);
+    setNotifMessage(
+      err.response?.data?.message ||
+        "Ocurrió un error al actualizar la contraseña"
+    );
+    setNotifType("error");
+    setNotifVisible(true);
+  }
+};
+
 
   // Maneja el cierre automático de la notificación solo si fue éxito
   useEffect(() => {
