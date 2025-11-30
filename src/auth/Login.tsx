@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -57,6 +57,13 @@ const LoginPage: React.FC = () => {
         return;
       }
 
+      // 👉 Guardar número de usuario si marcó "Recordar"
+      if (rememberMe) {
+        localStorage.setItem("rememberUser", username);
+      } else {
+        localStorage.removeItem("rememberUser");
+      }
+
       console.log("Login exitoso:", data.user);
 
       // ✅ Actualizar contexto y guardar en localStorage
@@ -81,6 +88,14 @@ const LoginPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+  const savedUser = localStorage.getItem("rememberUser");
+  if (savedUser) {
+    setUsername(savedUser);
+    setRememberMe(true);
+  }
+}, []);
 
   const handleForgotPassword = () => {
     setRecoveryMode(true); // ✅ activar modo recuperación
