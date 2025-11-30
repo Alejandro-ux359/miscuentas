@@ -17,24 +17,22 @@ import { AuthContext } from "../../context/AuthContext";
 
 export default function Contrasenya() {
   const navigate = useNavigate();
-  const { usuario } = useContext(AuthContext);
-  const { setRecoveryMode } = useContext(AuthContext);
+  const { usuario, setRecoveryMode } = useContext(AuthContext);
+
+  const [emailOrPhone, setEmailOrPhone] = useState(""); // Para usuario no logueado
   const [nueva, setNueva] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [showNueva, setShowNueva] = useState(false);
   const [showConfirmar, setShowConfirmar] = useState(false);
-
+  const [correoOCel, setCorreoOCel] = useState("");
   const [notifVisible, setNotifVisible] = useState(false);
   const [notifMessage, setNotifMessage] = useState("");
   const [notifType, setNotifType] = useState<"success" | "error">("success");
 
-  // Función para validar contraseña: mínimo 8 caracteres, al menos un símbolo
-  const isPasswordStrong = (pwd: string) => {
-    return /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(pwd);
-  };
+  const API_URL = "http://localhost:3000"; // Cambiar en producción
 
-  // Para desarrollo (localhost) o producción (remplaza con tu dominio)
-  const API_URL = "http://localhost:3000"; // o "https://mi-backend.com" en producción
+  const isPasswordStrong = (pwd: string) =>
+    /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(pwd);
 
   const handleGuardar = async () => {
     if (nueva !== confirmar) {
@@ -53,25 +51,36 @@ export default function Contrasenya() {
       return;
     }
 
-    if (!usuario?.id_usuario) {
-      setNotifMessage("No se encontró usuario activo");
-      setNotifType("error");
-      setNotifVisible(true);
-      return;
-    }
-
     try {
+      // Construir payload dinámico
+      const payload: any = { password: nueva };
+
+      if (usuario?.id_usuario) {
+        payload.id_usuario = usuario.id_usuario;
+      } else {
+        if (!correoOCel) {
+          setNotifMessage("Por favor ingresa tu correo o teléfono");
+          setNotifType("error");
+          setNotifVisible(true);
+          return;
+        }
+
+        // Detectar si es número o correo
+        if (/^\d+$/.test(correoOCel)) {
+          payload.cel_usuario = correoOCel;
+        } else {
+          payload.correo_usuario = correoOCel;
+        }
+      }
+
       const response = await axios.post(
         `${API_URL}/sync/loginregistre/actualizar-password`,
-        {
-          id_usuario: usuario.id_usuario,
-          password: nueva,
-        },
+        payload,
         {
           headers: {
             "Content-Type": "application/json",
           },
-          timeout: 5000, // opcional: 5 segundos de timeout
+          timeout: 5000,
         }
       );
 
@@ -81,6 +90,7 @@ export default function Contrasenya() {
         setNotifVisible(true);
         setNueva("");
         setConfirmar("");
+        if (!usuario) setCorreoOCel(""); // limpiar campo si estaba en modo recuperación
       }
     } catch (err: any) {
       console.error("Axios error:", err);
@@ -93,23 +103,23 @@ export default function Contrasenya() {
     }
   };
 
-  // Maneja el cierre automático de la notificación solo si fue éxito
+  // Ocultar notificación después de 4 segundos
   useEffect(() => {
     if (notifVisible) {
       const timer = setTimeout(() => {
         setNotifVisible(false);
-        if (notifType === "success") navigate(-1); // solo navegar atrás si fue éxito
-      }, 3000); // 3 segundos
+        if (notifType === "success") {
+          setRecoveryMode(false);
+          if (usuario && usuario.id_usuario !== undefined) {
+            navigate(-1);
+          } else {
+            navigate("/login");
+          }
+        }
+      }, 4000); // ⬅ 4 segundos
       return () => clearTimeout(timer);
     }
-  }, [notifVisible, notifType, navigate]);
-
-  useEffect(() => {
-  if (notifVisible && notifType === "success") {
-    setRecoveryMode(false); // ✅ desactivar modo recuperación
-    navigate("/login");     // volver a login o a donde quieras
-  }
-}, [notifVisible, notifType, navigate, setRecoveryMode]);
+  }, [notifVisible, notifType, navigate, setRecoveryMode, usuario]);
 
   return (
     <div
@@ -158,6 +168,17 @@ export default function Contrasenya() {
         }}
       >
         <CardContent>
+          {!usuario && (
+            <TextField
+              label="Correo o teléfono"
+              type="text"
+              fullWidth
+              margin="normal"
+              value={correoOCel}
+              onChange={(e) => setCorreoOCel(e.target.value)}
+            />
+          )}
+
           <TextField
             label="Nueva contraseña"
             type={showNueva ? "text" : "password"}
