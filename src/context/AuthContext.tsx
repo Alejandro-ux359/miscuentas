@@ -13,6 +13,8 @@ interface AuthContextType {
   setUsuario: (usuario: Usuario | null) => void;
   cerrarSesion: () => void;
   loading: boolean;
+  recoveryMode: boolean;
+  setRecoveryMode: (value: boolean) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -20,11 +22,15 @@ export const AuthContext = createContext<AuthContextType>({
   setUsuario: () => {},
   cerrarSesion: () => {},
   loading: true,
+  recoveryMode: false,          // ✅ nuevo
+  setRecoveryMode: () => {},    // ✅ nuevo
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
+
+   const [recoveryMode, setRecoveryMode] = useState(false);
 
   // Cargar usuario guardado del localStorage
   useEffect(() => {
@@ -51,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ usuario, setUsuario, cerrarSesion, loading }}
+      value={{ usuario, setUsuario, cerrarSesion, loading, recoveryMode, setRecoveryMode }}
     >
       {children}
     </AuthContext.Provider>

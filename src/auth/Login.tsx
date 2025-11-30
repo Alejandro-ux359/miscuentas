@@ -32,6 +32,7 @@ const LoginPage: React.FC = () => {
 
   const navigate = useNavigate();
   const { setUsuario } = useContext(AuthContext); // ✅ usar contexto
+  const { setRecoveryMode } = useContext(AuthContext);
 
   const API_URL =
     window.location.hostname === "localhost"
@@ -82,7 +83,8 @@ const LoginPage: React.FC = () => {
   };
 
   const handleForgotPassword = () => {
-    navigate("/forgot-password");
+    setRecoveryMode(true); // ✅ activar modo recuperación
+    navigate("/contrasenya"); // ✅ ir a la página de cambio de contraseña
   };
 
   return (

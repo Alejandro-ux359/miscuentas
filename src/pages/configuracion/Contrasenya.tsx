@@ -18,7 +18,7 @@ import { AuthContext } from "../../context/AuthContext";
 export default function Contrasenya() {
   const navigate = useNavigate();
   const { usuario } = useContext(AuthContext);
-
+  const { setRecoveryMode } = useContext(AuthContext);
   const [nueva, setNueva] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [showNueva, setShowNueva] = useState(false);
@@ -33,79 +33,83 @@ export default function Contrasenya() {
     return /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(pwd);
   };
 
+  // Para desarrollo (localhost) o producción (remplaza con tu dominio)
+  const API_URL = "http://localhost:3000"; // o "https://mi-backend.com" en producción
 
-// Para desarrollo (localhost) o producción (remplaza con tu dominio)
-const API_URL = "http://localhost:3000"; // o "https://mi-backend.com" en producción
-
-const handleGuardar = async () => {
-  if (nueva !== confirmar) {
-    setNotifMessage("La nueva contraseña no coincide");
-    setNotifType("error");
-    setNotifVisible(true);
-    return;
-  }
-
-  if (!isPasswordStrong(nueva)) {
-    setNotifMessage(
-      "La contraseña debe tener al menos 8 caracteres y un símbolo"
-    );
-    setNotifType("error");
-    setNotifVisible(true);
-    return;
-  }
-
-  if (!usuario?.id_usuario) {
-    setNotifMessage("No se encontró usuario activo");
-    setNotifType("error");
-    setNotifVisible(true);
-    return;
-  }
-
-  try {
-    const response = await axios.post(
-      `${API_URL}/sync/loginregistre/actualizar-password`,
-      {
-        id_usuario: usuario.id_usuario,
-        password: nueva,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: 5000, // opcional: 5 segundos de timeout
-      }
-    );
-
-    if (response.data?.message) {
-      setNotifMessage("Contraseña actualizada correctamente");
-      setNotifType("success");
+  const handleGuardar = async () => {
+    if (nueva !== confirmar) {
+      setNotifMessage("La nueva contraseña no coincide");
+      setNotifType("error");
       setNotifVisible(true);
-      setNueva("");
-      setConfirmar("");
+      return;
     }
-  } catch (err: any) {
-    console.error("Axios error:", err);
-    setNotifMessage(
-      err.response?.data?.message ||
-        "Ocurrió un error al actualizar la contraseña"
-    );
-    setNotifType("error");
-    setNotifVisible(true);
-  }
-};
 
+    if (!isPasswordStrong(nueva)) {
+      setNotifMessage(
+        "La contraseña debe tener al menos 8 caracteres y un símbolo"
+      );
+      setNotifType("error");
+      setNotifVisible(true);
+      return;
+    }
+
+    if (!usuario?.id_usuario) {
+      setNotifMessage("No se encontró usuario activo");
+      setNotifType("error");
+      setNotifVisible(true);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/sync/loginregistre/actualizar-password`,
+        {
+          id_usuario: usuario.id_usuario,
+          password: nueva,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: 5000, // opcional: 5 segundos de timeout
+        }
+      );
+
+      if (response.data?.message) {
+        setNotifMessage("Contraseña actualizada correctamente");
+        setNotifType("success");
+        setNotifVisible(true);
+        setNueva("");
+        setConfirmar("");
+      }
+    } catch (err: any) {
+      console.error("Axios error:", err);
+      setNotifMessage(
+        err.response?.data?.message ||
+          "Ocurrió un error al actualizar la contraseña"
+      );
+      setNotifType("error");
+      setNotifVisible(true);
+    }
+  };
 
   // Maneja el cierre automático de la notificación solo si fue éxito
   useEffect(() => {
-  if (notifVisible) {
-    const timer = setTimeout(() => {
-      setNotifVisible(false);
-      if (notifType === "success") navigate(-1); // solo navegar atrás si fue éxito
-    }, 3000); // 3 segundos
-    return () => clearTimeout(timer);
-  }
-}, [notifVisible, notifType, navigate]);
+    if (notifVisible) {
+      const timer = setTimeout(() => {
+        setNotifVisible(false);
+        if (notifType === "success") navigate(-1); // solo navegar atrás si fue éxito
+      }, 3000); // 3 segundos
+      return () => clearTimeout(timer);
+    }
+  }, [notifVisible, notifType, navigate]);
 
+  useEffect(() => {
+  if (notifVisible && notifType === "success") {
+    setRecoveryMode(false); // ✅ desactivar modo recuperación
+    navigate("/login");     // volver a login o a donde quieras
+  }
+}, [notifVisible, notifType, navigate, setRecoveryMode]);
 
   return (
     <div

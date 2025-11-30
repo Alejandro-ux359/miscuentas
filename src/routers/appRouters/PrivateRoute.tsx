@@ -7,7 +7,7 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { usuario, loading } = useContext(AuthContext);
+  const { usuario, loading, recoveryMode } = useContext(AuthContext);
 
   // Mientras carga el usuario desde localStorage, NO redirigir
   if (loading) {
@@ -15,9 +15,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   }
 
   // Si no hay usuario una vez cargado → redirigir
-  if (!usuario) {
-    return <Navigate to="/login" replace />;
-  }
+ if (!usuario && !recoveryMode) return <Navigate to="/login" replace />;
 
   return children;
 };
