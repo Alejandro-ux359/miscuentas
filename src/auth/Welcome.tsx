@@ -146,7 +146,12 @@ const WelcomePage: React.FC = () => {
           <Box sx={{ position: "absolute", top: "5%", right: "6%" }}>
             <Typography
               variant="body1"
-              sx={{ color: "#fff", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+              sx={{
+                color: "#fff",
+                fontWeight: 600,
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
               onClick={handleSkip}
             >
               omitir
@@ -232,54 +237,58 @@ const WelcomePage: React.FC = () => {
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            height: "100%",
             width: "100%",
+            height: "100%",
             px: 3,
+            py: 3,
+            overflowY: "auto", // 👈 HABILITA SCROLL SI FALTA ESPACIO
             position: "relative",
           }}
         >
-          <Box sx={{ mt: "70%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <Box sx={{ mt: "-80%" }}>
-              <img
-                src="/logo/logo2.2.svg"
-                alt="Logo"
-                width="80%"
-                height="100%"
-                style={{ objectFit: "contain" }}
-              />
-            </Box>
-
-            <Typography variant="h4" sx={{ color: "#fff", fontWeight: 700, mb: 1 }}>
-              Bienvenidos
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#fcefee", mb: 3 }}>
-              Mis cuentas
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: "#fff", mb: 4, mt: "10%" }}>
-              Toma el control de tus finanzas. <br />
-              Crea una cuenta y estarás listo para empezar.
-            </Typography>
-
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#fff",
-                color: "#764ba2",
-                borderRadius: "25px",
-                px: 5,
-                py: 1,
-                mb: 2,
-                "&:hover": { backgroundColor: "#f5f5f5" },
-                mt: "30%",
-              }}
-              onClick={() => navigate("/register")}
-            >
-              REGISTRARSE
-            </Button>
+          {/* LOGO */}
+          <Box sx={{ mt: 4 }}>
+            <img
+              src="/logo/logo2.2.svg"
+              alt="Logo"
+              width="80%"
+              style={{ objectFit: "contain" }}
+            />
           </Box>
 
-          <Box sx={{ position: "absolute", bottom: "10%" }}>
+          <Typography
+            variant="h4"
+            sx={{ color: "#fff", fontWeight: 700, mt: 4 }}
+          >
+            Bienvenidos
+          </Typography>
+
+          <Typography variant="subtitle1" sx={{ color: "#fcefee", mb: 3 }}>
+            Mis cuentas
+          </Typography>
+
+          <Typography variant="body2" sx={{ color: "#fff", mb: 4 }}>
+            Toma el control de tus finanzas. <br />
+            Crea una cuenta y estarás listo para empezar.
+          </Typography>
+
+          {/* BOTÓN PRINCIPAL */}
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#fff",
+              color: "#764ba2",
+              borderRadius: "25px",
+              px: 5,
+              py: 1,
+              "&:hover": { backgroundColor: "#f5f5f5" },
+            }}
+            onClick={() => navigate("/register")}
+          >
+            REGISTRARSE
+          </Button>
+
+          {/* ENLACE INICIAR SESIÓN (SIEMPRE VISIBLE CON SCROLL) */}
+          <Box sx={{ mt: 6, mb: 8 }}>
             <Typography
               variant="body2"
               sx={{
