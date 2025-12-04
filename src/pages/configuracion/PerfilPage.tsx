@@ -77,6 +77,44 @@ export default function PerfilPage() {
     }
   };
 
+const eliminarCuenta = async () => {
+  if (!usuario?.id_usuario) return alert("Usuario no válido");
+
+  try {
+    const API_URL =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+        ? "http://localhost:3000"
+        : "https://api-miscuentas.onrender.com";
+
+    const respuesta = await fetch(
+      `${API_URL}/sync/deleteusuario/${Number(usuario.id_usuario)}`,
+      { method: "DELETE" }
+    );
+
+    const data = await respuesta.json(); // directamente JSON
+    console.log("RESPUESTA DELETE:", data);
+
+    if (!respuesta.ok || !data?.message) {
+      throw new Error(data?.error || "Error eliminando usuario");
+    }
+
+    // Eliminar usuario local en Dexie
+    await db.loginregistre.delete(Number(usuario.id_usuario));
+
+    // Cerrar sesión y redirigir
+    cerrarSesion();
+    alert("Cuenta eliminada correctamente");
+    navigate("/login");
+  } catch (e: any) {
+    console.error("Error al eliminar cuenta:", e);
+    alert("Error al eliminar la cuenta: " + e.message);
+  }
+};
+
+
+
+
   return (
     <div
       style={{
@@ -226,6 +264,7 @@ export default function PerfilPage() {
                 alignItems: "center",
                 gap: 1,
               }}
+              onClick={eliminarCuenta} // <-- CONECTADO AQUÍ
             >
               Eliminar Cuenta
               <DeleteIcon />
