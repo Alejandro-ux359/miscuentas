@@ -15,7 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { db } from "../../bdDexie";
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutIcon from "@mui/icons-material/Logout";
 
 export default function PerfilPage() {
   const navigate = useNavigate();
@@ -202,19 +202,18 @@ export default function PerfilPage() {
           }}
         >
           <CardContent>
-           <Button
-  sx={{
-    color: "red",
-    display: "flex",
-    alignItems: "center",
-    gap: 1,
-  }}
-  onClick={cerrarSesion}
->
-  Cerrar Sesión
-  <LogoutIcon />
-</Button>
-
+            <Button
+              sx={{
+                color: "red",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+              onClick={cerrarSesion}
+            >
+              Cerrar Sesión
+              <LogoutIcon />
+            </Button>
           </CardContent>
 
           <CardContent>
