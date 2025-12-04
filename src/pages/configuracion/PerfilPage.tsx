@@ -7,6 +7,7 @@ import {
   TextField,
   Typography,
   IconButton,
+  Box,
 } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
@@ -14,10 +15,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { db } from "../../bdDexie";
+import LogoutIcon from '@mui/icons-material/Logout';
 
 export default function PerfilPage() {
   const navigate = useNavigate();
-  const { usuario, setUsuario } = useContext(AuthContext);
+  const { usuario, setUsuario, cerrarSesion } = useContext(AuthContext);
 
   const [avatar, setAvatar] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -189,6 +191,48 @@ export default function PerfilPage() {
             </Button>
           </CardContent>
         </Card>
+
+        <Box
+          sx={{
+            display: "flex", // ← necesario
+            flexDirection: "column", // ← uno debajo del otro
+            alignItems: "center", // ← centrados horizontalmente
+            mt: 3,
+            gap: 1, // ← espacio entre botones
+          }}
+        >
+          <CardContent>
+           <Button
+  sx={{
+    color: "red",
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+  }}
+  onClick={cerrarSesion}
+>
+  Cerrar Sesión
+  <LogoutIcon />
+</Button>
+
+          </CardContent>
+
+          <CardContent>
+            <Button
+              sx={{
+                backgroundColor: "white",
+                borderRadius: 2,
+                color: "red",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              Eliminar Cuenta
+              <DeleteIcon />
+            </Button>
+          </CardContent>
+        </Box>
       </div>
     </div>
   );

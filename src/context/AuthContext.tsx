@@ -1,7 +1,8 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
+import { db } from "../bdDexie"; // si usas Dexie, opcional
 
 interface Usuario {
-  id_usuario: number; 
+  id_usuario: number;
   nombre: string;
   correo?: string;
   celular?: string;
@@ -22,17 +23,16 @@ export const AuthContext = createContext<AuthContextType>({
   setUsuario: () => {},
   cerrarSesion: () => {},
   loading: true,
-  recoveryMode: false,          // ✅ nuevo
-  setRecoveryMode: () => {},    // ✅ nuevo
+  recoveryMode: false,
+  setRecoveryMode: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recoveryMode, setRecoveryMode] = useState(false);
 
-   const [recoveryMode, setRecoveryMode] = useState(false);
-
-  // Cargar usuario guardado del localStorage
+  // 🔵 Cargar sesión desde localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("usuario");
 
@@ -43,21 +43,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
-  // Guardar usuario cuando cambie
+  // 🔵 Guardar usuario en localStorage
   useEffect(() => {
     if (usuario) {
       localStorage.setItem("usuario", JSON.stringify(usuario));
     }
   }, [usuario]);
 
-  const cerrarSesion = () => {
+  // 🔴 Cerrar sesión correctamente
+  const cerrarSesion = async () => {
     setUsuario(null);
     localStorage.removeItem("usuario");
+
+    // Si quieres borrar sesión en Dexie
+    // await db.loginregistre.clear();
+
+    // Redirigir al login inmediatamente
+    window.location.href = "/login";
   };
 
   return (
     <AuthContext.Provider
-      value={{ usuario, setUsuario, cerrarSesion, loading, recoveryMode, setRecoveryMode }}
+      value={{
+        usuario,
+        setUsuario,
+        cerrarSesion,
+        loading,
+        recoveryMode,
+        setRecoveryMode,
+      }}
     >
       {children}
     </AuthContext.Provider>
