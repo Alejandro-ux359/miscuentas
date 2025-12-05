@@ -84,6 +84,7 @@ export interface LoginRegistre {
   cel_usuario: number;
   correo_usuario: string;
   password: string;
+  foto_perfil?: string;
 }
 
 export interface Nomencladores {
@@ -116,7 +117,7 @@ class MiDB extends Dexie {
       tasa: "++id_tasa, codigo, nombre_tasa, compras_tasa, ventas_tasa, tasa",
       nomencladores: "++id",
       loginregistre:
-        "++id_usuario, &correo_usuario, id_codigounico, avatar, password, cel_usuario, nombre",
+        "++id_usuario, &correo_usuario, id_codigounico, foto_perfil, avatar, password, cel_usuario, nombre",
     });
 
     // ===== Versiones históricas (migraciones)

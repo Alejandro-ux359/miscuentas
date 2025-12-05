@@ -8,75 +8,84 @@ import {
   Typography,
   IconButton,
   Box,
+  Fade,
 } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { db, eliminarUsuarioLocal } from "../../bdDexie";
-import LogoutIcon from "@mui/icons-material/Logout";
+
+// Avatares
+import hombre1 from "../../../public/avatar/menAvatar.png";
+import hombre2 from "../../../public/avatar/menAVatar (2).png";
+import hombre3 from "../../../public/avatar/MenAvatar (3).png";
+import mujer1 from "../../../public/avatar/WomanAvatr.png";
+import mujer2 from "../../../public/avatar/WomanAVatar (2).png";
+import mujer3 from "../../../public/avatar/womanAvatar.png";
 
 export default function PerfilPage() {
   const navigate = useNavigate();
   const { usuario, setUsuario, cerrarSesion } = useContext(AuthContext);
 
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string>(hombre1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [notificacion, setNotificacion] = useState(false);
 
+  const avatares = [hombre1, hombre2, hombre3, mujer1, mujer2, mujer3];
+
+  // Cargar usuario al montar
   useEffect(() => {
     const cargarUsuario = async () => {
       if (!usuario) return;
 
+      const userDb = await db.loginregistre.get(usuario.id_usuario);
+      const avatarDB = userDb?.avatar || hombre1;
+
+      setAvatar(avatarDB);
       setName(usuario.nombre);
       setEmail(usuario.correo || "");
-      setPhone(usuario.celular || "");
-      setAvatar(usuario.foto_perfil || "");
+      setPhone(userDb?.cel_usuario?.toString() || usuario.celular || "");
+      setPassword(userDb?.password || "");
 
-      const userDb = await db.loginregistre.get(usuario.id_usuario);
-      if (userDb) {
-        setPhone(userDb.cel_usuario?.toString() || usuario.celular || "");
-        setPassword(userDb.password || "");
-      }
+      setUsuario({
+        ...usuario,
+        foto_perfil: avatarDB,
+      });
     };
 
     cargarUsuario();
-  }, [usuario]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setAvatar(URL.createObjectURL(file));
-  };
-
+  // Guardar avatar seleccionado
   const handleGuardarCambios = async () => {
-    if (!usuario) return;
+    if (!usuario || !avatar) return;
 
     try {
       await db.loginregistre.update(Number(usuario.id_usuario), {
-        nombre: name,
-        cel_usuario: Number(phone),
-        correo_usuario: email,
-        password,
-        avatar: avatar || "default.png",
+        avatar,
       });
 
       setUsuario({
         ...usuario,
-        nombre: name,
-        correo: email,
-        celular: phone,
-        foto_perfil: avatar || undefined,
+        foto_perfil: avatar,
       });
 
-      alert("Datos actualizados correctamente");
+      // Mostrar notificación
+      setNotificacion(true);
+      setTimeout(() => setNotificacion(false), 3000);
     } catch (err) {
-      alert("Error actualizando usuario: " + err);
+      console.error(err);
+      alert("Error actualizando foto: " + err);
     }
   };
 
+  // Eliminar cuenta
   const eliminarCuenta = async () => {
     if (!usuario?.id_usuario) return alert("Usuario no válido");
 
@@ -93,16 +102,11 @@ export default function PerfilPage() {
       );
 
       const data = await respuesta.json();
-      console.log("RESPUESTA DELETE:", data);
-
       if (!respuesta.ok || !data?.message) {
         throw new Error(data?.error || "Error eliminando usuario");
       }
 
-      // ✅ Eliminar usuario local y todos sus datos
       await eliminarUsuarioLocal(Number(usuario.id_usuario));
-
-      // Cerrar sesión y redirigir
       cerrarSesion();
       alert("Cuenta eliminada correctamente");
       navigate("/login");
@@ -122,12 +126,12 @@ export default function PerfilPage() {
         bottom: 0,
         background: "#F1F2F6",
         overflowY: "auto",
-        overflowX: "hidden", // evita scroll horizontal
+        overflowX: "hidden",
         zIndex: 9999,
-        boxSizing: "border-box", // importante
+        boxSizing: "border-box",
       }}
     >
-      {/* 🔵 Barra superior con degradado + botón atrás */}
+      {/* Barra superior */}
       <div
         style={{
           width: "100%",
@@ -142,53 +146,72 @@ export default function PerfilPage() {
         <IconButton onClick={() => navigate(-1)} style={{ color: "white" }}>
           <ArrowBackIosNewIcon />
         </IconButton>
-
-        <Typography
-          variant="h5"
-          style={{
-            marginLeft: 10,
-            fontWeight: "bold",
-          }}
-        >
+        <Typography variant="h5" style={{ marginLeft: 10, fontWeight: "bold" }}>
           Mi Perfil
         </Typography>
       </div>
 
-      {/* 🔽 Contenedor blanco centrado */}
+      {/* Contenedor principal */}
       <div style={{ padding: 20, boxSizing: "border-box" }}>
         <Card
           style={{
             borderRadius: 12,
             width: "100%",
             maxWidth: 500,
-            boxSizing: "border-box", // importante
-            margin: "0 auto",
+            margin: "50px auto",
           }}
         >
           <CardContent>
             <div style={{ textAlign: "center" }}>
               <Avatar
-                src={avatar || undefined}
+                src={avatar}
                 sx={{ width: 110, height: 110, margin: "auto" }}
               />
-              <div style={{ marginTop: 10 }}>
-                <IconButton component="label">
-                  <PhotoCameraIcon />
-                  <input
-                    hidden
-                    accept="image/*"
-                    type="file"
-                    onChange={handleAvatarChange}
-                  />
-                </IconButton>
-
-                {avatar && (
-                  <IconButton color="error" onClick={() => setAvatar(null)}>
-                    <DeleteIcon />
-                  </IconButton>
-                )}
-              </div>
             </div>
+
+            {/* Avatares */}
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 60px)",
+                  gridTemplateRows: "repeat(2, 60px)",
+                  gap: "10px",
+                  justifyContent: "center",
+                  margin: "0 auto",
+                }}
+              >
+                {avatares.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`avatar-${idx}`}
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: "50%",
+                      border:
+                        avatar === img ? "3px solid #1D4ED8" : "2px solid #ccc",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setAvatar(img)}
+                  />
+                ))}
+              </div>
+            </Box>
+
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{
+                mt: 2,
+                background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
+                padding: "10px",
+              }}
+              onClick={handleGuardarCambios}
+            >
+              Guardar foto
+            </Button>
 
             <TextField
               label="Nombre completo"
@@ -211,29 +234,17 @@ export default function PerfilPage() {
               margin="normal"
               disabled
             />
-
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{
-                mt: 2,
-                background: "linear-gradient(135deg, #1D4ED8 0%, #7E22CE 100%)",
-                padding: "10px",
-              }}
-              onClick={handleGuardarCambios}
-            >
-              Guardar foto
-            </Button>
           </CardContent>
         </Card>
 
+        {/* Botones Cerrar Sesión / Eliminar Cuenta */}
         <Box
           sx={{
-            display: "flex", // ← necesario
-            flexDirection: "column", // ← uno debajo del otro
-            alignItems: "center", // ← centrados horizontalmente
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             mt: 3,
-            gap: 1, // ← espacio entre botones
+            gap: 1,
           }}
         >
           <CardContent>
@@ -261,7 +272,7 @@ export default function PerfilPage() {
                 alignItems: "center",
                 gap: 1,
               }}
-              onClick={eliminarCuenta} // <-- CONECTADO AQUÍ
+              onClick={eliminarCuenta}
             >
               Eliminar Cuenta
               <DeleteIcon />
@@ -269,6 +280,30 @@ export default function PerfilPage() {
           </CardContent>
         </Box>
       </div>
+
+      {/* Notificación */}
+      <Fade in={notificacion}>
+        <Card
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            background: "#1D4ED8",
+            color: "white",
+            padding: "20px 30px",
+            borderRadius: 12,
+            zIndex: 99999,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+            textAlign: "center",
+            minWidth: 280,
+            fontWeight: "bold",
+            fontSize: 16,
+          }}
+        >
+          ¡Foto de perfil actualizada correctamente!
+        </Card>
+      </Fade>
     </div>
   );
 }
