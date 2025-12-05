@@ -29,61 +29,52 @@ export default function PerfilPage() {
   const navigate = useNavigate();
   const { usuario, setUsuario, cerrarSesion } = useContext(AuthContext);
 
-  const [avatar, setAvatar] = useState<string>(hombre1);
+  const [avatar, setAvatar] = useState<string>();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [notificacion, setNotificacion] = useState(false);
 
-  const avatares = [hombre1, hombre2, hombre3, mujer1, mujer2, mujer3];
+  const avatares = [
+    "/avatar/menAvatar.png",
+    "/avatar/menAVatar (2).png",
+    "/avatar/MenAvatar (3).png",
+    "/avatar/WomanAvatr.png",
+    "/avatar/WomanAVatar (2).png",
+    "/avatar/womanAvatar.png",
+  ];
 
   // Cargar usuario al montar
-  useEffect(() => {
-    const cargarUsuario = async () => {
-      if (!usuario) return;
+useEffect(() => {
+  if (!usuario) return;
 
-      const userDb = await db.loginregistre.get(usuario.id_usuario);
-      const avatarDB = userDb?.avatar || hombre1;
+  console.log("Usuario del contexto:", usuario);
 
-      setAvatar(avatarDB);
-      setName(usuario.nombre);
-      setEmail(usuario.correo || "");
-      setPhone(userDb?.cel_usuario?.toString() || usuario.celular || "");
-      setPassword(userDb?.password || "");
-
-      setUsuario({
-        ...usuario,
-        foto_perfil: avatarDB,
-      });
-    };
-
-    cargarUsuario();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Cargar datos desde el contexto local
+  setAvatar(usuario.foto_perfil || ""); // Foto guardada localmente
+  setName(usuario.nombre);
+  setEmail(usuario.correo || "");
+  setPhone(usuario.celular || "");
+}, [usuario]);
 
   // Guardar avatar seleccionado
-  const handleGuardarCambios = async () => {
-    if (!usuario || !avatar) return;
+const handleGuardarCambios = () => {
+  if (!usuario || !avatar) return;
 
-    try {
-      await db.loginregistre.update(Number(usuario.id_usuario), {
-        avatar,
-      });
+  // Actualizar la foto en el contexto local
+  setUsuario({
+    ...usuario,
+    foto_perfil: avatar,
+  });
 
-      setUsuario({
-        ...usuario,
-        foto_perfil: avatar,
-      });
+  console.log("Foto guardada localmente:", avatar);
 
-      // Mostrar notificación
-      setNotificacion(true);
-      setTimeout(() => setNotificacion(false), 3000);
-    } catch (err) {
-      console.error(err);
-      alert("Error actualizando foto: " + err);
-    }
-  };
+  // Mostrar notificación
+  setNotificacion(true);
+  setTimeout(() => setNotificacion(false), 3000);
+};
+
 
   // Eliminar cuenta
   const eliminarCuenta = async () => {
@@ -115,6 +106,7 @@ export default function PerfilPage() {
       alert("Error al eliminar la cuenta: " + e.message);
     }
   };
+  console.log("Avatar que se está mostrando:", avatar);
 
   return (
     <div
@@ -164,7 +156,7 @@ export default function PerfilPage() {
           <CardContent>
             <div style={{ textAlign: "center" }}>
               <Avatar
-                src={avatar}
+                src={avatar || undefined} // avatar = "/avatar/womanAvatar.png"
                 sx={{ width: 110, height: 110, margin: "auto" }}
               />
             </div>
@@ -194,7 +186,12 @@ export default function PerfilPage() {
                         avatar === img ? "3px solid #1D4ED8" : "2px solid #ccc",
                       cursor: "pointer",
                     }}
-                    onClick={() => setAvatar(img)}
+                    onClick={() => {
+                      {
+                        console.log("Avatar seleccionado:", img);
+                        setAvatar(img);
+                      }
+                    }}
                   />
                 ))}
               </div>
